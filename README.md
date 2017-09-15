@@ -1,6 +1,8 @@
 # Disturb
 *Distributed Workflow Processor*  
-Based on Kafka+Zookeeper
+Based on Phalcon and Kafka  
+
+*This project is not nammed : FlowEr, PlayFlow, DistriFlow, Sharp, Flowber, OctoFlow, ParaFlow, Flowter, Flowel, Flowable, Flowbert, Next *
 
 ## TODO
  See `xxx` tag in the code
