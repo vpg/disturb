@@ -1,0 +1,21 @@
+{
+    "name": "Vpg/Disturb",
+    "description": "Language agnostic Distributed Workflow Processor built on top of Apache Kafka",
+    "type": "library",
+    "minimum-stability":"dev",
+    "authors": [
+        {
+            "name": "Jerome Bourgeais",
+            "email": "jbourgeais@voyageprive.com"
+        }
+    ],
+    "autoload":{
+        "psr-4":{
+            "Vpg\\Disturb\\" : "Library/"
+        }
+    },
+    "require": {
+        "php": ">=7.0",
+        "ext-phalcon": "~3.0"
+    }
+}
