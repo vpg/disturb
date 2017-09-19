@@ -2,10 +2,16 @@
 namespace Disturb\Tasks;
 
 use Phalcon\Cli\Task;
+use Phalcon\Loader;
 use Disturb\Dtos;
 
 abstract class AbstractTask extends Task implements TaskInterface
 {
+    protected $taskOptionBaseList = [
+        'servicesPath:', // required workflow service class NS
+        'servicesNS:', // required workflow service class NS
+    ];
+
     protected $topicPartitionNo = 0;
 
     protected $kafkaConf = null;
@@ -19,7 +25,8 @@ abstract class AbstractTask extends Task implements TaskInterface
     protected $topicName = '';
     protected $service = null;
 
-    public function onConstruct() {
+    public function onConstruct()
+    {
         echo PHP_EOL . '>' . __FUNCTION__ . ' : ' . json_encode(func_get_args());
         $brokers = 'localhost'; // xxx take it from conf
         // xxx put kafka\Conf in DI and config in a config file
@@ -42,15 +49,35 @@ abstract class AbstractTask extends Task implements TaskInterface
         $this->kafkaProducer->addBrokers($brokers);
     }
 
+    private function parseOpt(array $paramList)
+    {
+        echo PHP_EOL . '>' . __METHOD__ . ' : ' . json_encode(func_get_args());
+        preg_match_all('/--(?P<optKeys>\w+)(?:=(?P<optVals>[^ ]*))?/', join($paramList, ' '), $paramMatchHash);
+        $paramHash = array_combine(array_values($paramMatchHash['optKeys']), array_values($paramMatchHash['optVals']));
+        // check required options
+        foreach(array_merge($this->taskOptionBaseList, $this->taskOptionList) as $option) {
+            if (
+                preg_match('/^(?<opt>\w+):?/', $option, $matchHash) &&
+                !array_key_exists($matchHash['opt'], $paramHash)
+            ) {
+                $this->usage();
+                exit(1);
+            }
+
+        }
+        return $paramHash;
+    }
 
     /**
      * @param array $params
      */
-    public function startAction(array $paramHash)
+    public final function startAction(array $paramList)
     {
+        echo PHP_EOL . '>' . __METHOD__ . ' : ' . json_encode(func_get_args());
+        $paramHash = $this->parseOpt($paramList);
+        $this->registerClientNS($paramHash['servicesNS'], $paramHash['servicesPath']);
         $this->initAction($paramHash);
 
-        echo PHP_EOL . '>' . __METHOD__ . ' : ' . json_encode(func_get_args());
         $this->kafkaTopicConsumer = $this->kafkaConsumer->newTopic($this->topicName, $this->kafkaTopicConf);
         $this->kafkaTopicConsumer->consumeStart($this->topicPartitionNo, RD_KAFKA_OFFSET_STORED);
         while (true) {
@@ -61,14 +88,15 @@ abstract class AbstractTask extends Task implements TaskInterface
                     continue;
                 }
                 switch($msg->err) {
-                case '-191': // no more msg
+                    case '-191': // no more msg
                     break;
-                default:
-                    echo "ERR : " . $msg->errstr() . PHP_EOL;
+                    default:
+                        echo "ERR : " . $msg->errstr() . PHP_EOL;
                 }
                 continue;
             }
-            $msgDto = new Dtos\Message(json_decode($msg->payload, true));
+            echo PHP_EOL . "RECEIVE msg on {$this->topicName} : $msg->payload" . PHP_EOL;
+            $msgDto = new Dtos\Message($msg->payload);
             if (!isset($msgDto['type'])) {
                 echo PHP_EOL. "ERR msg w/out type";
                 continue;
@@ -77,7 +105,6 @@ abstract class AbstractTask extends Task implements TaskInterface
                 $this->processMonitoringMessage($msgDto);
                 continue;
             }
-            echo PHP_EOL . "RECEIVE msg on {$this->topicName} : $msgDto";
             $this->processMessage($msgDto);
         }
     }
@@ -99,4 +126,14 @@ abstract class AbstractTask extends Task implements TaskInterface
         }
         $this->kafkaTopicProducerHash[$topicName]->produce(RD_KAFKA_PARTITION_UA, 0, $message);
     }
+
+    private function registerClientNS(string $clientServicesNamespace, string $clientServicesPath) {
+        echo PHP_EOL . '>' . __METHOD__ . ' : ' . json_encode(func_get_args());
+        $loader = $this->getDI()->getShared('loader');
+        $loader->registerNamespaces(array(
+            $clientServicesNamespace => $clientServicesPath,
+        ), true);
+        $loader->register();
+    }
+
 }

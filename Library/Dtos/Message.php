@@ -1,24 +1,27 @@
 <?
 namespace Disturb\Dtos;
 
-class Message implements \ArrayAccess {
+class Message implements \ArrayAccess
+{
+    const TYPE_STEP_CTRL = 'STEP-CTRL';
+    const TYPE_STEP_ACK = 'STEP-ACK';
+    const TYPE_WF_ACT = 'WF-ACTION';
+    const TYPE_WF_CTRL = 'WF-CONTROL';
+    const TYPE_WF_MONITOR = 'WF-MONITOR';
 
-    public const TYPE_STEP_CTRL = 'STEP-CTRL';
-    public const TYPE_STEP_ACK = 'STEP-ACK';
-    public const TYPE_WF_ACT = 'WF-ACTION';
-    public const TYPE_WF_CTRL = 'WF-CONTROL';
-    public const TYPE_WF_MONITOR = 'WF-MONITOR';
+    const ACTION_WF_CTRL_START = 'WF-CONTROL-START';
+    const ACTION_WF_CTRL_PAUSE = 'WF-CONTROL-PAUSE';
+    const ACTION_WF_CTRL_RESUME = 'WF-CONTROL-RESUME';
 
-    public const ACTION_WF_CTRL_START = 'WF-CONTROL-START';
-    public const ACTION_WF_CTRL_PAUSE = 'WF-CONTROL-PAUSE';
-    public const ACTION_WF_CTRL_RESUME = 'WF-CONTROL-RESUME';
-
-    public const ACTION_WF_MONITOR_PING = 'WF-MONITOR-PING';
-    public const ACTION_WF_MONITOR_PONG = 'WF-MONITOR-PONG';
+    const ACTION_WF_MONITOR_PING = 'WF-MONITOR-PING';
+    const ACTION_WF_MONITOR_PONG = 'WF-MONITOR-PONG';
 
     private $rawHash = [];
 
-    public function __construct(array $rawHash) {
+    public function __construct(string $rawHash) {
+        if (!($rawHash = json_decode($msg->payload, true))){
+            throw new \Exception('Not valid message');
+        }
         $this->rawHash = $rawHash;
     }
 
