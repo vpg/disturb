@@ -9,6 +9,7 @@
             "email": "jbourgeais@voyageprive.com"
         }
     ],
+    "bin": ["bin/disturb-manager", "bin/disturb-step"],
     "autoload":{
         "psr-4":{
             "Vpg\\Disturb\\" : "Library/"
