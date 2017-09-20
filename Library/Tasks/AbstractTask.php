@@ -8,8 +8,7 @@ use Disturb\Dtos;
 abstract class AbstractTask extends Task implements TaskInterface
 {
     protected $taskOptionBaseList = [
-        'servicesPath:', // required workflow service class NS
-        'servicesNS:', // required workflow service class NS
+        'workflow:',  // required step code config file
     ];
 
     protected $topicPartitionNo = 0;
@@ -19,11 +18,12 @@ abstract class AbstractTask extends Task implements TaskInterface
     protected $kafkaProducer = null;
     protected $kafkaTopicConf = null;
     protected $kafkaTopicConsumer = null;
-    protected $kafkaTopicProducer = null;
     protected $kafkaTopicProducerHash = [];
 
     protected $topicName = '';
     protected $service = null;
+
+    protected $workflowConfig;
 
     public function onConstruct()
     {
@@ -49,6 +49,28 @@ abstract class AbstractTask extends Task implements TaskInterface
         $this->kafkaProducer->addBrokers($brokers);
     }
 
+    /**
+     * Inits the current worker according to the given workflow config
+     *
+     * @param array $paramHash The parsed options hash
+     */
+    protected function initWorker(array $paramHash) {
+        echo PHP_EOL . '>' . __METHOD__ . ' : ' . json_encode(func_get_args());
+        // xxx check if file exists, throw exc on err
+        $this->workflowConfig = new \Phalcon\Config\Adapter\Json($paramHash['workflow']);
+        $this->registerClientNS(
+            $this->workflowConfig['servicesClassNameSpace'],
+            $this->workflowConfig['servicesClassPath']
+        );
+    }
+
+    /**
+     * Parses and validates the given argv according to the worker options config
+     *
+     * @param array $paramList The argv list
+     *
+     * @return array The parsed options hash
+     */
     private function parseOpt(array $paramList)
     {
         echo PHP_EOL . '>' . __METHOD__ . ' : ' . json_encode(func_get_args());
@@ -68,18 +90,15 @@ abstract class AbstractTask extends Task implements TaskInterface
         return $paramHash;
     }
 
-    /**
-     * @param array $params
-     */
     public final function startAction(array $paramList)
     {
         echo PHP_EOL . '>' . __METHOD__ . ' : ' . json_encode(func_get_args());
         $paramHash = $this->parseOpt($paramList);
-        $this->registerClientNS($paramHash['servicesNS'], $paramHash['servicesPath']);
-        $this->initAction($paramHash);
+        $this->initWorker($paramHash);
 
         $this->kafkaTopicConsumer = $this->kafkaConsumer->newTopic($this->topicName, $this->kafkaTopicConf);
         $this->kafkaTopicConsumer->consumeStart($this->topicPartitionNo, RD_KAFKA_OFFSET_STORED);
+        echo PHP_EOL . "Worker listening on \033[32m" . $this->topicName . "\033[0m";
         while (true) {
             $msg = $this->kafkaTopicConsumer->consume($this->topicPartitionNo, 100);
             // xxx q&d err handling
@@ -119,6 +138,12 @@ abstract class AbstractTask extends Task implements TaskInterface
         }
     }
 
+    /**
+     * Sends the given message to the specified topic
+     *
+     * @param string $topicName     Topic name on which send the message
+     * @param Dtos\Message $message The message to send
+     */
     protected function sendMessage(string $topicName, Dtos\Message $message) {
         echo PHP_EOL . '>' . __METHOD__ . "($topicName, $message)";
         if (!isset($this->kafkaTopicProducerHash[$topicName])) {
@@ -127,6 +152,12 @@ abstract class AbstractTask extends Task implements TaskInterface
         $this->kafkaTopicProducerHash[$topicName]->produce(RD_KAFKA_PARTITION_UA, 0, $message);
     }
 
+    /**
+     * Registers the "client" namespaces to make them auloadable
+     *
+     * @param string $clientServicesNamespace Absolute NS of the client logic service
+     * @param string $clientServicesPath      Absolute file path to the service classes
+     */
     private function registerClientNS(string $clientServicesNamespace, string $clientServicesPath) {
         echo PHP_EOL . '>' . __METHOD__ . ' : ' . json_encode(func_get_args());
         $loader = $this->getDI()->getShared('loader');
@@ -135,5 +166,4 @@ abstract class AbstractTask extends Task implements TaskInterface
         ), true);
         $loader->register();
     }
-
 }

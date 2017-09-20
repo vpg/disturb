@@ -12,17 +12,14 @@ $di = new CliDI();
  * Register the autoloader and tell it to register the tasks directory
  */
 $loader = new Loader();
-
-$loader->registerDirs(
+$loader->registerNamespaces(
     [
-    ]
+        'Disturb\Tasks' => realpath(__DIR__ . '/../Library/Tasks/'),
+        'Disturb\Dtos' => realpath(__DIR__ . '/../Library/Dtos/'),
+        'Disturb\Services' => realpath(__DIR__ . '/../Library/Services/')
+    ],
+    true
 );
-
-$loader->registerNamespaces(array(
-    'Disturb\Tasks'   => __DIR__ . "/Tasks/",
-    'Disturb\Dtos'    => __DIR__ . "/Dtos/",
-    'Disturb\Services' => __DIR__ . "/Services/",
-), true);
 
 $loader->register();
 $di->setShared('loader', $loader);
@@ -38,7 +35,6 @@ if (is_readable($configFile)) {
 
 // Create a console application
 $console = new ConsoleApp();
-
 $console->setDI($di);
 
 

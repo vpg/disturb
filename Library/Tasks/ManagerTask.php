@@ -6,7 +6,6 @@ use Phalcon\Cli\Task;
 class ManagerTask extends \Disturb\Tasks\AbstractTask
 {
     protected $taskOptionList = [
-        'workflow:',  // required workflow config file
         '?name:'    // optional workflow name
     ];
     
@@ -17,13 +16,15 @@ class ManagerTask extends \Disturb\Tasks\AbstractTask
         echo PHP_EOL;
     }
 
-    protected function initAction(array $paramHash)
+    protected function initWorker(array $paramHash)
     {
         echo PHP_EOL . '>' . __METHOD__ . ' : ' . json_encode(func_get_args());
-        // xxx Fully abstract the "client" service
-        $serviceFullName = $paramHash['servicesNS'] . "\LoadingWorkflowManager";
+        parent::initWorker($paramHash);
+        $serviceFullName = $this->workflowConfig['servicesClassNameSpace'] . '\\' . ucFirst($this->workflowConfig['name']);
+        echo PHP_EOL . "Loading $serviceFullName";
         $this->service = new $serviceFullName($paramHash['workflow']);
-        $this->topicName = 'tdl-manager';
+        // xxx factorise the topicname "build"
+        $this->topicName = 'disturb-' . $this->workflowConfig['name'] . '-manager';
     }
 
     protected function processMessage(\Disturb\Dtos\Message $payloadHash)
@@ -55,9 +56,12 @@ class ManagerTask extends \Disturb\Tasks\AbstractTask
         $stepTaskHashList = $this->service->getNextStepTaskList($workflowProcessId);
         foreach($stepTaskHashList as $stepTaskHash) {
             $stepCode = $stepTaskHash['name'];
-            $stepMessageDto = new \Disturb\Dtos\Message($this->service->getStepPayload($workflowProcessId, $stepCode));
-            $stepMessageDto['type'] = \Disturb\Dtos\Message::TYPE_STEP_CTRL;
-            $this->sendMessage($stepCode, $stepMessageDto);
+            $stepHash = $this->service->getStepPayload($workflowProcessId, $stepCode);
+            foreach($stepHash as $stepJob) {
+                $stepMessageDto = new \Disturb\Dtos\Message(json_encode($stepJob));
+                $stepMessageDto['type'] = \Disturb\Dtos\Message::TYPE_STEP_CTRL;
+                $this->sendMessage('disturb-' . $stepCode . '-step', $stepMessageDto);
+            }
         }
     }
 }

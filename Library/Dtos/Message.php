@@ -18,8 +18,8 @@ class Message implements \ArrayAccess
 
     private $rawHash = [];
 
-    public function __construct(string $rawHash) {
-        if (!($rawHash = json_decode($msg->payload, true))){
+    public function __construct(string $rawPayload) {
+        if (!($rawHash = json_decode($rawPayload, true))){
             throw new \Exception('Not valid message');
         }
         $this->rawHash = $rawHash;
