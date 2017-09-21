@@ -20,9 +20,19 @@ class Message implements \ArrayAccess
 
     public function __construct(string $rawPayload) {
         if (!($rawHash = json_decode($rawPayload, true))){
-            throw new \Exception('Not valid message');
+            // xxx defined typed Exception
+            throw new \Exception('Not able to parse message');
         }
         $this->rawHash = $rawHash;
+        $this->validate();
+    }
+
+    public function validate()
+    {
+        if (!isset($this->rawHash['type'])) {
+            // xxx defined typed Exception
+            throw new \Exception('Missing message Type');
+        }
     }
 
     public function __toString() {

@@ -25,32 +25,12 @@ abstract class AbstractTask extends Task implements TaskInterface
 
     protected $workflowConfig;
 
-    public function onConstruct()
-    {
-        echo PHP_EOL . '>' . __FUNCTION__ . ' : ' . json_encode(func_get_args());
-        $brokers = 'localhost'; // xxx take it from conf
-        // xxx put kafka\Conf in DI and config in a config file
-        $this->kafkaConf = new \RdKafka\Conf();
-        $this->kafkaConf->set('group.id', 'foo');
-        // xxx put Consumer in a DI service
-        $this->kafkaConsumer = new \RdKafka\Consumer($this->kafkaConf);
-        $this->kafkaConsumer->setLogLevel(LOG_DEBUG);
-        $this->kafkaConsumer->addBrokers($brokers);
-        // xxx put kafka\TopicConf in DI and config in a config file
-        $this->kafkaTopicConf = new \RdKafka\TopicConf();
-        $this->kafkaTopicConf->set('offset.store.method', 'file');
-        $this->kafkaTopicConf->set('auto.commit.interval.ms', 100);
-        $this->kafkaTopicConf->set('offset.store.sync.interval.ms', 100);
-        $this->kafkaTopicConf->set('offset.store.method', 'file');
-        $this->kafkaTopicConf->set('offset.store.path', sys_get_temp_dir());
-        $this->kafkaTopicConf->set('auto.offset.reset', 'smallest');
-
-        $this->kafkaProducer = new \RdKafka\Producer();
-        $this->kafkaProducer->addBrokers($brokers);
-    }
 
     /**
      * Inits the current worker according to the given workflow config
+     *  - Loads the config
+     *  - Register Client biz classes
+     *  - Init MQ sys
      *
      * @param array $paramHash The parsed options hash
      */
@@ -62,6 +42,7 @@ abstract class AbstractTask extends Task implements TaskInterface
             $this->workflowConfig['servicesClassNameSpace'],
             $this->workflowConfig['servicesClassPath']
         );
+        $this->initMq();
     }
 
     /**
@@ -98,7 +79,7 @@ abstract class AbstractTask extends Task implements TaskInterface
 
         $this->kafkaTopicConsumer = $this->kafkaConsumer->newTopic($this->topicName, $this->kafkaTopicConf);
         $this->kafkaTopicConsumer->consumeStart($this->topicPartitionNo, RD_KAFKA_OFFSET_STORED);
-        echo PHP_EOL . "Worker listening on \033[32m" . $this->topicName . "\033[0m";
+        echo PHP_EOL . "Worker listening on \033[32m" . implode(',', $this->workflowConfig['brokerServerList']->toArray()) . ":\033[32m" . $this->topicName . "\033[0m";
         while (true) {
             $msg = $this->kafkaTopicConsumer->consume($this->topicPartitionNo, 100);
             // xxx q&d err handling
@@ -114,10 +95,12 @@ abstract class AbstractTask extends Task implements TaskInterface
                 }
                 continue;
             }
-            echo PHP_EOL . "RECEIVE msg on {$this->topicName} : $msg->payload" . PHP_EOL;
-            $msgDto = new Dtos\Message($msg->payload);
-            if (!isset($msgDto['type'])) {
-                echo PHP_EOL. "ERR msg w/out type";
+            echo PHP_EOL . "RECEIVE msg on {$this->topicName} : $msg->payload";
+            try {
+                $msgDto = new Dtos\Message($msg->payload);
+            }
+            catch(\Exception $dtoException) {
+                echo PHP_EOL . "ERR : Invalid message : \033[31m" . $dtoException->getMessage() . "\033[0m";
                 continue;
             }
             if ($msgDto['type'] == Dtos\Message::TYPE_WF_MONITOR) {
@@ -165,5 +148,29 @@ abstract class AbstractTask extends Task implements TaskInterface
             $clientServicesNamespace => $clientServicesPath,
         ), true);
         $loader->register();
+    }
+
+    private function initMq()
+    {
+        echo PHP_EOL . '>' . __METHOD__ . ' : ' . json_encode(func_get_args());
+        $brokers = implode(',', $this->workflowConfig['brokerServerList']->toArray());
+        // xxx put kafka\Conf in DI and config in a config file
+        $this->kafkaConf = new \RdKafka\Conf();
+        $this->kafkaConf->set('group.id', 'foo');
+        // xxx put Consumer in a DI service
+        $this->kafkaConsumer = new \RdKafka\Consumer($this->kafkaConf);
+        $this->kafkaConsumer->setLogLevel(LOG_DEBUG);
+        $this->kafkaConsumer->addBrokers($brokers);
+        // xxx put kafka\TopicConf in DI and config in a config file
+        $this->kafkaTopicConf = new \RdKafka\TopicConf();
+        $this->kafkaTopicConf->set('offset.store.method', 'file');
+        $this->kafkaTopicConf->set('auto.commit.interval.ms', 100);
+        $this->kafkaTopicConf->set('offset.store.sync.interval.ms', 100);
+        $this->kafkaTopicConf->set('offset.store.method', 'file');
+        $this->kafkaTopicConf->set('offset.store.path', sys_get_temp_dir());
+        $this->kafkaTopicConf->set('auto.offset.reset', 'smallest');
+
+        $this->kafkaProducer = new \RdKafka\Producer();
+        $this->kafkaProducer->addBrokers($brokers);
     }
 }
