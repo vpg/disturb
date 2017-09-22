@@ -1,0 +1,23 @@
+{
+    "name" : "foo",
+    "version" : "0.0.1",
+    "brokerServerList" : ["localhost"],
+    "servicesClassPath" : "/home/jbourgeais/www/disturb-ex/Services/",
+    "servicesClassNameSpace" : "Ex\\Services",
+    "steps" : [
+        {
+            "name" : "step0"
+        },
+        [
+            {
+                "name" : "step1"
+            },
+            {
+                "name" : "step2"
+            }
+        ],
+        {
+            "name" : "step3"
+        }
+    ]
+}

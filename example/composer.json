@@ -1,0 +1,15 @@
+{
+    "name":"Vpg/Disturb/Example",
+    "description":"A simple use case of Vpg/Disturb",
+    "type":"project",
+    "minimum-stability":"dev",
+    "repositories": [
+        {
+            "type": "vcs",
+            "url": "https://github.com/vpg/disturb"
+        }
+    ],
+    "require": {
+        "vpg/disturb": "dev-poc"
+    }
+}

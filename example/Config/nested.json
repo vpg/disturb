@@ -1,0 +1,31 @@
+{
+    "name" : "foo",
+    "version" : "0.0.1",
+    "steps" : [
+        {
+            "name" : "step0",
+            "child" : [ 
+                [
+                    {
+                        "name" : "step0.1",
+                        "child" : [
+                            {
+                                "name" : "step0.1.1",
+                                "child" : []
+                            }
+                        ]
+                    },
+                    {
+                        "name" : "step0.2"
+                    }
+                ],
+                {
+                    "name" : "step0.3"
+                }
+            ]
+        },
+        {
+            "name" : "step1"
+        }
+    ]
+}

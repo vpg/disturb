@@ -1,0 +1,26 @@
+{
+    "name" : "foo",
+    "version" : "0.0.1",
+    "steps" : [
+        {
+            "name" : "step0",
+            "severity" : "blocking",
+            "type" : "parallel"
+        },
+        {
+            "name" : "step1",
+            "severity" : "blocking",
+            "type" : "serie"
+        },
+        {
+            "name" : "step2",
+            "severity" : "blocking",
+            "type" : "serie"
+        },
+        {
+            "name" : "step3",
+            "severity" : "blocking",
+            "type" : "serie"
+        }
+    ]
+}
