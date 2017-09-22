@@ -1,0 +1,12 @@
+#Composer lock file
+composer.lock
+
+#Third parties librairies
+vendor/
+
+#Config files for IntelliJ IDEA IDE
+.idea/
+*.iml
+
+#npm files
+package-lock.json
