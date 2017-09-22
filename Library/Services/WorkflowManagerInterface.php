@@ -48,15 +48,4 @@ interface WorkflowManagerInterface
      */
     public function finalizeStep(string $workflowProcessId, string $stepCode, array $resultHash);
 
-    /**
-     * Returns the data related to the given step
-     *
-     * @param string $workflowProcessId The workflow process identifier
-     * @param string $stepCode          The step code related to the step to finalize
-     *
-     * @return array the step to run input data
-     * @throws \Disturb\WorkflowException
-     */
-    public function getStepPayload(string $workflowProcessId, string $stepCode) : array;
 }
-

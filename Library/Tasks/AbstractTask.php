@@ -13,6 +13,7 @@ abstract class AbstractTask extends Task implements TaskInterface
 
     protected $topicPartitionNo = 0;
 
+    // xxx abstract MQ sys
     protected $kafkaConf = null;
     protected $kafkaConsumer = null;
     protected $kafkaProducer = null;
@@ -79,6 +80,7 @@ abstract class AbstractTask extends Task implements TaskInterface
 
         $this->kafkaTopicConsumer = $this->kafkaConsumer->newTopic($this->topicName, $this->kafkaTopicConf);
         $this->kafkaTopicConsumer->consumeStart($this->topicPartitionNo, RD_KAFKA_OFFSET_STORED);
+        // xxx Factorize stdout/err support
         echo PHP_EOL . "Worker listening on \033[32m" . implode(',', $this->workflowConfig['brokerServerList']->toArray()) . ":\033[32m" . $this->topicName . "\033[0m";
         while (true) {
             $msg = $this->kafkaTopicConsumer->consume($this->topicPartitionNo, 100);

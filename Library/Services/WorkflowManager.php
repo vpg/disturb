@@ -1,7 +1,7 @@
 <?
 namespace Disturb\Services;
 
-abstract class AbstractWorkflowManager extends \Phalcon\Mvc\User\Component implements WorkflowManagerInterface
+class WorkflowManager extends \Phalcon\Mvc\User\Component implements WorkflowManagerInterface
 {
     const STATUS_NO_STARTED = 'NOT_STARTED';
     const STATUS_PAUSED = 'PAUSED';

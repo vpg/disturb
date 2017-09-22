@@ -2,6 +2,7 @@
 namespace Disturb\Tasks;
 
 use Phalcon\Cli\Task;
+use \Disturb\Services;
 
 class ManagerTask extends \Disturb\Tasks\AbstractTask
 {
@@ -11,6 +12,7 @@ class ManagerTask extends \Disturb\Tasks\AbstractTask
     
     protected function usage()
     {
+        // xxx improve usage handling
         echo PHP_EOL . 'Usage : ';
         echo PHP_EOL . 'disturb.php "Tasks\\Manager" start --workflow="/path/to/workflow/condfig/file.json" [--name="workflowName"]';
         echo PHP_EOL;
@@ -21,9 +23,11 @@ class ManagerTask extends \Disturb\Tasks\AbstractTask
         echo PHP_EOL . '>' . __METHOD__ . ' : ' . json_encode(func_get_args());
         parent::initWorker($paramHash);
         $serviceFullName = $this->workflowConfig['servicesClassNameSpace'] . '\\' . ucFirst($this->workflowConfig['name']);
+        // xxx Allow client to overwrite ?
+        $this->workflowManagerService = new Services\WorkflowManager($paramHash['workflow']);
         echo PHP_EOL . "Loading $serviceFullName";
-        $this->service = new $serviceFullName($paramHash['workflow']);
-        // xxx factorise the topicname "build"
+        $this->service = new $serviceFullName();
+        // xxx factorise the topicname "build" logic
         $this->topicName = 'disturb-' . $this->workflowConfig['name'] . '-manager';
     }
 
@@ -54,9 +58,11 @@ class ManagerTask extends \Disturb\Tasks\AbstractTask
 
     protected function runNextStep(string $workflowProcessId) {
         $stepTaskHashList = $this->service->getNextStepTaskList($workflowProcessId);
+        // run through the next step(s)
         foreach($stepTaskHashList as $stepTaskHash) {
             $stepCode = $stepTaskHash['name'];
-            $stepHash = $this->service->getStepPayload($workflowProcessId, $stepCode);
+            $stepHash = $this->service->getStepInput($workflowProcessId, $stepCode);
+            // run through the "job" to send to each step
             foreach($stepHash as $stepJob) {
                 $stepMessageDto = new \Disturb\Dtos\Message(json_encode($stepJob));
                 $stepMessageDto['type'] = \Disturb\Dtos\Message::TYPE_STEP_CTRL;
