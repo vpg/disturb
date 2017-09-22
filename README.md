@@ -10,38 +10,39 @@ Based on Phalcon and Kafka
 ## TODO
  See `xxx` tag in the code
 
-## Install
-### Install Kafka + Zookeeper
-```
-wget ftp://mirrors.ircam.fr/pub/apache/kafka/0.10.1.0/kafka_2.11-0.10.1.0.tgz  
-tar --extract --gzip --file kafka*
-```
-either use standalone zookeeper bin included in kafka or install it
-cd kafka_*
-./bin/zookeeper-server-start.sh config/zookeeper.properties
+## Usage
+### prep requirements
+Kafka + Zookeeper : https://kafka.apache.org/quickstart
 
+### Install \Vpg\Disturb
+Add it to your project w/ compposer
 ```
-sudo apt-get install zookeeper
-sudo apt-get install zookeeperd
-sudo service zookeeper start
+    "require": {
+        "vpg/disturb": "dev-poc"
+    }
+```
+### Define workflow
+![see example](https://github.com/vpg/disturb/tree/poc/example/Config)
+
+### Code Logic
+Code your services (Steps and Manager) logic
+![see example](https://github.com/vpg/disturb/tree/poc/example/Services)
+
+### Run
+Run Manager
+```
+vendor/bin/disturb-manager  --workflow="/path/to/disturb/example/Config/parallelized.json"
 ```
 
-### Run Kafka
+### Run Step
 ```
-./bin/kafka-server-start.sh config/server.properties
+vendor/bin/disturb-step --step="step0" --workflow="/path/to/disturb/example/Config/parallelized.json"
+vendor/bin/disturb-step --step="step1" --workflow="/path/to/disturb/example/Config/parallelized.json"
+vendor/bin/disturb-step --step="step2" --workflow="/path/to/disturb/example/Config/parallelized.json"
+vendor/bin/disturb-step --step="step3" --workflow="/path/to/disturb/example/Config/parallelized.json"
 ```
 
-## Run Example
-### See Config
+### Start a workflow exec
 ```
-app/Config/workflow.json
-```
-### Start Loading Manager Worker
-```
-php app/cli.php "Tasks\\LoadingManager" start
-```
-### Start Steps Worker
-```
-php cli.php "Tasks\\Step" start step0
-php cli.php "Tasks\\Step" start step1
+php producer.php '{"contract":"FR-10-BOOOM", "type" : "WF-CONTROL", "action":"start"}' disturb-foo-manager
 ```
