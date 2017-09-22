@@ -34,13 +34,13 @@ class ManagerTask extends \Disturb\Tasks\AbstractTask
     protected function processMessage(\Disturb\Dtos\Message $payloadHash)
     {
         echo PHP_EOL . '>' . __METHOD__ . " : $payloadHash";
-        $status = $this->service->getStatus($payloadHash['contract']);
+        $status = $this->workflowManagerService->getStatus($payloadHash['contract']);
         echo PHP_EOL . "Contact {$payloadHash['contract']} is '$status'";
         switch($payloadHash['type']) {
         case \Disturb\Dtos\Message::TYPE_WF_CTRL:
             switch($payloadHash['action']) {
             case 'start':
-                $this->service->init($payloadHash['contract']);
+                $this->workflowManagerService->init($payloadHash['contract']);
                 $this->runNextStep($payloadHash['contract']);
                 break;
             }
@@ -48,7 +48,7 @@ class ManagerTask extends \Disturb\Tasks\AbstractTask
         case \Disturb\Dtos\Message::TYPE_STEP_ACK:
             echo PHP_EOL . "Step {$payloadHash['step']} says {$payloadHash['result']}";
             $stepResultHash = json_decode($payloadHash['result'], true);
-            $step = $this->service->finalizeStep($payloadHash['contract'], $payloadHash['step'], $stepResultHash);
+            $step = $this->workflowManagerService->finalizeStep($payloadHash['contract'], $payloadHash['step'], $stepResultHash);
             $this->runNextStep($payloadHash['contract']);
             break;
         default :
@@ -57,13 +57,13 @@ class ManagerTask extends \Disturb\Tasks\AbstractTask
     }
 
     protected function runNextStep(string $workflowProcessId) {
-        $stepTaskHashList = $this->service->getNextStepTaskList($workflowProcessId);
+        $stepTaskHashList = $this->workflowManagerService->getNextStepTaskList($workflowProcessId);
         // run through the next step(s)
         foreach($stepTaskHashList as $stepTaskHash) {
             $stepCode = $stepTaskHash['name'];
-            $stepHash = $this->service->getStepInput($workflowProcessId, $stepCode);
+            $stepInputList = $this->service->getStepInput($workflowProcessId, $stepCode);
             // run through the "job" to send to each step
-            foreach($stepHash as $stepJob) {
+            foreach($stepInputList as $stepJob) {
                 $stepMessageDto = new \Disturb\Dtos\Message(json_encode($stepJob));
                 $stepMessageDto['type'] = \Disturb\Dtos\Message::TYPE_STEP_CTRL;
                 $this->sendMessage('disturb-' . $stepCode . '-step', $stepMessageDto);
