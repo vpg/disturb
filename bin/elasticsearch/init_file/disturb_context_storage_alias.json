@@ -1,0 +1,10 @@
+{
+  "actions": [
+    {
+      "add": {
+        "index": "disturb_workflow",
+        "alias": "disturb_workflow"
+      }
+    }
+  ]
+}
