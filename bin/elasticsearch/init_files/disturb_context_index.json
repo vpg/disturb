@@ -1,0 +1,9 @@
+{
+  "settings" : {
+    "index" : {
+      "mapper" : {
+        "dynamic": false
+      }
+    }
+  }
+}

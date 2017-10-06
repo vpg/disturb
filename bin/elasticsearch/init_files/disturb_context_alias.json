@@ -1,0 +1,10 @@
+{
+  "actions": [
+    {
+      "add": {
+        "index": "disturb_context",
+        "alias": "disturb_context_alias"
+      }
+    }
+  ]
+}
