@@ -58,4 +58,8 @@ class Message implements \ArrayAccess
     public function offsetGet($offset) {
         return isset($this->rawHash[$offset]) ? $this->rawHash[$offset] : null;
     }
+
+    public function getPayload() {
+        return $this->rawHash['payload'];
+    }
 }

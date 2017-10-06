@@ -3,6 +3,6 @@ namespace Disturb\Services;
 
 interface StepServiceInterface
 {
-    public function execute(array $paramHash) : bool;
+    public function execute(array $paramHash) : array;
 }
 
