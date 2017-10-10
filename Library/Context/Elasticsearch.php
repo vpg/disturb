@@ -1,18 +1,13 @@
 <?php
-/**
- * User: adefretin
- * Date: 22/09/2017
- * Time: 12:17
- */
 
-namespace Disturb\ContextStorage;
+namespace Disturb\Context;
 
 /**
  * Class Elasticsearch
  *
  * @package Disturb\ContextStorage
  */
-class Elasticsearch implements ContextStorageInterface
+class Elasticsearch implements StorageInterface
 {
     /**
      * @const string DOC_INDEX
@@ -42,7 +37,18 @@ class Elasticsearch implements ContextStorageInterface
     /**
      * Constructor
      */
-    public function construct() {
+    public function construct()
+    {
+        $this->initialize();
+    }
+
+    /**
+     * Initialize
+     *
+     * @return void
+     */
+    public function initialize()
+    {
         $this->checkVendorLibraryAvailable();
         $this->initConfig();
         $this->initClient();
@@ -53,11 +59,14 @@ class Elasticsearch implements ContextStorageInterface
      *
      * @throws \Exception
      */
-    private function initConfig() {
-        if (!file_exists(realpath('./../Config/ContextStorage/elasticsearch.json'))) {
+    private function initConfig(string $filepath = '') {
+        if (empty($filepath)) {
+            $filepath = realpath(__DIR__ . '/../../Config/Context/Elasticsearch.json');
+        }
+        if (!file_exists($filepath)) {
             throw new \Exception('Elasticsearch config not found');
         }
-        $this->config = new \Phalcon\Config\Adapter\Json(realpath('./../Config/ContextStorage/elasticsearch.json'));
+        $this->config = new \Phalcon\Config\Adapter\Json($filepath);
     }
 
     /**
@@ -107,7 +116,7 @@ class Elasticsearch implements ContextStorageInterface
      * @throws \Exception
      */
     private function checkVendorLibraryAvailable() {
-        if (!file_exists(realpath('./../vendor/elasticsearch/elasticsearch/README.md'))) {
+        if (!file_exists(realpath(__DIR__ . '/../../vendor/elasticsearch/elasticsearch/README.md'))) {
             throw new \Exception('Elasticsearch lib not found. Please make "composer update"');
         }
     }

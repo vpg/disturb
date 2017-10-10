@@ -1,9 +1,16 @@
 <?php
 
-namespace Disturb\ContextStorage;
+namespace Disturb\Context;
 
-interface ContextStorageInterface
+interface StorageInterface
 {
+    /**
+     * Initialize
+     *
+     * @return mixed
+     */
+    public function initialize();
+
     /**
      * Get storage data identified by key
      *
