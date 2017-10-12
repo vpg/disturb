@@ -1,5 +1,5 @@
 {
-    "name": "vpg/disturb",
+    "name": "Disturb",
     "description": "Language agnostic Distributed Workflow Processor built on top of Apache Kafka",
     "type": "library",
     "minimum-stability":"dev",
@@ -12,7 +12,7 @@
     "bin": ["bin/disturb-manager", "bin/disturb-step"],
     "autoload":{
         "psr-4":{
-            "vpg\\disturb\\" : "Library/"
+            "Disturb\\" : "Library/"
         }
     },
     "require": {
