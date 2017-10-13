@@ -39,17 +39,17 @@ class Message implements \ArrayAccess
         } else {
             throw new \Exception('Not supported raw message type');
         }
-        if (!$this->isValid()) {
-            throw new \Exception('Missing message Type');
-        }
+        $this->validate();
     }
 
     /**
-     * Returns true if the current message is valid
+     * Validates the current message is valid
      *
-     * @return bool the validation state
+     * @throws \Exception in case of invalid message
+     *
+     * @return void
      */
-    public function isValid() : bool
+    public function validate()
     {
         $isValid = false;
         if (!isset($this->rawHash['type'])) {
@@ -63,9 +63,12 @@ class Message implements \ArrayAccess
             break;
             default:
                 throw new \Exception('Validation of message type ' . $this->rawHash['type'] . ' is not implemented yet, please do');
-
         }
-        return $isValid;
+        if (!$isValid) {
+            throw new \Exception('Missing properties for message ' . $this->rawHash['type'] . ' : ' .
+                implode(',', $this->WF_REQUIRED_PROP_HASH)
+            );
+        }
     }
 
     public function getId(): string {
