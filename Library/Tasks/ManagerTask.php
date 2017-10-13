@@ -3,6 +3,7 @@ namespace Disturb\Tasks;
 
 use Phalcon\Cli\Task;
 use \Disturb\Services;
+use \Disturb\Dtos\Message;
 
 class ManagerTask extends \Disturb\Tasks\AbstractTask
 {
@@ -30,14 +31,13 @@ class ManagerTask extends \Disturb\Tasks\AbstractTask
         // xxx factorise the topicname "build" logic
         $this->topicName = 'disturb-' . $this->workflowConfig['name'] . '-manager';
     }
-
-    protected function processMessage(\Disturb\Dtos\Message $messageDto)
+    protected function processMessage(Message $messageDto)
     {
         echo PHP_EOL . '>' . __METHOD__ . " : $messageDto";
         $status = $this->workflowManagerService->getStatus($messageDto->getContract());
         echo PHP_EOL . "Contract {$messageDto->getContract()} is '$status'";
         switch($messageDto->getType()) {
-        case \Disturb\Dtos\Message::TYPE_WF_CTRL:
+        case Message::TYPE_WF_CTRL:
             switch($messageDto->getAction()) {
             case 'start':
                 $this->workflowManagerService->init($messageDto->getContract());
@@ -45,12 +45,11 @@ class ManagerTask extends \Disturb\Tasks\AbstractTask
                 break;
             }
             break;
-        case \Disturb\Dtos\Message::TYPE_STEP_ACK:
+        case Message::TYPE_STEP_ACK:
             echo PHP_EOL . "Step {$messageDto->getStep()} says {$messageDto->getResult()}";
             $stepResultHash = json_decode($messageDto->getResult(), true);
 
             $step = $this->workflowManagerService->finalizeStep($messageDto->getContract(), $messageDto->getStep(), $stepResultHash);
-            echo PHP_EOL . "Contract {$messageDto->getResult()->contract}";
             $this->runNextStep($messageDto->getContract());
             break;
         default :

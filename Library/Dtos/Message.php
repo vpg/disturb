@@ -21,22 +21,67 @@ class Message
 
     private $rawHash = [];
 
-    public function __construct(string $rawPayload) {
-        if (!($rawHash = json_decode($rawPayload, true))){
-            // xxx defined typed Exception
-            throw new \Exception('Not able to parse message');
+    const WF_REQUIRED_PROP_HASH = ['id', 'type', 'action', 'payload'];
+
+    /**
+     * Instanciates a new Message Dto according to the given data
+     *
+     * @param mixed $rawMixed could either be a string (json) or an array
+     *
+     * @return array The parsed options hash
+     */
+    public function __construct($rawMixed) {
+        if (is_array($rawMixed)) {
+            $this->rawHash = $rawMixed;
+        } elseif (is_string($rawMixed)) {
+            if (!($rawHash = json_decode($rawMixed, true))) {
+                // xxx defined typed Exception
+                throw new \Exception('Not able to parse message');
+            }
+            $this->rawHash = $rawHash;
+        } else {
+            throw new \Exception('Not supported raw message type');
         }
-        $this->rawHash = $rawHash;
         $this->validate();
     }
 
+    /**
+     * Validates the current message is valid
+     *
+     * @throws \Exception in case of invalid message
+     *
+     * @return void
+     */
     public function validate()
     {
+        $isValid = false;
         if (!isset($this->rawHash['type'])) {
             // xxx defined typed Exception
             throw new \Exception('Missing message Type');
         }
+        switch ($this->rawHash['type']) {
+            case self::TYPE_WF_CTRL:
+                $matchPropList = array_intersect_key($this->rawHash, array_flip(self::WF_REQUIRED_PROP_HASH));
+                $isValid = (count(self::WF_REQUIRED_PROP_HASH) == count($matchPropList));
+            break;
+            default:
+                throw new \Exception('Validation of message type ' . $this->rawHash['type'] . ' is not implemented yet, please do');
+        }
+        if (!$isValid) {
+            throw new \Exception('Missing properties for message ' . $this->rawHash['type'] . ' : ' .
+                implode(',', self::WF_REQUIRED_PROP_HASH)
+            );
+        }
     }
+
+    public function getId(): string {
+        return $this->rawHash['id'] ?? '';
+    }
+
+    public function getType(): string {
+        return $this->rawHash['type'] ?? '';
+    }
+
 
     public function __toString() {
         return json_encode($this->rawHash);
