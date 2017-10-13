@@ -18,7 +18,7 @@ class Message implements \ArrayAccess
 
     private $rawHash = [];
 
-    private $WF_REQUIRED_PROP_HASH = ['id', 'type', 'action', 'payload'];
+    const WF_REQUIRED_PROP_HASH = ['id', 'type', 'action', 'payload'];
 
     /**
      * Instanciates a new Message Dto according to the given data
@@ -58,15 +58,15 @@ class Message implements \ArrayAccess
         }
         switch ($this->rawHash['type']) {
             case self::TYPE_WF_CTRL:
-                $matchPropList = array_intersect_key($this->rawHash, array_flip($this->WF_REQUIRED_PROP_HASH));
-                $isValid = (count($this->WF_REQUIRED_PROP_HASH) == count($matchPropList));
+                $matchPropList = array_intersect_key($this->rawHash, array_flip(self::WF_REQUIRED_PROP_HASH));
+                $isValid = (count(self::WF_REQUIRED_PROP_HASH) == count($matchPropList));
             break;
             default:
                 throw new \Exception('Validation of message type ' . $this->rawHash['type'] . ' is not implemented yet, please do');
         }
         if (!$isValid) {
             throw new \Exception('Missing properties for message ' . $this->rawHash['type'] . ' : ' .
-                implode(',', $this->WF_REQUIRED_PROP_HASH)
+                implode(',', self::WF_REQUIRED_PROP_HASH)
             );
         }
     }
