@@ -61,13 +61,14 @@ class Message
         if (!isset($this->rawHash['type'])) {
             throw new Exceptions\InvalidMessageException('Missing message Type');
         }
-        $requiredKeys = [];
+
+        $propHashRequired = [];
         switch ($this->rawHash['type']) {
             case self::TYPE_WF_CTRL:
-                $requiredKeys = array_flip(self::WF_REQUIRED_PROP_HASH);
+                $propHashRequired = self::WF_REQUIRED_PROP_HASH;
             break;
             case self::TYPE_STEP_CTRL:
-                $requiredKeys = array_flip(self::STEP_REQUIRED_PROP_HASH);
+                $propHashRequired = self::STEP_REQUIRED_PROP_HASH;
             break;
             default:
                 throw new \Exception(
@@ -75,11 +76,11 @@ class Message
                 );
                 throw new Exceptions\InvalidMessageException('Validation of message type ' . $this->rawHash['type'] . ' is not implemented yet, please do');
         }
-        $matchPropList = array_intersect_key($this->rawHash, $requiredKeys);
-        $isValid = (count($requiredKeys) == count($matchPropList));
+        $matchPropList = array_intersect_key($this->rawHash, array_flip($propHashRequired));
+        $isValid = (count($propHashRequired) == count($matchPropList));
         if (!$isValid) {
             throw new Exceptions\InvalidMessageException('Missing properties for message ' . $this->rawHash['type'] . ' : ' .
-                implode(',', self::WF_REQUIRED_PROP_HASH)
+                implode(',', $propHashRequired)
             );
         }
     }
@@ -91,7 +92,6 @@ class Message
     public function getType(): string {
         return $this->rawHash['type'] ?? '';
     }
-
 
     public function __toString() {
         return json_encode($this->rawHash);
