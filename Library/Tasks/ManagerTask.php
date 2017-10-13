@@ -59,11 +59,11 @@ class ManagerTask extends \Disturb\Tasks\AbstractTask
     protected function runNextStep(string $workflowProcessId) {
         $stepTaskHashList = $this->workflowManagerService->getNextStepTaskList($workflowProcessId);
         // run through the next step(s)
-        foreach($stepTaskHashList as $stepTaskHash) {
+        foreach ($stepTaskHashList as $stepTaskHash) {
             $stepCode = $stepTaskHash['name'];
             $stepInputList = $this->service->getStepInput($workflowProcessId, $stepCode);
             // run through the "job" to send to each step
-            foreach($stepInputList as $stepJob) {
+            foreach ($stepInputList as $stepJob) {
                 $messageHash = [
                     'type' => \Disturb\Dtos\Message::TYPE_STEP_CTRL,
                     'payload' => $stepJob

@@ -1,5 +1,5 @@
 <?
-namespace Disturb\Dtos;
+namespace Disturb;
 
 class Message implements \ArrayAccess
 {
@@ -15,6 +15,9 @@ class Message implements \ArrayAccess
 
     const ACTION_WF_MONITOR_PING = 'WF-MONITOR-PING';
     const ACTION_WF_MONITOR_PONG = 'WF-MONITOR-PONG';
+
+    const MSG_RETURN_SUCCESS = 'SUCCESS';
+    const MSG_RETURN_ERROR = 'ERROR';
 
     private $rawHash = [];
 
@@ -59,7 +62,7 @@ class Message implements \ArrayAccess
         return isset($this->rawHash[$offset]) ? $this->rawHash[$offset] : null;
     }
 
-    public function getPayload() {
-        return $this->rawHash['payload'];
+    public function getPayload() : array {
+        return !empty($this->rawHash['payload']) ? $this->rawHash['payload'] : [];
     }
 }
