@@ -1,6 +1,8 @@
 <?
 namespace Disturb\Services;
 
+use \Disturb\Exceptions;
+
 class WorkflowManager extends \Phalcon\Mvc\User\Component implements WorkflowManagerInterface
 {
     const STATUS_NO_STARTED = 'NOT_STARTED';

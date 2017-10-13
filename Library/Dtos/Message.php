@@ -1,6 +1,8 @@
 <?
 namespace Disturb\Dtos;
 
+use \Disturb\Exceptions;
+
 class Message
 {
     const TYPE_STEP_CTRL = 'STEP-CTRL';
@@ -22,6 +24,7 @@ class Message
     private $rawHash = [];
 
     const WF_REQUIRED_PROP_HASH = ['id', 'type', 'action', 'payload'];
+    const STEP_REQUIRED_PROP_HASH = ['id', 'type', 'action', 'payload'];
 
     /**
      * Instanciates a new Message Dto according to the given data
@@ -36,11 +39,11 @@ class Message
         } elseif (is_string($rawMixed)) {
             if (!($rawHash = json_decode($rawMixed, true))) {
                 // xxx defined typed Exception
-                throw new \Exception('Not able to parse message');
+                throw new Exceptions\InvalidMessageException('Not able to parse message');
             }
             $this->rawHash = $rawHash;
         } else {
-            throw new \Exception('Not supported raw message type');
+            throw new Exceptions\InvalidMessageException('Not supported raw message type');
         }
         $this->validate();
     }
@@ -56,20 +59,28 @@ class Message
     {
         $isValid = false;
         if (!isset($this->rawHash['type'])) {
-            // xxx defined typed Exception
-            throw new \Exception('Missing message Type');
+            throw new Exceptions\InvalidMessageException('Missing message Type');
         }
+
+        $propHashRequired = [];
         switch ($this->rawHash['type']) {
             case self::TYPE_WF_CTRL:
-                $matchPropList = array_intersect_key($this->rawHash, array_flip(self::WF_REQUIRED_PROP_HASH));
-                $isValid = (count(self::WF_REQUIRED_PROP_HASH) == count($matchPropList));
+                $propHashRequired = self::WF_REQUIRED_PROP_HASH;
+            break;
+            case self::TYPE_STEP_CTRL:
+                $propHashRequired = self::STEP_REQUIRED_PROP_HASH;
             break;
             default:
-                throw new \Exception('Validation of message type ' . $this->rawHash['type'] . ' is not implemented yet, please do');
+                throw new \Exception(
+                    'Validation of message type ' . $this->rawHash['type'] . ' is not implemented yet, please do'
+                );
+                throw new Exceptions\InvalidMessageException('Validation of message type ' . $this->rawHash['type'] . ' is not implemented yet, please do');
         }
+        $matchPropList = array_intersect_key($this->rawHash, array_flip($propHashRequired));
+        $isValid = (count($propHashRequired) == count($matchPropList));
         if (!$isValid) {
-            throw new \Exception('Missing properties for message ' . $this->rawHash['type'] . ' : ' .
-                implode(',', self::WF_REQUIRED_PROP_HASH)
+            throw new Exceptions\InvalidMessageException('Missing properties for message ' . $this->rawHash['type'] . ' : ' .
+                implode(',', $propHashRequired)
             );
         }
     }
@@ -82,21 +93,12 @@ class Message
         return $this->rawHash['type'] ?? '';
     }
 
-
     public function __toString() {
         return json_encode($this->rawHash);
     }
 
     public function getPayload() : array {
         return !empty($this->rawHash['payload']) ? $this->rawHash['payload'] : [];
-    }
-
-    public function getId(): string {
-        return $this->rawHash['id'] ?? '';
-    }
-
-    public function getType(): string {
-        return $this->rawHash['type'] ?? '';
     }
 
     public function getFrom(): string {
