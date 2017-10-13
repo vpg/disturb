@@ -18,6 +18,8 @@ class Message implements \ArrayAccess
 
     private $rawHash = [];
 
+    private $WF_REQUIRED_PROP_HASH = ['id', 'type', 'action', 'payload'];
+
     public function __construct(string $rawPayload) {
         if (!($rawHash = json_decode($rawPayload, true))){
             // xxx defined typed Exception
@@ -27,12 +29,31 @@ class Message implements \ArrayAccess
         $this->validate();
     }
 
+    public function getId(): string {
+        return $this->rawHash['id'];
+    }
+    public function getType(): string {
+        return $this->rawHash['type'];
+    }
+
     public function validate()
     {
         if (!isset($this->rawHash['type'])) {
             // xxx defined typed Exception
             throw new \Exception('Missing message Type');
         }
+        $isValid = false;
+        switch ($this->rawHash['type']) {
+            case self::TYPE_WF_CTRL:
+                $matchPropList = array_intersect_key($this->rawHash, array_flip($this->WF_REQUIRED_PROP_HASH));
+                $isValid = (count($this->WF_REQUIRED_PROP_HASH) == count($matchPropList));
+            break;
+            default:
+                throw new \Exception('Validation of message type ' . $this->rawHash['type'] . ' is not implemented yet, please do');
+
+        }
+        if (!$isValid)
+            throw new \Exception('Invalid Message');
     }
 
     public function __toString() {
