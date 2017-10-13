@@ -1,5 +1,5 @@
 <?
-namespace Disturb\Services;
+namespace Vpg\Disturb\Services;
 
 use \Disturb\Exceptions;
 

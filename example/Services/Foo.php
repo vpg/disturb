@@ -1,9 +1,9 @@
 <?
-namespace Ex\Services;
+namespace Vpg\Disturb\Example\Services;
 
-use \Disturb;
+use \Vpg\Disturb\Services\ManagerServiceInterface;
 
-class Foo implements \Disturb\Services\ManagerServiceInterface
+class Foo implements ManagerServiceInterface
 {
 
     public function getStepInput(string $contractCode, string $stepCode) : array {

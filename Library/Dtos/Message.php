@@ -1,5 +1,5 @@
 <?
-namespace Disturb\Dtos;
+namespace Vpg\Disturb\Dtos;
 
 use \Disturb\Exceptions;
 

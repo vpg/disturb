@@ -1,5 +1,5 @@
 <?
-namespace Ex\Services;
+namespace Vpg\Disturb\Example\Services;
 
 class Step0  extends AbstractStep implements StepInterface
 {

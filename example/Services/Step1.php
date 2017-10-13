@@ -1,5 +1,5 @@
 <?
-namespace ex\Services;
+namespace Vpg\Disturb\Example\Services;
 
 class Step1 extends \Phalcon\Mvc\User\Component
 {

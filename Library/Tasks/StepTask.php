@@ -1,7 +1,8 @@
 <?php
-namespace Disturb\Tasks;
+namespace Vpg\Disturb\Tasks;
 
-use Phalcon\Cli\Task;
+use \Phalcon\Cli\Task;
+use \Vpg\Disturb\Tasks\AbstractTask as AbstractTask;
 
 /**
  * Generic Step task
@@ -10,7 +11,7 @@ use Phalcon\Cli\Task;
  *
  * @see \Disturb\Tasks\AbstractTask
  */
-class StepTask extends \Disturb\Tasks\AbstractTask
+class StepTask extends AbstractTask
 {
 
     protected $taskOptionList = [

@@ -1,9 +1,9 @@
 <?php
-namespace Disturb\Tasks;
+namespace Vpg\Disturb\Tasks;
 
-use Phalcon\Cli\Task;
-use Phalcon\Loader;
-use Disturb\Dtos;
+use \Phalcon\Cli\Task;
+use \Phalcon\Loader;
+use \Vpg\Disturb\Dtos;
 
 abstract class AbstractTask extends Task implements TaskInterface
 {

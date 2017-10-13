@@ -1,11 +1,13 @@
 <?php
-namespace Disturb\Tasks;
+namespace Vpg\Disturb\Tasks;
 
 use Phalcon\Cli\Task;
-use \Disturb\Services;
-use \Disturb\Dtos\Message;
+use \Vpg\Disturb\Services as Services;
+use \Vpg\Disturb\Dtos\Message as Message;
+use \Vpg\Disturb\Tasks\AbstractTask as AbstractTask;
 
-class ManagerTask extends \Disturb\Tasks\AbstractTask
+
+class ManagerTask extends AbstractTask
 {
     protected $taskOptionList = [
         '?name:'    // optional workflow name
