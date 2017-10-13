@@ -35,18 +35,21 @@ class StepTask extends AbstractTask
      *  - the process result (returned by the service) is sent back to the manager
      *
      * @param Vpg\Disturb\Dtos\Message $messageDto the message to process
+     *
+     * @return void
      */
     protected function processMessage(Dtos\Message $messageDto)
     {
         echo PHP_EOL . '>' . __METHOD__ . " : $messageDto";
         $resultHash = $this->service->execute($messageDto->getPayload());
         $msgDto = new Dtos\Message(
-            json_encode([
-                'contract' => $messageDto->getPayload()['contract'],
-                'type' => Dtos\Message::TYPE_STEP_ACK,
-                'step' => $this->topicName,
+            [
+                'id' => $messageDto->getId(),
+                'type' => \Disturb\Dtos\Message::TYPE_STEP_ACK,
+                'stepCode' => $messageDto->getStepCode(),
+                'jobId' => $messageDto->getJobId(),
                 'result' => json_encode($resultHash)
-            ])
+            ]
         );
         $this->sendMessage('disturb-' . $this->workflowConfig['name']  . '-manager', $msgDto);
     }
@@ -57,6 +60,8 @@ class StepTask extends AbstractTask
      *  - Instanciates the "Client" service
      *
      * @param array $paramHash the parsed step task argv
+     *
+     * @return void
      */
     protected function initWorker(array $paramHash)
     {

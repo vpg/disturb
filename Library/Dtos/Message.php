@@ -25,6 +25,7 @@ class Message
 
     const WF_REQUIRED_PROP_HASH = ['id', 'type', 'action', 'payload'];
     const STEP_REQUIRED_PROP_HASH = ['id', 'type', 'action', 'payload'];
+    const STEP_ACK_REQUIRED_PROP_HASH = ['id', 'type', 'jobId', 'result'];
 
     /**
      * Instanciates a new Message Dto according to the given data
@@ -70,6 +71,9 @@ class Message
             case self::TYPE_STEP_CTRL:
                 $propHashRequired = self::STEP_REQUIRED_PROP_HASH;
             break;
+            case self::TYPE_STEP_ACK:
+                $propHashRequired = self::STEP_ACK_REQUIRED_PROP_HASH;
+            break;
             default:
                 throw new \Exception(
                     'Validation of message type ' . $this->rawHash['type'] . ' is not implemented yet, please do'
@@ -87,6 +91,10 @@ class Message
 
     public function getId(): string {
         return $this->rawHash['id'] ?? '';
+    }
+
+    public function getJobId(): string {
+        return $this->rawHash['jobId'] ?? '';
     }
 
     public function getType(): string {
@@ -113,8 +121,8 @@ class Message
         return $this->rawHash['contract'] ?? '';
     }
 
-    public function getStep(): string {
-        return $this->rawHash['step'] ?? '';
+    public function getStepCode(): string {
+        return $this->rawHash['stepCode'] ?? '';
     }
 
     public function getResult(): string {
