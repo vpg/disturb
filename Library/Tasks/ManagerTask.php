@@ -63,10 +63,10 @@ class ManagerTask extends \Disturb\Tasks\AbstractTask
             $stepCode = $stepTaskHash['name'];
             $stepInputList = $this->service->getStepInput($workflowProcessId, $stepCode);
             // run through the "job" to send to each step
-            foreach ($stepInputList as $stepJob) {
+            foreach ($stepInputList as $stepJobHash) {
                 $messageHash = [
                     'type' => \Disturb\Dtos\Message::TYPE_STEP_CTRL,
-                    'payload' => $stepJob
+                    'payload' => $stepJobHash
                 ];
                 $stepMessageDto = new \Disturb\Dtos\Message(json_encode($messageHash));
                 $this->sendMessage('disturb-' . $stepCode . '-step', $stepMessageDto);
