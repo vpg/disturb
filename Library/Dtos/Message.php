@@ -57,21 +57,21 @@ class Message implements \ArrayAccess
             // xxx defined typed Exception
             throw new \Exception('Missing message Type');
         }
-        $requieredKeys = [];
+        $requiredKeys = [];
         switch ($this->rawHash['type']) {
             case self::TYPE_WF_CTRL:
-                $requieredKeys = array_flip(self::WF_REQUIRED_PROP_HASH);
+                $requiredKeys = array_flip(self::WF_REQUIRED_PROP_HASH);
             break;
             case self::TYPE_STEP_CTRL:
-                $requieredKeys = array_flip(self::STEP_REQUIRED_PROP_HASH);
+                $requiredKeys = array_flip(self::STEP_REQUIRED_PROP_HASH);
             break;
             default:
                 throw new \Exception(
                     'Validation of message type ' . $this->rawHash['type'] . ' is not implemented yet, please do'
                 );
         }
-        $matchPropList = array_intersect_key($this->rawHash, $requieredKeys);
-        $isValid = (count($requieredKeys) == count($matchPropList));
+        $matchPropList = array_intersect_key($this->rawHash, $requiredKeys);
+        $isValid = (count($requiredKeys) == count($matchPropList));
         if (!$isValid) {
             throw new \Exception(
                 'Missing properties for message ' . $this->rawHash['type'] . ' : ' .
