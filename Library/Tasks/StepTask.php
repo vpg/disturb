@@ -38,12 +38,13 @@ class StepTask extends \Disturb\Tasks\AbstractTask
         echo PHP_EOL . '>' . __METHOD__ . " : $messageDto";
         $resultHash = $this->service->execute($messageDto->getPayload());
         $msgDto = new \Disturb\Dtos\Message(
-            json_encode([
-                'contract' => $messageDto->getPayload()['contract'],
+            [
+                'id' => $messageDto->getId(),
                 'type' => \Disturb\Dtos\Message::TYPE_STEP_ACK,
-                'step' => $this->topicName,
+                'stepCode' => $messageDto->getStepCode(),
+                'jobId' => $messageDto->getJobId(),
                 'result' => json_encode($resultHash)
-            ])
+            ]
         );
         $this->sendMessage('disturb-' . $this->workflowConfig['name']  . '-manager', $msgDto);
     }

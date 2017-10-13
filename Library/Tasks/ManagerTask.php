@@ -34,39 +34,48 @@ class ManagerTask extends \Disturb\Tasks\AbstractTask
     protected function processMessage(Message $messageDto)
     {
         echo PHP_EOL . '>' . __METHOD__ . " : $messageDto";
-        $status = $this->workflowManagerService->getStatus($messageDto->getContract());
-        echo PHP_EOL . "Contract {$messageDto->getContract()} is '$status'";
+        $status = $this->workflowManagerService->getStatus($messageDto->getId());
+        echo PHP_EOL . "Id {$messageDto->getId()} is '$status'";
         switch($messageDto->getType()) {
-        case Message::TYPE_WF_CTRL:
-            switch($messageDto->getAction()) {
-            case 'start':
-                $this->workflowManagerService->init($messageDto->getContract());
-                $this->runNextStep($messageDto->getContract());
+            case Message::TYPE_WF_CTRL:
+                switch($messageDto->getAction()) {
+                    case 'start':
+                        $this->workflowManagerService->init($messageDto->getId());
+                        $this->runNextStep($messageDto->getId());
+                    break;
+                }
                 break;
-            }
-            break;
-        case Message::TYPE_STEP_ACK:
-            echo PHP_EOL . "Step {$messageDto->getStep()} says {$messageDto->getResult()}";
-            $stepResultHash = json_decode($messageDto->getResult(), true);
-
-            $step = $this->workflowManagerService->finalizeStep($messageDto->getContract(), $messageDto->getStep(), $stepResultHash);
-            $this->runNextStep($messageDto->getContract());
-            break;
-        default :
-            echo PHP_EOL . "ERR : Unknown message type : {$messageDto->getType()}";
+            case Message::TYPE_STEP_ACK:
+                echo PHP_EOL . "Step {$messageDto->getStepCode()} says {$messageDto->getResult()}";
+                $stepResultHash = json_decode($messageDto->getResult(), true);
+                $step = $this->workflowManagerService->processStepJobResult(
+                    $messageDto->getId(),
+                    $messageDto->getStepCode(),
+                    $messageDto->getJobId(),
+                    $stepResultHash
+                );
+               // $this->runNextStep($messageDto->getId());
+                break;
+            default :
+                echo PHP_EOL . "ERR : Unknown message type : {$messageDto->getType()}";
         }
     }
 
     protected function runNextStep(string $workflowProcessId) {
-        $stepTaskHashList = $this->workflowManagerService->getNextStepTaskList($workflowProcessId);
+        $stepHashList = $this->workflowManagerService->getNextStepList($workflowProcessId);
         // run through the next step(s)
-        foreach ($stepTaskHashList as $stepTaskHash) {
-            $stepCode = $stepTaskHash['name'];
+        foreach ($stepHashList as $stepHash) {
+            $stepCode = $stepHash['name'];
             $stepInputList = $this->service->getStepInput($workflowProcessId, $stepCode);
             // run through the "job" to send to each step
-            foreach ($stepInputList as $stepJobHash) {
+            foreach ($stepInputList as $jobId => $stepJobHash) {
+                $this->workflowManagerService->registerStepJob($workflowProcessId, $stepCode, $jobId);
                 $messageHash = [
+                    'id' => $workflowProcessId,
+                    'jobId' => $jobId,
+                    'stepCode' => $stepCode,
                     'type' => \Disturb\Dtos\Message::TYPE_STEP_CTRL,
+                    'action' => 'start',
                     'payload' => $stepJobHash
                 ];
                 $stepMessageDto = new \Disturb\Dtos\Message(json_encode($messageHash));
