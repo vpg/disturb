@@ -20,29 +20,42 @@ class Message implements \ArrayAccess
 
     private $WF_REQUIRED_PROP_HASH = ['id', 'type', 'action', 'payload'];
 
-    public function __construct(string $rawPayload) {
-        if (!($rawHash = json_decode($rawPayload, true))){
-            // xxx defined typed Exception
-            throw new \Exception('Not able to parse message');
+    /**
+     * Instanciates a new Message Dto according to the given data
+     *
+     * @param mixed $rawMixed could either be a string (json) or an array
+     *
+     * @return array The parsed options hash
+     */
+    public function __construct($rawMixed) {
+        if (is_array($rawMixed)) {
+            $this->rawHash = $rawMixed;
+        } elseif (is_string($rawMixed)) {
+            if (!($rawHash = json_decode($rawMixed, true))) {
+                // xxx defined typed Exception
+                throw new \Exception('Not able to parse message');
+            }
+            $this->rawHash = $rawHash;
+        } else {
+            throw new \Exception('Not supported raw message type');
         }
-        $this->rawHash = $rawHash;
-        $this->validate();
+        if (!$this->isValid()) {
+            throw new \Exception('Missing message Type');
+        }
     }
 
-    public function getId(): string {
-        return $this->rawHash['id'];
-    }
-    public function getType(): string {
-        return $this->rawHash['type'];
-    }
-
-    public function validate()
+    /**
+     * Returns true if the current message is valid
+     *
+     * @return bool the validation state
+     */
+    public function isValid() : bool
     {
+        $isValid = false;
         if (!isset($this->rawHash['type'])) {
             // xxx defined typed Exception
             throw new \Exception('Missing message Type');
         }
-        $isValid = false;
         switch ($this->rawHash['type']) {
             case self::TYPE_WF_CTRL:
                 $matchPropList = array_intersect_key($this->rawHash, array_flip($this->WF_REQUIRED_PROP_HASH));
@@ -52,9 +65,17 @@ class Message implements \ArrayAccess
                 throw new \Exception('Validation of message type ' . $this->rawHash['type'] . ' is not implemented yet, please do');
 
         }
-        if (!$isValid)
-            throw new \Exception('Invalid Message');
+        return $isValid;
     }
+
+    public function getId(): string {
+        return $this->rawHash['id'] ?? '';
+    }
+
+    public function getType(): string {
+        return $this->rawHash['type'] ?? '';
+    }
+
 
     public function __toString() {
         return json_encode($this->rawHash);
