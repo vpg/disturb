@@ -31,28 +31,30 @@ class ManagerTask extends \Disturb\Tasks\AbstractTask
         $this->topicName = 'disturb-' . $this->workflowConfig['name'] . '-manager';
     }
 
-    protected function processMessage(\Disturb\Dtos\Message $payloadHash)
+    protected function processMessage(\Disturb\Dtos\Message $messageDto)
     {
-        echo PHP_EOL . '>' . __METHOD__ . " : $payloadHash";
-        $status = $this->workflowManagerService->getStatus($payloadHash['contract']);
-        echo PHP_EOL . "Contact {$payloadHash['contract']} is '$status'";
-        switch($payloadHash['type']) {
+        echo PHP_EOL . '>' . __METHOD__ . " : $messageDto";
+        $status = $this->workflowManagerService->getStatus($messageDto->getContract());
+        echo PHP_EOL . "Contract {$messageDto->getContract()} is '$status'";
+        switch($messageDto->getType()) {
         case \Disturb\Dtos\Message::TYPE_WF_CTRL:
-            switch($payloadHash['action']) {
+            switch($messageDto->getAction()) {
             case 'start':
-                $this->workflowManagerService->init($payloadHash['contract']);
-                $this->runNextStep($payloadHash['contract']);
+                $this->workflowManagerService->init($messageDto->getContract());
+                $this->runNextStep($messageDto->getContract());
                 break;
             }
             break;
         case \Disturb\Dtos\Message::TYPE_STEP_ACK:
-            echo PHP_EOL . "Step {$payloadHash['step']} says {$payloadHash['result']}";
-            $stepResultHash = json_decode($payloadHash['result'], true);
-            $step = $this->workflowManagerService->finalizeStep($payloadHash['contract'], $payloadHash['step'], $stepResultHash);
-            $this->runNextStep($payloadHash['contract']);
+            echo PHP_EOL . "Step {$messageDto->getStep()} says {$messageDto->getResult()}";
+            $stepResultHash = json_decode($messageDto->getResult(), true);
+
+            $step = $this->workflowManagerService->finalizeStep($messageDto->getContract(), $messageDto->getStep(), $stepResultHash);
+            echo PHP_EOL . "Contract {$messageDto->getResult()->contract}";
+            $this->runNextStep($messageDto->getContract());
             break;
         default :
-            echo PHP_EOL . "ERR : Unknown message type : {$payloadHash['type']}";
+            echo PHP_EOL . "ERR : Unknown message type : {$messageDto->getType()}";
         }
     }
 

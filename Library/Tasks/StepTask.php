@@ -39,7 +39,7 @@ class StepTask extends \Disturb\Tasks\AbstractTask
         $resultHash = $this->service->execute($messageDto->getPayload());
         $msgDto = new \Disturb\Dtos\Message(
             json_encode([
-                'contract' => $messageDto['contract'],
+                'contract' => $messageDto->getPayload()['contract'],
                 'type' => \Disturb\Dtos\Message::TYPE_STEP_ACK,
                 'step' => $this->topicName,
                 'result' => json_encode($resultHash)
