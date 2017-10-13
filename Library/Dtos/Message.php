@@ -1,6 +1,8 @@
 <?
 namespace Disturb\Dtos;
 
+use \Disturb\Exceptions;
+
 class Message
 {
     const TYPE_STEP_CTRL = 'STEP-CTRL';
@@ -37,11 +39,11 @@ class Message
         } elseif (is_string($rawMixed)) {
             if (!($rawHash = json_decode($rawMixed, true))) {
                 // xxx defined typed Exception
-                throw new \Exception('Not able to parse message');
+                throw new Exceptions\InvalidMessageException('Not able to parse message');
             }
             $this->rawHash = $rawHash;
         } else {
-            throw new \Exception('Not supported raw message type');
+            throw new Exceptions\InvalidMessageException('Not supported raw message type');
         }
         $this->validate();
     }
@@ -57,8 +59,7 @@ class Message
     {
         $isValid = false;
         if (!isset($this->rawHash['type'])) {
-            // xxx defined typed Exception
-            throw new \Exception('Missing message Type');
+            throw new Exceptions\InvalidMessageException('Missing message Type');
         }
         $requiredKeys = [];
         switch ($this->rawHash['type']) {
@@ -72,12 +73,12 @@ class Message
                 throw new \Exception(
                     'Validation of message type ' . $this->rawHash['type'] . ' is not implemented yet, please do'
                 );
+                throw new Exceptions\InvalidMessageException('Validation of message type ' . $this->rawHash['type'] . ' is not implemented yet, please do');
         }
         $matchPropList = array_intersect_key($this->rawHash, $requiredKeys);
         $isValid = (count($requiredKeys) == count($matchPropList));
         if (!$isValid) {
-            throw new \Exception(
-                'Missing properties for message ' . $this->rawHash['type'] . ' : ' .
+            throw new Exceptions\InvalidMessageException('Missing properties for message ' . $this->rawHash['type'] . ' : ' .
                 implode(',', self::WF_REQUIRED_PROP_HASH)
             );
         }
@@ -98,14 +99,6 @@ class Message
 
     public function getPayload() : array {
         return !empty($this->rawHash['payload']) ? $this->rawHash['payload'] : [];
-    }
-
-    public function getId(): string {
-        return $this->rawHash['id'] ?? '';
-    }
-
-    public function getType(): string {
-        return $this->rawHash['type'] ?? '';
     }
 
     public function getFrom(): string {

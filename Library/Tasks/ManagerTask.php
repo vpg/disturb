@@ -15,7 +15,7 @@ class ManagerTask extends \Disturb\Tasks\AbstractTask
     {
         // xxx improve usage handling
         echo PHP_EOL . 'Usage : ';
-        echo PHP_EOL . 'disturb.php "Tasks\\Manager" start --workflow="/path/to/workflow/condfig/file.json" [--name="workflowName"]';
+        echo PHP_EOL . 'disturb.php "Tasks\\Manager" start --workflow="/path/to/workflow/config/file.json" [--name="workflowName"]';
         echo PHP_EOL;
     }
 
