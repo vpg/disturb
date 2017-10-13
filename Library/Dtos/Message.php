@@ -1,7 +1,7 @@
 <?
 namespace Disturb\Dtos;
 
-class Message implements \ArrayAccess
+class Message
 {
     const TYPE_STEP_CTRL = 'STEP-CTRL';
     const TYPE_STEP_ACK = 'STEP-ACK';
@@ -15,6 +15,9 @@ class Message implements \ArrayAccess
 
     const ACTION_WF_MONITOR_PING = 'WF-MONITOR-PING';
     const ACTION_WF_MONITOR_PONG = 'WF-MONITOR-PONG';
+
+    const MSG_RETURN_SUCCESS = 'SUCCESS';
+    const MSG_RETURN_ERROR = 'ERROR';
 
     private $rawHash = [];
 
@@ -84,23 +87,36 @@ class Message implements \ArrayAccess
         return json_encode($this->rawHash);
     }
 
-    public function offsetSet($offset, $value) {
-        if (is_null($offset)) {
-            $this->rawHash[] = $value;
-        } else {
-            $this->rawHash[$offset] = $value;
-        }
+    public function getPayload() : array {
+        return !empty($this->rawHash['payload']) ? $this->rawHash['payload'] : [];
     }
 
-    public function offsetExists($offset) {
-        return isset($this->rawHash[$offset]);
+    public function getId(): string {
+        return $this->rawHash['id'] ?? '';
     }
 
-    public function offsetUnset($offset) {
-        unset($this->rawHash[$offset]);
+    public function getType(): string {
+        return $this->rawHash['type'] ?? '';
     }
 
-    public function offsetGet($offset) {
-        return isset($this->rawHash[$offset]) ? $this->rawHash[$offset] : null;
+    public function getFrom(): string {
+        return $this->rawHash['from'] ?? '';
     }
+
+    public function getAction(): string {
+        return $this->rawHash['action'] ?? '';
+    }
+
+    public function getContract(): string {
+        return $this->rawHash['contract'] ?? '';
+    }
+
+    public function getStep(): string {
+        return $this->rawHash['step'] ?? '';
+    }
+
+    public function getResult(): string {
+        return $this->rawHash['result'] ?? '';
+    }
+
 }

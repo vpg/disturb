@@ -105,7 +105,7 @@ abstract class AbstractTask extends Task implements TaskInterface
                 echo PHP_EOL . "ERR : Invalid message : \033[31m" . $dtoException->getMessage() . "\033[0m";
                 continue;
             }
-            if ($msgDto['type'] == Dtos\Message::TYPE_WF_MONITOR) {
+            if ($msgDto->getType() == Dtos\Message::TYPE_WF_MONITOR) {
                 $this->processMonitoringMessage($msgDto);
                 continue;
             }
@@ -115,10 +115,10 @@ abstract class AbstractTask extends Task implements TaskInterface
 
     private function processMonitoringMessage(\Disturb\Dtos\Message $messageDto) {
         echo PHP_EOL . '>' . __METHOD__ . ' : ' . $messageDto;
-        switch($messageDto['action']) {
+        switch($messageDto->getAction()) {
         case Dtos\Message::ACTION_WF_MONITOR_PING:
-            echo PHP_EOL . "PING receive from {$messageDto['from']}";
-            $this->sendMessage($messageDto['from'], Dtos\Message::ACTION_WF_MONITOR_PONG);
+            echo PHP_EOL . "PING receive from {$messageDto->getFrom()}";
+            $this->sendMessage($messageDto->getFrom(), Dtos\Message::ACTION_WF_MONITOR_PONG);
             break;
         }
     }

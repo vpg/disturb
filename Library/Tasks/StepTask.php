@@ -21,7 +21,7 @@ class StepTask extends \Disturb\Tasks\AbstractTask
     protected function usage()
     {
         echo PHP_EOL . 'Usage : ';
-        echo PHP_EOL . 'disturb.php "Tasks\\Step" start --step="stepName" --workflow="/path/to/workflow/condfig/file.json" [--name="workflowName"]';
+        echo PHP_EOL . 'disturb.php "Tasks\\Step" start --step="stepName" --workflow="/path/to/workflow/config/file.json" [--name="workflowName"]';
         echo PHP_EOL;
     }
 
@@ -36,10 +36,10 @@ class StepTask extends \Disturb\Tasks\AbstractTask
     protected function processMessage(\Disturb\Dtos\Message $messageDto)
     {
         echo PHP_EOL . '>' . __METHOD__ . " : $messageDto";
-        $resultHash = $this->service->execute($messageDto);
+        $resultHash = $this->service->execute($messageDto->getPayload());
         $msgDto = new \Disturb\Dtos\Message(
             json_encode([
-                'contract' => $messageDto['contract'],
+                'contract' => $messageDto->getPayload()['contract'],
                 'type' => \Disturb\Dtos\Message::TYPE_STEP_ACK,
                 'step' => $this->topicName,
                 'result' => json_encode($resultHash)

@@ -1,10 +1,8 @@
 <?
 namespace Ex\Services;
 
-class Step0 extends \Phalcon\Mvc\User\Component
+class Step0  extends AbstractStep implements StepInterface
 {
-
-    // MUST be in an interface
     public function execute() : array {
         echo PHP_EOL . '>' . __METHOD__ . ' : ' . json_encode(func_get_args());
         $resultHash = [];
@@ -13,7 +11,7 @@ class Step0 extends \Phalcon\Mvc\User\Component
             sleep(1);
         }
         $resultHash = [
-            'status' => 'SUCESS', // xxx MUST be abstracted in a base classe as const
+            'status' => $this->MSG_ACK_SUCCESS, // xxx MUST be abstracted in a base classe as const
         ];
         return $resultHash;
     }

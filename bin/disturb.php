@@ -14,9 +14,7 @@ $di = new CliDI();
 $loader = new Loader();
 $loader->registerNamespaces(
     [
-        'Disturb\Tasks' => realpath(__DIR__ . '/../Library/Tasks/'),
-        'Disturb\Dtos' => realpath(__DIR__ . '/../Library/Dtos/'),
-        'Disturb\Services' => realpath(__DIR__ . '/../Library/Services/')
+        'Disturb' => realpath(__DIR__ . '/../Library/')
     ],
     true
 );
