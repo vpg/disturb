@@ -1,5 +1,5 @@
 <?
-namespace Disturb;
+namespace Disturb\Dtos;
 
 class Message implements \ArrayAccess
 {
