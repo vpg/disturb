@@ -1,5 +1,5 @@
 <?php
-namespace Disturb\Services;
+namespace Vpg\Disturb\Services;
 
 interface StepServiceInterface
 {

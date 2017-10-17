@@ -1,9 +1,10 @@
 <?php
-namespace Disturb\Tasks;
+namespace Vpg\Disturb\Tasks;
 
-use Phalcon\Cli\Task;
-use Phalcon\Loader;
-use Disturb\Dtos;
+use \Phalcon\Cli\Task;
+use \Phalcon\Loader;
+use \Vpg\Disturb\Dtos;
+use \Phalcon\Config\Adapter\Json;
 
 abstract class AbstractTask extends Task implements TaskInterface
 {
@@ -38,7 +39,7 @@ abstract class AbstractTask extends Task implements TaskInterface
     protected function initWorker(array $paramHash) {
         echo PHP_EOL . '>' . __METHOD__ . ' : ' . json_encode(func_get_args());
         // xxx check if file exists, throw exc on err
-        $this->workflowConfig = new \Phalcon\Config\Adapter\Json($paramHash['workflow']);
+        $this->workflowConfig = new Json($paramHash['workflow']);
         $this->registerClientNS(
             $this->workflowConfig['servicesClassNameSpace'],
             $this->workflowConfig['servicesClassPath']
@@ -113,7 +114,7 @@ abstract class AbstractTask extends Task implements TaskInterface
         }
     }
 
-    private function processMonitoringMessage(\Disturb\Dtos\Message $messageDto) {
+    private function processMonitoringMessage(Dtos\Message $messageDto) {
         echo PHP_EOL . '>' . __METHOD__ . ' : ' . $messageDto;
         switch($messageDto->getAction()) {
         case Dtos\Message::ACTION_WF_MONITOR_PING:

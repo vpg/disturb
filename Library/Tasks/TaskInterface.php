@@ -1,5 +1,5 @@
 <?php
-namespace Disturb\Tasks;
+namespace Vpg\Disturb\Tasks;
 
 interface TaskInterface
 {

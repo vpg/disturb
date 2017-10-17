@@ -14,7 +14,7 @@ $di = new CliDI();
 $loader = new Loader();
 $loader->registerNamespaces(
     [
-        'Disturb' => realpath(__DIR__ . '/../Library/')
+        'Vpg\Disturb' => realpath(__DIR__ . '/../Library/')
     ],
     true
 );

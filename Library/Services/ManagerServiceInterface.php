@@ -1,5 +1,5 @@
 <?php
-namespace Disturb\Services;
+namespace Vpg\Disturb\Services;
 
 interface ManagerServiceInterface
 {
@@ -10,7 +10,7 @@ interface ManagerServiceInterface
      * @param string $stepCode          The step code related to the step to finalize
      *
      * @return array the step to run input data
-     * @throws \Disturb\WorkflowException
+     * @throws Vpg\Disturb\WorkflowException
      */
     public function getStepInput(string $workflowProcessId, string $stepCode) : array;
 }

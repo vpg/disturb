@@ -1,11 +1,13 @@
 <?php
-namespace Disturb\Tasks;
+namespace Vpg\Disturb\Tasks;
 
 use Phalcon\Cli\Task;
-use \Disturb\Services;
-use \Disturb\Dtos\Message;
+use \Vpg\Disturb\Services;
+use \Vpg\Disturb\Dtos;
+use \Vpg\Disturb\Tasks\AbstractTask as AbstractTask;
 
-class ManagerTask extends \Disturb\Tasks\AbstractTask
+
+class ManagerTask extends AbstractTask
 {
     protected $taskOptionList = [
         '?name:'    // optional workflow name
@@ -31,13 +33,13 @@ class ManagerTask extends \Disturb\Tasks\AbstractTask
         // xxx factorise the topicname "build" logic
         $this->topicName = 'disturb-' . $this->workflowConfig['name'] . '-manager';
     }
-    protected function processMessage(Message $messageDto)
+    protected function processMessage(Dtos\Message $messageDto)
     {
         echo PHP_EOL . '>' . __METHOD__ . " : $messageDto";
         $status = $this->workflowManagerService->getStatus($messageDto->getContract());
         echo PHP_EOL . "Contract {$messageDto->getContract()} is '$status'";
         switch($messageDto->getType()) {
-        case Message::TYPE_WF_CTRL:
+        case Dtos\Message::TYPE_WF_CTRL:
             switch($messageDto->getAction()) {
             case 'start':
                 $this->workflowManagerService->init($messageDto->getContract());
@@ -45,7 +47,7 @@ class ManagerTask extends \Disturb\Tasks\AbstractTask
                 break;
             }
             break;
-        case Message::TYPE_STEP_ACK:
+        case Dtos\Message::TYPE_STEP_ACK:
             echo PHP_EOL . "Step {$messageDto->getStep()} says {$messageDto->getResult()}";
             $stepResultHash = json_decode($messageDto->getResult(), true);
 
@@ -66,10 +68,12 @@ class ManagerTask extends \Disturb\Tasks\AbstractTask
             // run through the "job" to send to each step
             foreach ($stepInputList as $stepJobHash) {
                 $messageHash = [
-                    'type' => \Disturb\Dtos\Message::TYPE_STEP_CTRL,
+                    'id' => $workflowProcessId,
+                    'type' => Dtos\Message::TYPE_STEP_CTRL,
+                    'action' => 'start',
                     'payload' => $stepJobHash
                 ];
-                $stepMessageDto = new \Disturb\Dtos\Message(json_encode($messageHash));
+                $stepMessageDto = new Dtos\Message(json_encode($messageHash));
                 $this->sendMessage('disturb-' . $stepCode . '-step', $stepMessageDto);
             }
         }

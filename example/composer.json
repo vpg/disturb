@@ -1,5 +1,5 @@
 {
-    "name":"Vpg/Disturb/Example",
+    "name":"vpg/disturb/example",
     "description":"A simple use case of Vpg/Disturb",
     "type":"project",
     "minimum-stability":"dev",
