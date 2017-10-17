@@ -2,6 +2,8 @@
 namespace Vpg\Disturb\Tasks;
 
 use \Phalcon\Cli\Task;
+
+use \Vpg\Disturb\Dtos;
 use \Vpg\Disturb\Tasks\AbstractTask as AbstractTask;
 
 /**
@@ -32,16 +34,16 @@ class StepTask extends AbstractTask
      * \Disturb\Services\StepServiceInterface.php by calling the execute method
      *  - the process result (returned by the service) is sent back to the manager
      *
-     * @param \Disturb\Dtos\Message $messageDto the message to process
+     * @param Vpg\Disturb\Dtos\Message $messageDto the message to process
      */
-    protected function processMessage(\Disturb\Dtos\Message $messageDto)
+    protected function processMessage(Dtos\Message $messageDto)
     {
         echo PHP_EOL . '>' . __METHOD__ . " : $messageDto";
         $resultHash = $this->service->execute($messageDto->getPayload());
-        $msgDto = new \Disturb\Dtos\Message(
+        $msgDto = new Dtos\Message(
             json_encode([
                 'contract' => $messageDto->getPayload()['contract'],
-                'type' => \Disturb\Dtos\Message::TYPE_STEP_ACK,
+                'type' => Dtos\Message::TYPE_STEP_ACK,
                 'step' => $this->topicName,
                 'result' => json_encode($resultHash)
             ])

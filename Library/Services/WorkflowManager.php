@@ -1,9 +1,12 @@
 <?
 namespace Vpg\Disturb\Services;
 
-use \Disturb\Exceptions;
+use \Phalcon\Config\Adapter\Json;
+use \Phalcon\Mvc\User\Component;
+use \Vpg\Disturb\Exceptions;
 
-class WorkflowManager extends \Phalcon\Mvc\User\Component implements WorkflowManagerInterface
+
+class WorkflowManager extends Component implements WorkflowManagerInterface
 {
     const STATUS_NO_STARTED = 'NOT_STARTED';
     const STATUS_PAUSED = 'PAUSED';
@@ -20,7 +23,7 @@ class WorkflowManager extends \Phalcon\Mvc\User\Component implements WorkflowMan
     public function __construct(string $workflowConfigFilePath)
     {
         echo PHP_EOL . "Loading WF from '$workflowConfigFilePath'";
-        $this->config = new \Phalcon\Config\Adapter\Json($workflowConfigFilePath);
+        $this->config = new Json($workflowConfigFilePath);
     }
 
     public function init(string $workflowProcessId) {
