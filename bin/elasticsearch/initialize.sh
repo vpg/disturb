@@ -1,6 +1,6 @@
 #!/bin/bash
 
-HOST="https://elasticsearch5.recette12.vpglabs.site"
+HOST="https://elasticsearch5.recette11.vpglabs.site"
 #HOST="192.168.100.100:9200"
 
 echo "------------------------------------------------"

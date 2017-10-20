@@ -39,7 +39,7 @@ class ElasticsearchTest extends \Tests\DisturbUnitTestCase
             if ($exception) {
                 $this->assertEquals('Elasticsearch config not found', $exception->getMessage());
             } else {
-                $this->fail('Exception expected');
+                $this->fail('Exception expected : Elasticsearch config not found');
             }
         }
 
@@ -56,7 +56,7 @@ class ElasticsearchTest extends \Tests\DisturbUnitTestCase
             if ($exception) {
                 $this->assertEquals('The argument is not initialized or iterable()', $exception->getMessage());
             } else {
-                $this->fail('Exception expected');
+                $this->fail('Exception expected : The argument is not initialized or iterable()');
             }
         }
 

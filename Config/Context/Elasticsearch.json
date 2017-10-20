@@ -1,9 +1,0 @@
-{
-  "host": "192.168.100.100",
-  "port": "9200",
-  "scheme": "https",
-  "context": {
-    "index": "disturb_context",
-    "type": "loading"
-  }
-}

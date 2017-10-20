@@ -1,9 +1,7 @@
 {
-  "settings" : {
-    "index" : {
-      "mapper" : {
-        "dynamic": false
-      }
+  "mappings": {
+    "_default_": {
+      "dynamic": "false"
     }
   }
 }

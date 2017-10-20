@@ -16,6 +16,8 @@ class WorkflowManager extends Component implements WorkflowManagerInterface
     const STATUS_FINISHED   = 'FINISHED';
     const STATUS_RUNNING    = 'RUNNING';
 
+    private $contextStorage = null;
+
     private $config = null;
 
     // xxx MUST be replaced by smthg like Redis
@@ -26,6 +28,7 @@ class WorkflowManager extends Component implements WorkflowManagerInterface
     {
         $this->getDI()->get('logger')->debug("Loading WF from '$workflowConfigFilePath'");
         $this->config = new Json($workflowConfigFilePath);
+        $this->contextStorage = new ContextStorage($this->config->contextStorage);
     }
 
     /**

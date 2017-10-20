@@ -1,14 +1,30 @@
 <?php
 
-namespace Disturb\Context;
+namespace Disturb\ContextStorageAdapters;
+use Disturb\Exception;
 
 /**
- * Class Elasticsearch
+ * Class Elasticsearch Adapter
  *
- * @package Disturb\ContextStorage
+ * @package Disturb\ContextStorageAdapters
  */
-class Elasticsearch implements StorageInterface
+class ElasticsearchAdapter implements ContextStorageAdapterInterface
 {
+    /**
+     * @const string VENDOR_CLASSNAME
+     */
+    const VENDOR_CLASSNAME = 'Elasticsearch';
+
+    /**
+     * @const string DEFAULT_INDEX
+     */
+    const DEFAULT_DOC_INDEX = 'disturb_context';
+
+    /**
+     * @const string DEFAULT_TYPE
+     */
+    const DEFAULT_DOC_TYPE = 'workflow';
+
     /**
      * @const string DOC_INDEX
      */
@@ -18,6 +34,20 @@ class Elasticsearch implements StorageInterface
      * @const string DOC_TYPE
      */
     const DOC_TYPE = 'type';
+
+    /**
+     * @const string CONFIG_HOST
+     */
+    const CONFIG_HOST = 'host';
+
+    /**
+     * @const array REQUIRED_CONFIG_FIELD_LIST
+     */
+    const REQUIRED_CONFIG_FIELD_LIST = [
+        self::CONFIG_HOST,
+        self::DOC_INDEX,
+        self::DOC_TYPE
+    ];
 
     /*
      * @var \Phalcon\Config\Adapter\Json $config
@@ -37,36 +67,46 @@ class Elasticsearch implements StorageInterface
     /**
      * Constructor
      */
-    public function construct()
-    {
-        $this->initialize();
-    }
+    public function construct() {}
 
     /**
      * Initialize
      *
+     * @param \Phalcon\Config\Adapter\Json $config
+     *
      * @return void
      */
-    public function initialize()
+    public function initialize(\Phalcon\Config\Adapter\Json $config)
     {
-        $this->checkVendorLibraryAvailable();
-        $this->initConfig();
+        $this->checkVendorLibraryAvailable(self::VENDOR_CLASSNAME);
+        $this->initConfig($config);
         $this->initClient();
     }
 
     /**
      * Init configuration
      *
+     * @param \Phalcon\Config\Adapter\Json $config
+     *
      * @throws \Exception
      */
-    private function initConfig(string $filepath = '') {
-        if (empty($filepath)) {
-            $filepath = realpath(__DIR__ . '/../../Config/Context/Elasticsearch.json');
-        }
-        if (!file_exists($filepath)) {
+    private function initConfig(\Phalcon\Config\Adapter\Json $config)
+    {
+        if (empty($config)) {
             throw new \Exception('Elasticsearch config not found');
         }
-        $this->config = new \Phalcon\Config\Adapter\Json($filepath);
+
+        // get default values for document index / type
+        $config[self::DOC_INDEX] = self::DEFAULT_DOC_INDEX;
+        $config[self::DOC_TYPE] = self::DEFAULT_DOC_TYPE;
+
+        // check required config fields
+        foreach (self::REQUIRED_CONFIG_FIELD_LIST as $configField) {
+            if (empty($config[$configField])) {
+                throw new \Exception('Elasticsearch config ' . $configField . ' not found');
+            }
+            $this->config[$configField] = $config[$configField];
+        }
     }
 
     /**
@@ -74,50 +114,49 @@ class Elasticsearch implements StorageInterface
      *
      * @throws \Exception
      */
-    private function initCommonRequestParams () {
+    private function initCommonRequestParams()
+    {
         foreach ([self::DOC_INDEX, self::DOC_TYPE] as $field) {
-            if (empty($this->config->context->$field)) {
-                throw new \Exception('Elasticsearch config not found [ context : ' . $field . ' ]');
-            }
+            $this->commonRequestParamHash[$field] = $this->config[$field];
         }
-        $this->commonRequestParamHash = [
-            self::DOC_INDEX => $this->config->context->index,
-            self::DOC_TYPE => $this->config->context->type
-        ];
     }
 
     /**
      * Initialization of Elasticsearch Client
      *
-     * @throws \Exception
-     */
-    private function initClient() {
-        $hostConfigHash = [
-            'host' => $this->config->host,
-            'port' => $this->config->port,
-            'scheme' => $this->config->scheme
-        ];
-
-        $this->client = \Elasticsearch\ClientBuilder::create()
-            ->setHosts([$hostConfigHash])
-            ->build();
-
-        $this->initCommonRequestParams();
-
-        // Check connexion
-        if (! $this->client->ping($this->commonRequestParamHash)) {
-            throw new \Exception('Elasticsearch index/type not available');
-        }
-    }
-
-    /**
-     * Check if Elascticsearch dependencies librairy is available
+     * @return void
      *
      * @throws \Exception
      */
-    private function checkVendorLibraryAvailable() {
-        if (!file_exists(realpath(__DIR__ . '/../../vendor/elasticsearch/elasticsearch/README.md'))) {
-            throw new \Exception('Elasticsearch lib not found. Please make "composer update"');
+    private function initClient()
+    {
+
+        $this->client = \Elasticsearch\ClientBuilder::create()
+            ->setHosts([$this->config[self::CONFIG_HOST]])
+            ->build();
+
+        // Check host connexion
+        if (! $this->client->ping()) {
+            throw new \Exception('Elasticsearch host : ' . $this->config[self::CONFIG_HOST] . ' not available');
+        }
+
+        $this->initCommonRequestParams();
+
+        // Check index
+        // TODO: check if index exists ?
+    }
+
+    /**
+     * Check if Elascticsearch dependencies library is available
+     *
+     * @param string $className
+     *
+     * @throws \Exception
+     */
+    private function checkVendorLibraryAvailable($className)
+    {
+        if (!class_exists($className)) {
+            throw new \Exception($className . ' lib not found. Please make "composer update"');
         }
     }
 
@@ -130,10 +169,10 @@ class Elasticsearch implements StorageInterface
      *
      * @throws \Exception
      */
-    public function get(string $key) : array {
-
+    public function get(string $key) : array
+    {
         if (empty($key)) {
-            throw new \Exception('Elasticsearch get invalid parameter');
+            throw new \Exception('Elasticsearch get : invalid parameter');
         }
 
         $requestParamHash = array_merge(
@@ -153,9 +192,10 @@ class Elasticsearch implements StorageInterface
      *
      * @throws \Exception
      */
-    public function exist(string $key) : bool {
+    public function exist(string $key) : bool
+    {
         if (empty($key)) {
-            throw new \Exception('Elasticsearch exist invalid parameter');
+            throw new \Exception('Elasticsearch exist : invalid parameter');
         }
 
         $requestParamHash = array_merge(
@@ -176,8 +216,8 @@ class Elasticsearch implements StorageInterface
      *
      * @throws \Exception
      */
-    public function save(string $key, array $documentHash) : array {
-
+    public function save(string $key, array $documentHash) : array
+    {
         // Specify how many times should the operation be retried when a conflict occurs (simultaneous doc update)
         // TODO : check for param "retry_on_conflict"
 
@@ -206,7 +246,8 @@ class Elasticsearch implements StorageInterface
      *
      * @throws \Exception
      */
-    public function delete(string $key) : array {
+    public function delete(string $key) : array
+    {
         if (empty($key)) {
             throw new \Exception('Elasticsearch delete invalid parameter');
         }
