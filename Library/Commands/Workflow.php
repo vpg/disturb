@@ -8,7 +8,9 @@
  * file that was distributed with this source code.
  */
 
-namespace Disturb\Commands;
+namespace Vpg\Disturb\Commands;
+
+use \Vpg\Disturb\Dtos;
 
 class Workflow
 {
@@ -23,7 +25,14 @@ class Workflow
     public static function start(string $workflowName, string $workflowId, array $payloadHash)
     {
         $brokers = 'localhost';
-        $msg = '{"contract":"'.$workflowId.'", "type" : "WF-CONTROL", "action":"start"}';
+
+        $messageHash = [
+            'id' => $workflowId,
+            'type' => Dtos\Message::TYPE_WF_CTRL,
+            'action' => 'start',
+            'payload' => $payloadHash
+        ];
+        $stepMessageDto = new Dtos\Message(json_encode($messageHash));
 
         //send message with givens params
         $kafkaProducer = new \RdKafka\Producer();
@@ -31,6 +40,6 @@ class Workflow
         $topicName = 'disturb-' . $workflowName . '-manager'; //xxx create service to manage topic name
 
         $kafkaTopic = $kafkaProducer->newTopic($topicName);
-        $kafkaTopic->produce(RD_KAFKA_PARTITION_UA, 0, "$msg");
+        $kafkaTopic->produce(RD_KAFKA_PARTITION_UA, 0, "$stepMessageDto");
     }
 }
