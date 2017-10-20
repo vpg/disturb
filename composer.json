@@ -7,6 +7,22 @@
         {
             "name": "Jerome Bourgeais",
             "email": "jbourgeais@voyageprive.com"
+        },
+        {
+            "name": "Alexandre Defretin",
+            "email": "adefretin@voyageprive.com"
+        },
+        {
+            "name": "Matthieu Ventura",
+            "email": "mventura@voyageprive.com"
+        },
+        {
+            "name": "Thomas Pellegatta",
+            "email": "tpellegatta@voyageprive.com"
+        },
+        {
+            "name": "Maxime Brenguier",
+            "email": "mbrenguier@voyageprive.com"
         }
     ],
     "bin": ["bin/disturb-manager", "bin/disturb-step"],
@@ -18,5 +34,9 @@
     "require": {
         "php": ">=7.0",
         "ext-phalcon": "~3.0"
+    },
+    "require-dev": {
+        "phalcon/devtools":"3.0.*",
+        "phpunit/phpunit": "6.2.3"
     }
 }
