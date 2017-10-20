@@ -1,6 +1,8 @@
 <?php
 
-namespace Disturb\ContextStorageAdapters;
+namespace Vpg\Disturb\ContextStorageAdapters;
+
+use \Phalcon\Config\Adapter\Json;
 
 /**
  * Interface ContextStorageAdapterInterface
@@ -12,11 +14,11 @@ interface ContextStorageAdapterInterface
     /**
      * Initialize
      *
-     * @param \Phalcon\Config\Adapter\Json $config
+     * @param Json $config
      *
      * @return mixed
      */
-    public function initialize(\Phalcon\Config\Adapter\Json $config);
+    public function initialize(Json $config);
 
     /**
      * Get storage data identified by key

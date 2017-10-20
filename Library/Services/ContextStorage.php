@@ -1,46 +1,42 @@
 <?php
 
-namespace Disturb\Services;
+namespace Vpg\Disturb\Services;
 
-use Disturb\ContextStorageAdapters;
-use Disturb\Exception;
+use Vpg\Disturb\ContextStorageAdapters;
+use Vpg\Disturb\Exceptions\ContextStorageException;
+
+use \Phalcon\Config\Adapter\Json;
 
 class ContextStorage
 {
     /**
-     * @var \Disturb\ContextStorageAdapters\ContextStorageAdapterInterface $adapter
+     * @var ContextStorageAdapterInterface $adapter
      */
     private $adpater;
 
     /**
      * ContextStorage constructor
      *
-     * @param \Phalcon\Config\Adapter\Json $config
+     * @param Json $config
      *
-     * @throws Exception
+     * @throws ContextStorageException
      */
-    public function __construct(\Phalcon\Config\Adapter\Json $config)
+    public function __construct(Json $config)
     {
-        echo "DEBUG = " . __FILE__ . " => " . __METHOD__ . " => " . __LINE__;
-        echo "<pre>";
-        echo var_dump('HERE');
-        echo "</pre>";
-        die('END DEBUG');
-
         // check adapter type
         if (empty($config->adapter)) {
-            throw new Exception('Context Storage adapter name not found');
+            throw new ContextStorageException('Adapter name not found');
         }
 
         // check if adapter class exists
         $adapterClass = ucfirst($config->adapter) . 'Adapter';
         if (! class_exists($adapterClass)) {
-            throw new Exception('Context Storage adapter class not found');
+            throw new ContextStorageException('Adapter class not found');
         }
 
         // check if adapter config exists
         if (empty($config->config)) {
-            throw new Exception('Context Storage adapter config not found');
+            throw new ContextStorageException('Adapter config not found');
         }
 
         $this->adpater = new $adapterClass();
