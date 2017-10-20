@@ -56,7 +56,7 @@ class ManagerTask extends AbstractTask
                     $messageDto->getJobId(),
                     $stepResultHash
                 );
-                //$this->runNextStep($messageDto->getId());
+               // $this->runNextStep($messageDto->getId());
                 break;
             default :
                 echo PHP_EOL . "ERR : Unknown message type : {$messageDto->getType()}";
@@ -75,6 +75,7 @@ class ManagerTask extends AbstractTask
                 $messageHash = [
                     'id' => $workflowProcessId,
                     'type' => Dtos\Message::TYPE_STEP_CTRL,
+                    'jobId' => $jobId,
                     'stepCode' => $stepCode,
                     'action' => 'start',
                     'payload' => $stepJobHash

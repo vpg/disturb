@@ -45,7 +45,7 @@ class StepTask extends AbstractTask
         $msgDto = new Dtos\Message(
             [
                 'id' => $messageDto->getId(),
-                'type' => \Disturb\Dtos\Message::TYPE_STEP_ACK,
+                'type' => Dtos\Message::TYPE_STEP_ACK,
                 'stepCode' => $messageDto->getStepCode(),
                 'jobId' => $messageDto->getJobId(),
                 'result' => json_encode($resultHash)

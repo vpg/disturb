@@ -1,4 +1,4 @@
-<?
+<?PHP
 namespace Vpg\Disturb\Services;
 
 use \Phalcon\Config\Adapter\Json;
@@ -20,15 +20,17 @@ class WorkflowManager extends Component implements WorkflowManagerInterface
     // xxx MUST be abstracted (e.g. Disturb\Storage::set($k, $v)
     private $tmpStorage = [];
 
+
     public function __construct(string $workflowConfigFilePath)
     {
         echo PHP_EOL . "Loading WF from '$workflowConfigFilePath'";
         $this->config = new Json($workflowConfigFilePath);
     }
 
-    public function init(string $workflowProcessId) {
+    public function init(string $workflowProcessId)
+    {
         echo PHP_EOL . '>' . __METHOD__ . ' : ' . json_encode(func_get_args());
-        $this->tmpStorage[$workflowProcessId] = [
+       $this->tmpStorage[$workflowProcessId] = [
             'workflow' => ['steps' => $this->config['steps']->toArray()],
             'status' => self::STATUS_STARTED,
             'currentStepPos' => -1,
@@ -37,7 +39,8 @@ class WorkflowManager extends Component implements WorkflowManagerInterface
         ];
     }
 
-    public function getStatus(string $workflowProcessId) : string {
+    public function getStatus(string $workflowProcessId) : string
+    {
         echo PHP_EOL . '>' . __METHOD__ . ' : ' . json_encode(func_get_args());
         if (!isset($this->tmpStorage[$workflowProcessId]) || empty($this->tmpStorage[$workflowProcessId]['status'])) {
             return self::STATUS_NO_STARTED;
@@ -45,7 +48,8 @@ class WorkflowManager extends Component implements WorkflowManagerInterface
         return $this->tmpStorage[$workflowProcessId]['status'];
     }
 
-    public function getNextStepList(string $workflowProcessId) : array {
+    public function getNextStepList(string $workflowProcessId) : array
+    {
         // Check WF status
         echo PHP_EOL . '>' . __METHOD__ . ' : ' . json_encode(func_get_args());
         $nextStepPos = $this->tmpStorage[$workflowProcessId]['currentStepPos'] + 1;
@@ -57,89 +61,89 @@ class WorkflowManager extends Component implements WorkflowManagerInterface
         return $stepNode;
     }
 
-    // xxx comment
-    public function processStepJobResult(string $workflowProcessId, string $stepCode, int $jobId, array $resultHash) {
+    /**
+     * Parses and stores the step's job results related to the given wf process id and step
+     * Result is stored in the context as below :
+     *  {
+     *      'jobList' : [
+     *          {
+     *              'jobId' : 0,
+     *              'status' : 'SUCCESS',
+     *              'result' : {
+     *                  // biz data
+     *              }
+     *          },
+     *      ]
+     *  }
+     *
+     * @param string $workflowProcessId the wf process identifier to which belongs the step's job result
+     * @param string $stepCode          the step to which belongs the job
+     * @param int    $jobId             the job identifier related to the step
+     * @param array  $resultHash        the result data
+     *
+     * @return void
+     */
+    public function processStepJobResult(string $workflowProcessId, string $stepCode, int $jobId, array $resultHash)
+    {
         echo PHP_EOL . '>' . __METHOD__ . ' : ' . json_encode(func_get_args());
-        var_dump($this->tmpStorage);
-        // q&d search in context the job for which saving the result
-        $stepJobList = null;
-        foreach ($this->tmpStorage[$workflowProcessId]['workflow']['steps'] as &$stepNode) {
-            var_dump($stepNode);
-            if ($this->isStepParallelized($stepNode)) {
-                echo '//';
-                foreach ($stepNode as &$stepHash) {
-                    if ($stepHash['name'] == $stepCode) {
-                        $stepJobList = &$stepHash['jobList'];
-                        break;
-                    }
-                }
-            } else {
-                $stepHash = &$stepNode;
-                if ($stepHash['name'] = $stepCode) {
-                    echo 'FOUUUUND';
-                    $stepJobList = &$stepHash['jobList'];
-                    break;
-                }
-            }
-
-
-        }
-        if (!$stepJobList) {
+        $stepHash = &$this->getContextStepHashRef($workflowProcessId, $stepCode);
+        var_dump($stepHash);
+        if (!isset($stepHash['jobList']) || !isset($stepHash['jobList'][$jobId])) {
+            // not initialized, must not happen
             // Exc
-         }
-        var_dump($stepJobList);
-        foreach($stepJobList as $id => &$jobHash) {
-            if ($jobId != $id) continue;
-            $jobHash['result'] = $resultHash;
-            var_dump($jobHash);
-
         }
-        var_dump($this->tmpStorage);
+        $stepHash['jobList'][$jobId]['status'] = $resultHash['status'] ?? self::STATUS_FAILED;
+        $stepHash['jobList'][$jobId]['result'] = $resultHash['data'] ?? [];
+        var_dump($stepHash);
     }
 
-    public function registerStepJob($workflowProcessId, $stepCode, $jobId) {
+    /**
+     * Registers in context the step's job related to the given wf process id
+     * Stores in context as below :
+     *  {
+     *      'jobList' : [
+     *          {
+     *              'jobId' : 0,
+     *              'status' : 'NOT_STARTED',
+     *              'result' : {}
+     *          },
+     *      ]
+     *  }
+     *
+     * @param string $workflowProcessId the wf process identifier to which belongs the step's job result
+     * @param string $stepCode          the step to which belongs the job
+     * @param int    $jobId             the job identifier related to the step
+     *
+     * @return void
+     */
+    public function registerStepJob($workflowProcessId, $stepCode, $jobId)
+    {
         echo PHP_EOL . '>' . __METHOD__ . ' : ' . json_encode(func_get_args());
-        var_dump($this->tmpStorage);
         // q&d search in context the job for which saving the result
+        $stepHash = &$this->getContextStepHashRef($workflowProcessId, $stepCode);
+        if (!isset($stepHash['jobList'])) {
+            $stepHash['jobList'] = [];
+        }
+        $stepHash['jobList'][] = [
+            'id' => $jobId,
+            'status' => self::STATUS_NO_STARTED,
+            'result' => []
+        ];
+    }
+
+    private function &getContextStepHashRef($workflowProcessId, $stepCode)
+    {
         foreach ($this->tmpStorage[$workflowProcessId]['workflow']['steps'] as &$stepNode) {
-            var_dump($stepNode);
             if ($this->isStepParallelized($stepNode)) {
-                echo '//';
                 foreach ($stepNode as &$stepHash) {
                     if ($stepHash['name'] == $stepCode) {
-                        if ($stepHash['jobList']) {
-                            $stepHash['jobList'][] = [
-                                'id' => $jobId,
-                                'result' => []
-                            ];
-                        } else {
-                            $stepHash['jobList'] = [[
-                                'id' => $jobId,
-                                'result' => []
-                            ]];
-                        }
-                        return;
+                        return $stepHash;
                     }
                 }
             } else {
                 $stepHash = &$stepNode;
-                echo '--';
-                if ($stepHash['name'] = $stepCode) {
-                    echo 'found';
-                        if ($stepHash['jobList']) {
-                            echo 'KO';
-                            $stepHash['jobList'][] = [
-                                'id' => $jobId,
-                                'result' => []
-                            ];
-                        } else {
-                            echo 'OK';
-                            $stepHash['jobList'] = [[
-                                'id' => $jobId,
-                                'result' => []
-                            ]];
-                        }
-                        return;
+                if ($stepHash['name'] == $stepCode) {
+                    return $stepHash;
                 }
             }
         }
