@@ -17,19 +17,18 @@ class ManagerTask extends AbstractTask
     protected function usage()
     {
         // xxx improve usage handling
-        echo PHP_EOL . 'Usage : ';
-        echo PHP_EOL . 'disturb.php "Tasks\\Manager" start --workflow="/path/to/workflow/config/file.json" [--name="workflowName"]';
-        echo PHP_EOL;
+        $this->getDI()->get('logger')->debug('Usage : ');
+        $this->getDI()->get('logger')->debug('disturb.php "Tasks\\Manager" start --workflow="/path/to/workflow/config/file.json" [--name="workflowName"]');
     }
 
     protected function initWorker(array $paramHash)
     {
-        echo PHP_EOL . '>' . __METHOD__ . ' : ' . json_encode(func_get_args());
+        $this->getDI()->get('logger')->debug(json_encode(func_get_args()));
         parent::initWorker($paramHash);
         $serviceFullName = $this->workflowConfig['servicesClassNameSpace'] . '\\' . ucFirst($this->workflowConfig['name']);
         // xxx Allow client to overwrite ?
         $this->workflowManagerService = new Services\WorkflowManager($paramHash['workflow']);
-        echo PHP_EOL . "Loading $serviceFullName";
+        $this->getDI()->get('logger')->debug('Loading ' . $serviceFullName);
         $this->service = new $serviceFullName();
         // xxx factorise the topicname "build" logic
         $this->topicName = 'disturb-' . $this->workflowConfig['name'] . '-manager';
@@ -37,7 +36,7 @@ class ManagerTask extends AbstractTask
 
     protected function processMessage(Dtos\Message $messageDto)
     {
-        echo PHP_EOL . '>' . __METHOD__ . " : $messageDto";
+        $this->getDI()->get('logger')->info('messageDto : ' . $messageDto);
         switch($messageDto->getType()) {
             case Dtos\Message::TYPE_WF_CTRL:
                 switch($messageDto->getAction()) {
@@ -48,7 +47,7 @@ class ManagerTask extends AbstractTask
                 }
                 break;
             case Dtos\Message::TYPE_STEP_ACK:
-                echo PHP_EOL . "Step {$messageDto->getStepCode()} says {$messageDto->getResult()}";
+                $this->getDI()->get('logger')->debug("Step {$messageDto->getStepCode()} says {$messageDto->getResult()}");
                 $stepResultHash = json_decode($messageDto->getResult(), true);
                 $this->workflowManagerService->processStepJobResult(
                     $messageDto->getId(),
@@ -58,7 +57,7 @@ class ManagerTask extends AbstractTask
                 );
 
                 $status = $this->workflowManagerService->getStatus($messageDto->getId());
-                echo PHP_EOL . "Id {$messageDto->getId()} is '$status'";
+                $this->getDI()->get('logger')->debug("Id {$messageDto->getId()} is '$status'");
                 if ($status == Services\WorkflowManager::STATUS_FAILED) {
                     throw new WorkflowException("Id failed {$messageDto->getId()}");
                 }
@@ -69,7 +68,7 @@ class ManagerTask extends AbstractTask
                 }
                 break;
             default:
-                echo PHP_EOL . "ERR : Unknown message type : {$messageDto->getType()}";
+                $this->getDI()->get('logger')->error("ERR : Unknown message type : {$messageDto->getType()}");
         }
     }
 

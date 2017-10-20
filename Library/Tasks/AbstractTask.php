@@ -37,7 +37,7 @@ abstract class AbstractTask extends Task implements TaskInterface
      * @param array $paramHash The parsed options hash
      */
     protected function initWorker(array $paramHash) {
-        echo PHP_EOL . '>' . __METHOD__ . ' : ' . json_encode(func_get_args());
+        $this->getDI()->get('logger')->debug(json_encode(func_get_args()));
         // xxx check if file exists, throw exc on err
         $this->workflowConfig = new Json($paramHash['workflow']);
         $this->registerClientNS(
@@ -56,7 +56,7 @@ abstract class AbstractTask extends Task implements TaskInterface
      */
     private function parseOpt(array $paramList)
     {
-        echo PHP_EOL . '>' . __METHOD__ . ' : ' . json_encode(func_get_args());
+        $this->getDI()->get('logger')->debug(json_encode(func_get_args()));
         preg_match_all('/--(?P<optKeys>\w+)(?:=(?P<optVals>[^ ]*))?/', join($paramList, ' '), $paramMatchHash);
         $paramHash = array_combine(array_values($paramMatchHash['optKeys']), array_values($paramMatchHash['optVals']));
         // check required options
@@ -75,14 +75,14 @@ abstract class AbstractTask extends Task implements TaskInterface
 
     public final function startAction(array $paramList)
     {
-        echo PHP_EOL . '>' . __METHOD__ . ' : ' . json_encode(func_get_args());
+        $this->getDI()->get('logger')->debug(json_encode(func_get_args()));
         $paramHash = $this->parseOpt($paramList);
         $this->initWorker($paramHash);
 
         $this->kafkaTopicConsumer = $this->kafkaConsumer->newTopic($this->topicName, $this->kafkaTopicConf);
         $this->kafkaTopicConsumer->consumeStart($this->topicPartitionNo, RD_KAFKA_OFFSET_STORED);
         // xxx Factorize stdout/err support
-        echo PHP_EOL . "Worker listening on \033[32m" . implode(',', $this->workflowConfig['brokerServerList']->toArray()) . ":\033[32m" . $this->topicName . "\033[0m";
+        $this->getDI()->get('logger')->info("Worker listening on \033[32m" . implode(',', $this->workflowConfig['brokerServerList']->toArray()) . ":\033[32m" . $this->topicName . "\033[0m");
         while (true) {
             $msg = $this->kafkaTopicConsumer->consume($this->topicPartitionNo, 100);
             // xxx q&d err handling
@@ -94,16 +94,16 @@ abstract class AbstractTask extends Task implements TaskInterface
                     case '-191': // no more msg
                     break;
                     default:
-                        echo "ERR : " . $msg->errstr() . PHP_EOL;
+                        $this->getDI()->get('logger')->error($msg->errstr());
                 }
                 continue;
             }
-            echo PHP_EOL . "RECEIVE msg on {$this->topicName} : $msg->payload";
+            $this->getDI()->get('logger')->info("RECEIVE msg on {$this->topicName} : $msg->payload");
             try {
                 $msgDto = new Dtos\Message($msg->payload);
             }
             catch(\Exception $dtoException) {
-                echo PHP_EOL . "ERR : Invalid message : \033[31m" . $dtoException->getMessage() . "\033[0m";
+                $this->getDI()->get('logger')->error("Invalid message : \033[31m" . $dtoException->getMessage() . "\033[0m");
                 continue;
             }
             if ($msgDto->getType() == Dtos\Message::TYPE_WF_MONITOR) {
@@ -115,10 +115,10 @@ abstract class AbstractTask extends Task implements TaskInterface
     }
 
     private function processMonitoringMessage(Dtos\Message $messageDto) {
-        echo PHP_EOL . '>' . __METHOD__ . ' : ' . $messageDto;
+        $this->getDI()->get('logger')->debug($messageDto);
         switch($messageDto->getAction()) {
         case Dtos\Message::ACTION_WF_MONITOR_PING:
-            echo PHP_EOL . "PING receive from {$messageDto->getFrom()}";
+            $this->getDI()->get('logger')->debug("PING receive from {$messageDto->getFrom()}");
             $this->sendMessage($messageDto->getFrom(), Dtos\Message::ACTION_WF_MONITOR_PONG);
             break;
         }
@@ -131,7 +131,7 @@ abstract class AbstractTask extends Task implements TaskInterface
      * @param Dtos\Message $message The message to send
      */
     protected function sendMessage(string $topicName, Dtos\Message $message) {
-        echo PHP_EOL . '>' . __METHOD__ . "($topicName, $message)";
+        $this->getDI()->get('logger')->debug("($topicName, $message)");
         if (!isset($this->kafkaTopicProducerHash[$topicName])) {
             $this->kafkaTopicProducerHash[$topicName] = $this->kafkaProducer->newTopic($topicName);
         }
@@ -145,7 +145,7 @@ abstract class AbstractTask extends Task implements TaskInterface
      * @param string $clientServicesPath      Absolute file path to the service classes
      */
     private function registerClientNS(string $clientServicesNamespace, string $clientServicesPath) {
-        echo PHP_EOL . '>' . __METHOD__ . ' : ' . json_encode(func_get_args());
+        $this->getDI()->get('logger')->debug(json_encode(func_get_args()));
         $loader = $this->getDI()->getShared('loader');
         $loader->registerNamespaces(array(
             $clientServicesNamespace => $clientServicesPath,
@@ -155,7 +155,7 @@ abstract class AbstractTask extends Task implements TaskInterface
 
     private function initMq()
     {
-        echo PHP_EOL . '>' . __METHOD__ . ' : ' . json_encode(func_get_args());
+        $this->getDI()->get('logger')->debug(json_encode(func_get_args()));
         $brokers = implode(',', $this->workflowConfig['brokerServerList']->toArray());
         // xxx put kafka\Conf in DI and config in a config file
         $this->kafkaConf = new \RdKafka\Conf();

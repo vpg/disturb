@@ -23,13 +23,14 @@ class WorkflowManager extends Component implements WorkflowManagerInterface
 
     public function __construct(string $workflowConfigFilePath)
     {
-        echo PHP_EOL . "Loading WF from '$workflowConfigFilePath'";
+        $this->getDI()->get('logger')->debug("Loading WF from '$workflowConfigFilePath'");
         $this->config = new Json($workflowConfigFilePath);
     }
 
+
     public function init(string $workflowProcessId)
     {
-        echo PHP_EOL . '>' . __METHOD__ . ' : ' . json_encode(func_get_args());
+        $this->getDI()->get('logger')->debug(json_encode(func_get_args()));
         $this->tmpStorage[$workflowProcessId] = [
             'workflow' => ['steps' => $this->config['steps']->toArray()],
             'status' => self::STATUS_STARTED,
@@ -39,14 +40,14 @@ class WorkflowManager extends Component implements WorkflowManagerInterface
         ];
     }
 
-    public function getStatus(string $workflowProcessId) : string
-    {
-        echo PHP_EOL . '>' . __METHOD__ . ' : ' . json_encode(func_get_args());
+    public function getStatus(string $workflowProcessId) : string {
+        $this->getDI()->get('logger')->debug(json_encode(func_get_args()));
         if (!isset($this->tmpStorage[$workflowProcessId]) || empty($this->tmpStorage[$workflowProcessId]['status'])) {
             return self::STATUS_NO_STARTED;
         }
         return $this->tmpStorage[$workflowProcessId]['status'];
     }
+
 
     /**
      * Go to next step
@@ -61,9 +62,8 @@ class WorkflowManager extends Component implements WorkflowManagerInterface
 
     public function getNextStepList(string $workflowProcessId) : array
     {
-        echo PHP_EOL . '>' . __METHOD__ . ' : ' . json_encode(func_get_args());
+        $this->getDI()->get('logger')->debug(json_encode(func_get_args()));
         $nextStepPos = $this->tmpStorage[$workflowProcessId]['currentStepPos'] + 1;
-        echo PHP_EOL . '<' . __METHOD__ . ' : ' . $nextStepPos;
         $stepNode = $this->config->steps[$nextStepPos]->toArray();
         if (!$this->isStepParallelized($stepNode)) {
             return [$stepNode];
@@ -98,6 +98,7 @@ class WorkflowManager extends Component implements WorkflowManagerInterface
      */
     public function isNextStepRunnable(string $workflowProcessId) : bool
     {
+        $this->getDI()->get('logger')->debug(json_encode(func_get_args()));
         $runnable = true;
         $currentStepPos = $this->tmpStorage[$workflowProcessId]['currentStepPos'];
         $stepNode = $this->tmpStorage[$workflowProcessId]['workflow']['steps'][$currentStepPos];
@@ -142,9 +143,8 @@ class WorkflowManager extends Component implements WorkflowManagerInterface
      */
     public function processStepJobResult(string $workflowProcessId, string $stepCode, int $jobId, array $resultHash)
     {
-        echo PHP_EOL . '>' . __METHOD__ . ' : ' . json_encode(func_get_args());
+        $this->getDI()->get('logger')->debug(json_encode(func_get_args()));
         $stepHash = &$this->getContextStepHashRef($workflowProcessId, $stepCode);
-        var_dump($stepHash);
         if (!isset($stepHash['jobList']) || !isset($stepHash['jobList'][$jobId])) {
             throw new Exceptions\WorkflowException('Cannot find any job');
         }
@@ -154,8 +154,6 @@ class WorkflowManager extends Component implements WorkflowManagerInterface
         if ($stepHash['jobList'][$jobId]['status'] == self::STATUS_FAILED) {
             $this->tmpStorage[$workflowProcessId]['status'] = self::STATUS_FAILED;
         }
-
-        var_dump($stepHash);
     }
 
     /**
@@ -179,7 +177,7 @@ class WorkflowManager extends Component implements WorkflowManagerInterface
      */
     public function registerStepJob($workflowProcessId, $stepCode, $jobId)
     {
-        echo PHP_EOL . '>' . __METHOD__ . ' : ' . json_encode(func_get_args());
+        $this->getDI()->get('logger')->debug(json_encode(func_get_args()));
         // q&d search in context the job for which saving the result
         $stepHash = &$this->getContextStepHashRef($workflowProcessId, $stepCode);
         if (!isset($stepHash['jobList'])) {
@@ -194,6 +192,7 @@ class WorkflowManager extends Component implements WorkflowManagerInterface
 
     private function &getContextStepHashRef($workflowProcessId, $stepCode)
     {
+        $this->getDI()->get('logger')->debug(json_encode(func_get_args()));
         foreach ($this->tmpStorage[$workflowProcessId]['workflow']['steps'] as &$stepNode) {
             if ($this->isStepParallelized($stepNode)) {
                 foreach ($stepNode as &$stepHash) {
@@ -211,6 +210,7 @@ class WorkflowManager extends Component implements WorkflowManagerInterface
     }
 
     private function isRunning(string $workflowProcessId) {
+        $this->getDI()->get('logger')->debug(json_encode(func_get_args()));
         return ($this->tmpStorage[$workflowProcessId]['status'] == self::STATUS_STARTED);
     }
 
@@ -223,6 +223,7 @@ class WorkflowManager extends Component implements WorkflowManagerInterface
         //      { "name" : "step_foo"},
         //      { "name" : "step_bar"}
         // ]
+        $this->getDI()->get('logger')->debug(json_encode(func_get_args()));
         return !(array_keys($stepNode) !== array_keys(array_keys($stepNode)));
     }
 

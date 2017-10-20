@@ -23,9 +23,8 @@ class StepTask extends AbstractTask
     // xxx improve usage handling
     protected function usage()
     {
-        echo PHP_EOL . 'Usage : ';
-        echo PHP_EOL . 'disturb.php "Tasks\\Step" start --step="stepName" --workflow="/path/to/workflow/config/file.json" [--name="workflowName"]';
-        echo PHP_EOL;
+        $this->getDI()->get('logger')->debug('Usage : ');
+        $this->getDI()->get('logger')->debug('disturb.php "Tasks\\Step" start --step="stepName" --workflow="/path/to/workflow/config/file.json" [--name="workflowName"]');
     }
 
     /**
@@ -40,7 +39,7 @@ class StepTask extends AbstractTask
      */
     protected function processMessage(Dtos\Message $messageDto)
     {
-        echo PHP_EOL . '>' . __METHOD__ . " : $messageDto";
+        $this->getDI()->get('logger')->info('messageDto : ' . $messageDto);
         $resultHash = $this->service->execute($messageDto->getPayload());
         $msgDto = new Dtos\Message(
             [
@@ -65,7 +64,7 @@ class StepTask extends AbstractTask
      */
     protected function initWorker(array $paramHash)
     {
-        echo PHP_EOL . '>' . __METHOD__ . ' : ' . json_encode(func_get_args());
+        $this->getDI()->get('logger')->debug(json_encode(func_get_args()));
         parent::initWorker($paramHash);
         $serviceFullName = $this->workflowConfig['servicesClassNameSpace'] . '\\' . ucFirst($paramHash['step']);
         $this->service = new $serviceFullName($paramHash['workflow']);
