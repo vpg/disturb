@@ -30,8 +30,8 @@ class ManagerTask extends AbstractTask
         $this->workflowManagerService = new Services\WorkflowManager($paramHash['workflow']);
         echo PHP_EOL . "Loading $serviceFullName";
         $this->service = new $serviceFullName();
-        // xxx factorise the topicname "build" logic
-        $this->topicName = 'disturb-' . $this->workflowConfig['name'] . '-manager';
+
+        $this->topicName = Services\TopicService::getWorkflowManagerTopicName($this->workflowConfig['name']);
     }
     protected function processMessage(Dtos\Message $messageDto)
     {
@@ -74,7 +74,11 @@ class ManagerTask extends AbstractTask
                     'payload' => $stepJobHash
                 ];
                 $stepMessageDto = new Dtos\Message(json_encode($messageHash));
-                $this->sendMessage('disturb-' . $stepCode . '-step', $stepMessageDto);
+
+                $this->sendMessage(
+                    Services\TopicService::getWorkflowStepTopicName($stepCode, $workflowProcessId),
+                    $stepMessageDto
+                );
             }
         }
     }
