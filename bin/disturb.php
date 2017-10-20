@@ -4,7 +4,7 @@ use Phalcon\Di\FactoryDefault\Cli as CliDI;
 use Phalcon\Cli\Console as ConsoleApp;
 use Phalcon\Loader;
 
-define('DISTURB_DEBUG', true);
+define('DISTURB_DEBUG', getenv('DISTURB_DEBUG'));
 
 // Using the CLI factory default services container
 $di = new CliDI();
