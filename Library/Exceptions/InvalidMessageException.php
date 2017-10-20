@@ -1,6 +1,6 @@
 <?php
 
-namespace Disturb\Exceptions;
+namespace Vpg\Disturb\Exceptions;
 
 /**
  * Class InvalidMessageException
