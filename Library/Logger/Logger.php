@@ -1,6 +1,6 @@
 <?php
 
-namespace Disturb\Logger;
+namespace Vpg\Disturb\Logger;
 
 /**
  * Class Logger
@@ -19,8 +19,10 @@ class Logger extends \Phalcon\Logger\Multiple
      */
     public function debug($message, array $context = null)
     {
-        $message = $this->prefixMessage($message);
-        parent::debug($message, $context);
+        if (defined('DISTURB_DEBUG') && DISTURB_DEBUG == true) {
+            $message = $this->prefixMessage($message);
+            parent::debug($message, $context);
+        }
     }
 
     /**
@@ -74,15 +76,16 @@ class Logger extends \Phalcon\Logger\Multiple
      */
     public function prefixMessage($message)
     {
-        $dbt = debug_backtrace();
-        $message =
-            ' > ' .
-            $dbt[2]['class'] .
-            '\\' .
-            $dbt[2]['function'] .
-            ' : ' .
-            $message
-        ;
+        if (defined('DISTURB_DEBUG') && DISTURB_DEBUG == true) {
+            $dbt = debug_backtrace();
+            $message =
+                '> ' .
+                $dbt[2]['class'] .
+                '\\' .
+                $dbt[2]['function'] .
+                ' : ' .
+                $message;
+        }
 
         return $message;
     }

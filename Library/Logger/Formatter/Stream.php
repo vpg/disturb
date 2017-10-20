@@ -1,60 +1,40 @@
 <?php
 
-namespace Disturb\Logger\Formatter;
+namespace Vpg\Disturb\Logger\Formatter;
 
 use \Phalcon\Logger\FormatterInterface;
+use \Phalcon\Logger;
 
 class Stream implements FormatterInterface
 {
-    const LOG_SEPARATOR = ';';
     const LOG_DATE_FORMAT = 'Y-m-d H:i:s';
 
     /**
-     * Const log type
+     * Const type attributes
      *
      * @var array
      *
      * @see http://docs.phalconphp.com/en/latest/api/Phalcon_Logger.html
-     */
-    private $constType = [
-        'emergence',
-        'critical',
-        'alert',
-        'error',
-        'warning',
-        'notice',
-        'info',
-        'debug',
-        'custom',
-        'special'
-    ];
-
-    /**
-     * Const log type color
-     *
-     * @var array
      *
      * 0 = none
-     * 30 = black
      * 31 = red
      * 32 = green
      * 33 = yellow
      * 34 = blue
-     * 35 = magenta
-     * 36 = cyan
-     * 37 = white
      */
-    private $constTypeColor = [
-        '31', // emergence
-        '31', // critical
-        '31', // alert
-        '31', // error
-        '33', // warning
-        '0', // notice
-        '32', // info
-        '0', // debug
-        '0', // custom
-        '0'  // special
+    private $constType = [
+        \Phalcon\Logger::INFO => [
+            'label' => 'INFO', 'color' => '32'
+        ],
+        \Phalcon\Logger::WARNING => [
+            'label' => 'WARNING', 'color' => '33'
+        ],
+        \Phalcon\Logger::DEBUG => [
+            'label' => 'DEBUG', 'color' => '0'
+        ],
+        \Phalcon\Logger::ERROR => [
+            'label' => 'ERROR', 'color' => '31'
+        ]
     ];
 
     /**
@@ -73,7 +53,7 @@ class Stream implements FormatterInterface
         $dateLog->setTimestamp($timestamp);
 
         return $dateLog->format(self::LOG_DATE_FORMAT) .
-            " \033[" . $this->constTypeColor[$type] . "m[" . strtoupper($this->constType[$type]) . "]\033[" . $this->constTypeColor[$type] . "m" . "\033[0m" .
+            " \033[" . $this->constType[$type]['color'] . "m[" . $this->constType[$type]['label'] . "]\033[" . $this->constType[$type]['color'] . "m" . "\033[0m " .
             $message.
             "\n";
     }

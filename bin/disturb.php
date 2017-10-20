@@ -4,6 +4,7 @@ use Phalcon\Di\FactoryDefault\Cli as CliDI;
 use Phalcon\Cli\Console as ConsoleApp;
 use Phalcon\Loader;
 
+define('DISTURB_DEBUG', true);
 
 // Using the CLI factory default services container
 $di = new CliDI();
@@ -35,7 +36,7 @@ if (is_readable($configFile)) {
 $di->set(
     'logger',
     function () use ($di) {
-        $logger = new \Disturb\Logger\Logger();
+        $logger = new \Vpg\Disturb\Logger\Logger();
 
         // xxx - syslog
         /*$syslog = new \Phalcon\Logger\Adapter\Syslog(
@@ -49,11 +50,11 @@ $di->set(
         $syslog->setLogLevel(LOG_INFO);
         $logger->push($syslog);*/
 
-        $phplog = new \Phalcon\Logger\Adapter\Stream(
+        $stdoutLogger = new \Phalcon\Logger\Adapter\Stream(
             'php://stdout'
         );
-        $phplog->setFormatter(new \Disturb\Logger\Formatter\Stream());
-        $logger->push($phplog);
+        $stdoutLogger->setFormatter(new \Vpg\Disturb\Logger\Formatter\Stream());
+        $logger->push($stdoutLogger);
         return $logger;
     },
     true
