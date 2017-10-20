@@ -22,12 +22,12 @@ class WorkflowManager extends Component implements WorkflowManagerInterface
 
     public function __construct(string $workflowConfigFilePath)
     {
-        echo PHP_EOL . "Loading WF from '$workflowConfigFilePath'";
+        $this->getDI()->get('logger')->debug("Loading WF from '$workflowConfigFilePath'");
         $this->config = new Json($workflowConfigFilePath);
     }
 
     public function init(string $workflowProcessId) {
-        echo PHP_EOL . '>' . __METHOD__ . ' : ' . json_encode(func_get_args());
+        $this->getDI()->get('logger')->debug(json_encode(func_get_args()));
         $this->tmpStorage[$workflowProcessId] = [ 
             'workflow' => $this->config['step'],
             'status' => self::STATUS_STARTED,
@@ -38,7 +38,7 @@ class WorkflowManager extends Component implements WorkflowManagerInterface
     }
 
     public function getStatus(string $workflowProcessId) : string {
-        echo PHP_EOL . '>' . __METHOD__ . ' : ' . json_encode(func_get_args());
+        $this->getDI()->get('logger')->debug(json_encode(func_get_args()));
         if (!isset($this->tmpStorage[$workflowProcessId]) || empty($this->tmpStorage[$workflowProcessId]['status'])) {
             return self::STATUS_NO_STARTED;
         }
@@ -47,9 +47,9 @@ class WorkflowManager extends Component implements WorkflowManagerInterface
 
     public function getNextStepTaskList(string $workflowProcessId) : array {
         // Check WF status
-        echo PHP_EOL . '>' . __METHOD__ . ' : ' . json_encode(func_get_args());
+        $this->getDI()->get('logger')->debug(json_encode(func_get_args()));
         $nextStepPos = $this->tmpStorage[$workflowProcessId]['currentStepPos'] + 1;
-        echo PHP_EOL . '<' . __METHOD__ . ' : ' . $nextStepPos;
+        $this->getDI()->get('logger')->debug($nextStepPos);
         $stepHash = $this->config->steps[$nextStepPos]->toArray();
         // Deals w/ parallelized task xxx to unitest
         if (array_keys($stepHash) !== array_keys(array_keys($stepHash))) {
@@ -59,7 +59,7 @@ class WorkflowManager extends Component implements WorkflowManagerInterface
     }
 
     public function finalizeStep(string $workflowProcessId, string $stepCode, array $resultHash) {
-        echo PHP_EOL . '>' . __METHOD__ . ' : ' . json_encode(func_get_args());
+        $this->getDI()->get('logger')->debug(json_encode(func_get_args()));
         //$currentStepNo = array_search($stepName, array_column($this->config['steps'], 'name'));
         $currentStepPos = $this->tmpStorage[$workflowProcessId]['currentStepPos'];
         $this->tmpStorage[$workflowProcessId]['workflow']['steps'][$currentStepPos]['result'] = $resultHash;
