@@ -2,6 +2,7 @@
 namespace Disturb\Services;
 
 use \Disturb\Exceptions;
+use \Disturb\Logger;
 
 class WorkflowManager extends \Phalcon\Mvc\User\Component implements WorkflowManagerInterface
 {

@@ -31,6 +31,34 @@ if (is_readable($configFile)) {
     $di->set('config', $config);
 }
 
+// Register logger
+$di->set(
+    'logger',
+    function () use ($di) {
+        $logger = new \Disturb\Logger\Logger();
+
+        // xxx - syslog
+        /*$syslog = new \Phalcon\Logger\Adapter\Syslog(
+            xxx - $logName,
+            [
+                'option' => LOG_NDELAY,
+                'facility' => LOG_LOCAL1
+            ]
+        );
+        $syslog->setFormatter(new \Disturb\Logger\Formatter\Syslog());
+        $syslog->setLogLevel(LOG_INFO);
+        $logger->push($syslog);*/
+
+        $phplog = new \Phalcon\Logger\Adapter\Stream(
+            'php://stdout'
+        );
+        $phplog->setFormatter(new \Disturb\Logger\Formatter\Stream());
+        $logger->push($phplog);
+        return $logger;
+    },
+    true
+);
+
 // Create a console application
 $console = new ConsoleApp();
 $console->setDI($di);
