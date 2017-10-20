@@ -1,7 +1,7 @@
 <?
 namespace Vpg\Disturb\Dtos;
 
-use \Disturb\Exceptions;
+use Vpg\Disturb\Exceptions;
 
 class Message
 {
