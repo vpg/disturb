@@ -77,7 +77,7 @@ class WorkflowManager extends Component implements WorkflowManagerInterface
      * @param array $step
      * @return bool
      */
-    private function hasAllJobSucceeded(array $step) : bool
+    private function didAllStepJobsSucceeded(array $step) : bool
     {
         $succeed = true;
         $jobList = $step['jobList'];
@@ -94,9 +94,9 @@ class WorkflowManager extends Component implements WorkflowManagerInterface
      * Check current step status and if we can go further in the workflow
      *
      * @param string $workflowProcessId
-     * @return string
+     * @return bool
      */
-    public function isNextStepRunnable(string $workflowProcessId) : string
+    public function isNextStepRunnable(string $workflowProcessId) : bool
     {
         $runnable = true;
         $currentStepPos = $this->tmpStorage[$workflowProcessId]['currentStepPos'];
@@ -106,13 +106,13 @@ class WorkflowManager extends Component implements WorkflowManagerInterface
         {
             foreach ($stepNode as $stepHash)
             {
-                if (!$this->hasAllJobSucceeded($stepHash)) {
+                if (!$this->didAllStepJobsSucceeded($stepHash)) {
                     $runnable = false;
                     break;
                 }
             }
         } else {
-            $runnable = $this->hasAllJobSucceeded($stepNode);
+            $runnable = $this->didAllStepJobsSucceeded($stepNode);
         }
         return $runnable;
     }
