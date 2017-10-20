@@ -2,6 +2,7 @@
 namespace Vpg\Disturb\Tasks;
 
 use Phalcon\Cli\Task;
+use Vpg\Disturb\Exceptions\WorkflowException;
 use \Vpg\Disturb\Services;
 use \Vpg\Disturb\Dtos;
 use \Vpg\Disturb\Tasks\AbstractTask as AbstractTask;
@@ -33,11 +34,10 @@ class ManagerTask extends AbstractTask
         // xxx factorise the topicname "build" logic
         $this->topicName = 'disturb-' . $this->workflowConfig['name'] . '-manager';
     }
+
     protected function processMessage(Dtos\Message $messageDto)
     {
         echo PHP_EOL . '>' . __METHOD__ . " : $messageDto";
-        $status = $this->workflowManagerService->getStatus($messageDto->getId());
-        echo PHP_EOL . "Id {$messageDto->getId()} is '$status'";
         switch($messageDto->getType()) {
             case Dtos\Message::TYPE_WF_CTRL:
                 switch($messageDto->getAction()) {
@@ -50,21 +50,35 @@ class ManagerTask extends AbstractTask
             case Dtos\Message::TYPE_STEP_ACK:
                 echo PHP_EOL . "Step {$messageDto->getStepCode()} says {$messageDto->getResult()}";
                 $stepResultHash = json_decode($messageDto->getResult(), true);
-                $step = $this->workflowManagerService->processStepJobResult(
+                $this->workflowManagerService->processStepJobResult(
                     $messageDto->getId(),
                     $messageDto->getStepCode(),
                     $messageDto->getJobId(),
                     $stepResultHash
                 );
-               // $this->runNextStep($messageDto->getId());
+
+                $status = $this->workflowManagerService->getStatus($messageDto->getId());
+                echo PHP_EOL . "Id {$messageDto->getId()} is '$status'";
+                if ($status == Services\WorkflowManager::STATUS_FAILED) {
+                    throw new WorkflowException("Id failed {$messageDto->getId()}");
+                }
+
+                if ($this->workflowManagerService->isNextStepRunnable($messageDto->getId()))
+                {
+                    $this->runNextStep($messageDto->getId());
+                }
                 break;
-            default :
+            default:
                 echo PHP_EOL . "ERR : Unknown message type : {$messageDto->getType()}";
         }
     }
 
-    protected function runNextStep(string $workflowProcessId) {
+    protected function runNextStep(string $workflowProcessId)
+    {
+
         $stepHashList = $this->workflowManagerService->getNextStepList($workflowProcessId);
+        $this->workflowManagerService->initNextStep($workflowProcessId);
+
         // run through the next step(s)
         foreach ($stepHashList as $stepHash) {
             $stepCode = $stepHash['name'];

@@ -30,7 +30,7 @@ class WorkflowManager extends Component implements WorkflowManagerInterface
     public function init(string $workflowProcessId)
     {
         echo PHP_EOL . '>' . __METHOD__ . ' : ' . json_encode(func_get_args());
-       $this->tmpStorage[$workflowProcessId] = [
+        $this->tmpStorage[$workflowProcessId] = [
             'workflow' => ['steps' => $this->config['steps']->toArray()],
             'status' => self::STATUS_STARTED,
             'currentStepPos' => -1,
@@ -48,17 +48,73 @@ class WorkflowManager extends Component implements WorkflowManagerInterface
         return $this->tmpStorage[$workflowProcessId]['status'];
     }
 
+    /**
+     * Go to next step
+     *
+     * @param string $workflowProcessId
+     */
+    public function initNextStep(string $workflowProcessId)
+    {
+        echo PHP_EOL . '>' . __METHOD__ . ' : ' . json_encode(func_get_args());
+        $this->tmpStorage[$workflowProcessId]['currentStepPos']++;
+    }
+
     public function getNextStepList(string $workflowProcessId) : array
     {
-        // Check WF status
         echo PHP_EOL . '>' . __METHOD__ . ' : ' . json_encode(func_get_args());
         $nextStepPos = $this->tmpStorage[$workflowProcessId]['currentStepPos'] + 1;
         echo PHP_EOL . '<' . __METHOD__ . ' : ' . $nextStepPos;
         $stepNode = $this->config->steps[$nextStepPos]->toArray();
-        if(!$this->isStepParallelized($stepNode)) {
+        if (!$this->isStepParallelized($stepNode)) {
             return [$stepNode];
         }
         return $stepNode;
+    }
+
+    /**
+     * Check for a step if all related jobs have been succeed
+     *
+     * @param array $step
+     * @return bool
+     */
+    private function hasAllJobSucceeded(array $step) : bool
+    {
+        $succeed = true;
+        $jobList = $step['jobList'];
+        foreach ($jobList as $job) {
+            if ($job['status'] != self::STATUS_SUCCESS) {
+                $succeed = false;
+                break;
+            }
+        }
+        return $succeed;
+    }
+
+    /**
+     * Check current step status and if we can go further in the workflow
+     *
+     * @param string $workflowProcessId
+     * @return string
+     */
+    public function isNextStepRunnable(string $workflowProcessId) : string
+    {
+        $runnable = true;
+        $currentStepPos = $this->tmpStorage[$workflowProcessId]['currentStepPos'];
+        $stepNode = $this->tmpStorage[$workflowProcessId]['workflow']['steps'][$currentStepPos];
+
+        if ($this->isStepParallelized($stepNode))
+        {
+            foreach ($stepNode as $stepHash)
+            {
+                if (!$this->hasAllJobSucceeded($stepHash)) {
+                    $runnable = false;
+                    break;
+                }
+            }
+        } else {
+            $runnable = $this->hasAllJobSucceeded($stepNode);
+        }
+        return $runnable;
     }
 
     /**
@@ -80,6 +136,7 @@ class WorkflowManager extends Component implements WorkflowManagerInterface
      * @param string $stepCode          the step to which belongs the job
      * @param int    $jobId             the job identifier related to the step
      * @param array  $resultHash        the result data
+     * @throws \Exception in case of invalid message
      *
      * @return void
      */
@@ -89,11 +146,15 @@ class WorkflowManager extends Component implements WorkflowManagerInterface
         $stepHash = &$this->getContextStepHashRef($workflowProcessId, $stepCode);
         var_dump($stepHash);
         if (!isset($stepHash['jobList']) || !isset($stepHash['jobList'][$jobId])) {
-            // not initialized, must not happen
-            // Exc
+            throw new Exceptions\WorkflowException('Cannot find any job');
         }
         $stepHash['jobList'][$jobId]['status'] = $resultHash['status'] ?? self::STATUS_FAILED;
         $stepHash['jobList'][$jobId]['result'] = $resultHash['data'] ?? [];
+
+        if ($stepHash['jobList'][$jobId]['status'] == self::STATUS_FAILED) {
+            $this->tmpStorage[$workflowProcessId]['status'] = self::STATUS_FAILED;
+        }
+
         var_dump($stepHash);
     }
 

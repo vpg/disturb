@@ -41,7 +41,7 @@ interface WorkflowManagerInterface
      *
      * @param string $workflowProcessId The workflow process identifier
      * @param string $stepCode          The step code related to the step to finalize
-     * @param int    $JobId             The job id related to the processed job
+     * @param int    $jobId             The job id related to the processed job
      * @param array  $resultHash        The result info returned by the step to finalize
      *
      * @return void

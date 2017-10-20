@@ -1,7 +1,7 @@
 <?
 namespace Vpg\Disturb\Dtos;
 
-use \Disturb\Exceptions;
+use Vpg\Disturb\Exceptions;
 
 class Message
 {
@@ -32,7 +32,7 @@ class Message
      *
      * @param mixed $rawMixed could either be a string (json) or an array
      *
-     * @return array The parsed options hash
+     * @throws Exceptions\InvalidMessageException
      */
     public function __construct($rawMixed) {
         if (is_array($rawMixed)) {
