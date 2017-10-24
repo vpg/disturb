@@ -13,6 +13,7 @@ class WorkflowManager extends Component implements WorkflowManagerInterface
     const STATUS_STARTED = 'STARTED';
     const STATUS_SUCCESS = 'SUCCESS';
     const STATUS_FAILED = 'FAILED';
+    const STATUS_FINISHED = 'FINISHED';
 
     private $config = null;
 
@@ -40,6 +41,13 @@ class WorkflowManager extends Component implements WorkflowManagerInterface
         ];
     }
 
+    public function setStatus(string $workflowProcessId, string $status) {
+        $this->getDI()->get('logger')->debug(json_encode(func_get_args()));
+        if (isset($this->tmpStorage[$workflowProcessId])) {
+            $this->tmpStorage[$workflowProcessId]['status'] = $status;
+        }
+    }
+
     public function getStatus(string $workflowProcessId) : string {
         $this->getDI()->get('logger')->debug(json_encode(func_get_args()));
         if (!isset($this->tmpStorage[$workflowProcessId]) || empty($this->tmpStorage[$workflowProcessId]['status'])) {
@@ -64,6 +72,13 @@ class WorkflowManager extends Component implements WorkflowManagerInterface
     {
         $this->getDI()->get('logger')->debug(json_encode(func_get_args()));
         $nextStepPos = $this->tmpStorage[$workflowProcessId]['currentStepPos'] + 1;
+
+        // Manage case when there is no more step to run
+        if(empty($this->config->steps[$nextStepPos])) {
+            $this->setStatus($workflowProcessId, self::STATUS_FINISHED);
+            return [];
+        }
+
         $stepNode = $this->config->steps[$nextStepPos]->toArray();
         if (!$this->isStepParallelized($stepNode)) {
             return [$stepNode];

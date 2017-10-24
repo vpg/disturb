@@ -2,7 +2,7 @@
 namespace Vpg\Disturb\Tasks;
 
 use Phalcon\Cli\Task;
-use Vpg\Disturb\Exceptions\WorkflowException;
+use \Vpg\Disturb\Exceptions\WorkflowException;
 use \Vpg\Disturb\Services;
 use \Vpg\Disturb\Dtos;
 use \Vpg\Disturb\Tasks\AbstractTask as AbstractTask;
