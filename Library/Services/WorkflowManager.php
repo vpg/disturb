@@ -9,11 +9,11 @@ use \Vpg\Disturb\Exceptions;
 class WorkflowManager extends Component implements WorkflowManagerInterface
 {
     const STATUS_NO_STARTED = 'NOT_STARTED';
-    const STATUS_PAUSED = 'PAUSED';
-    const STATUS_STARTED = 'STARTED';
-    const STATUS_SUCCESS = 'SUCCESS';
-    const STATUS_FAILED = 'FAILED';
-    const STATUS_FINISHED = 'FINISHED';
+    const STATUS_PAUSED     = 'PAUSED';
+    const STATUS_STARTED    = 'STARTED';
+    const STATUS_SUCCESS    = 'SUCCESS';
+    const STATUS_FAILED     = 'FAILED';
+    const STATUS_FINISHED   = 'FINISHED';
 
     private $config = null;
 
@@ -21,14 +21,17 @@ class WorkflowManager extends Component implements WorkflowManagerInterface
     // xxx MUST be abstracted (e.g. Disturb\Storage::set($k, $v)
     private $tmpStorage = [];
 
-
     public function __construct(string $workflowConfigFilePath)
     {
         $this->getDI()->get('logger')->debug("Loading WF from '$workflowConfigFilePath'");
         $this->config = new Json($workflowConfigFilePath);
     }
 
-
+    /**
+     * Initialize workflow
+     *
+     * @param string $workflowProcessId
+     */
     public function init(string $workflowProcessId)
     {
         $this->getDI()->get('logger')->debug(json_encode(func_get_args()));
@@ -41,21 +44,34 @@ class WorkflowManager extends Component implements WorkflowManagerInterface
         ];
     }
 
-    public function setStatus(string $workflowProcessId, string $status) {
+    /**
+     * Set workflow status
+     *
+     * @param string $workflowProcessId
+     * @param string $status
+     */
+    public function setStatus(string $workflowProcessId, string $status)
+    {
         $this->getDI()->get('logger')->debug(json_encode(func_get_args()));
         if (isset($this->tmpStorage[$workflowProcessId])) {
             $this->tmpStorage[$workflowProcessId]['status'] = $status;
         }
     }
 
-    public function getStatus(string $workflowProcessId) : string {
+    /**
+     * Get workflow status
+     *
+     * @param string $workflowProcessId
+     * @return string
+     */
+    public function getStatus(string $workflowProcessId) : string
+    {
         $this->getDI()->get('logger')->debug(json_encode(func_get_args()));
         if (!isset($this->tmpStorage[$workflowProcessId]) || empty($this->tmpStorage[$workflowProcessId]['status'])) {
             return self::STATUS_NO_STARTED;
         }
         return $this->tmpStorage[$workflowProcessId]['status'];
     }
-
 
     /**
      * Go to next step
@@ -68,6 +84,12 @@ class WorkflowManager extends Component implements WorkflowManagerInterface
         $this->tmpStorage[$workflowProcessId]['currentStepPos']++;
     }
 
+    /**
+     * Get next step if it exists
+     *
+     * @param string $workflowProcessId
+     * @return array
+     */
     public function getNextStepList(string $workflowProcessId) : array
     {
         $this->getDI()->get('logger')->debug(json_encode(func_get_args()));
@@ -205,6 +227,13 @@ class WorkflowManager extends Component implements WorkflowManagerInterface
         ];
     }
 
+    /**
+     * Access step
+     *
+     * @param $workflowProcessId
+     * @param $stepCode
+     * @return mixed
+     */
     private function &getContextStepHashRef($workflowProcessId, $stepCode)
     {
         $this->getDI()->get('logger')->debug(json_encode(func_get_args()));
@@ -224,12 +253,26 @@ class WorkflowManager extends Component implements WorkflowManagerInterface
         }
     }
 
-    private function isRunning(string $workflowProcessId) {
+    /**
+     * Check whether the workflow is running or not
+     *
+     * @param string $workflowProcessId
+     * @return bool
+     */
+    private function isRunning(string $workflowProcessId) : bool
+    {
         $this->getDI()->get('logger')->debug(json_encode(func_get_args()));
         return ($this->tmpStorage[$workflowProcessId]['status'] == self::STATUS_STARTED);
     }
 
-    private function isStepParallelized($stepNode) {
+    /**
+     * Check if the step is parallelized
+     *
+     * @param $stepNode
+     * @return bool
+     */
+    private function isStepParallelized($stepNode) : bool
+    {
         // Deals w/ parallelized task xxx to unitest
         // To ditinguish single step hash :
         // { "name" : "step_foo"}
