@@ -88,6 +88,10 @@ class ManagerTask extends AbstractTask
     {
 
         $stepHashList = $this->workflowManagerService->getNextStepList($workflowProcessId);
+        if (empty($stepHashList)) {
+            $this->getDI()->get('logger')->info("No more step to run, WF ends");
+            var_dump($this->workflowManagerService->getContext($workflowProcessId));
+        }
         $this->workflowManagerService->initNextStep($workflowProcessId);
 
         // run through the next step(s)
@@ -108,7 +112,7 @@ class ManagerTask extends AbstractTask
                 $stepMessageDto = new Dtos\Message(json_encode($messageHash));
 
                 $this->sendMessage(
-                    Services\TopicService::getWorkflowStepTopicName($stepCode, $workflowProcessId),
+                    Services\TopicService::getWorkflowStepTopicName($stepCode, $this->workflowConfig['name']),
                     $stepMessageDto
                 );
             }

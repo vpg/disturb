@@ -46,6 +46,17 @@ class WorkflowManager extends Component implements WorkflowManagerInterface
     }
 
     /**
+     * Returns the context of the given workflow
+     *
+     * @param string $workflowProcessId the wf process identifier
+     */
+    public function getContext(string $workflowProcessId)
+    {
+        $this->getDI()->get('logger')->debug(json_encode(func_get_args()));
+        return $this->tmpStorage[$workflowProcessId];
+    }
+
+    /**
      * Set workflow status
      *
      * @param string $workflowProcessId the wf process identifier
