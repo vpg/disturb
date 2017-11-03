@@ -62,9 +62,21 @@ class ManagerTask extends AbstractTask
                     throw new WorkflowException("Id failed {$messageDto->getId()}");
                 }
 
-                if ($this->workflowManagerService->isNextStepRunnable($messageDto->getId()))
-                {
-                    $this->runNextStep($messageDto->getId());
+                switch($this->workflowManagerService->getCurrentStepStatus($messageDto->getId())) {
+                    case Services\WorkflowManager::STATUS_RUNNING:
+                        // xxx check timeout
+                        break;
+                    case Services\WorkflowManager::STATUS_SUCCESS:
+                        $this->runNextStep($messageDto->getId());
+                        break;
+                    case Services\WorkflowManager::STATUS_FAILED:
+                        $this->workflowManagerService->setStatus(
+                            $messageDto->getId(),
+                            Services\WorkflowManager::STATUS_FAILED
+                        );
+                        break;
+                    default:
+                        throw new WorkflowException('Can\'t retrieve current step status');
                 }
                 break;
             default:

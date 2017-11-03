@@ -14,6 +14,7 @@ class WorkflowManager extends Component implements WorkflowManagerInterface
     const STATUS_SUCCESS    = 'SUCCESS';
     const STATUS_FAILED     = 'FAILED';
     const STATUS_FINISHED   = 'FINISHED';
+    const STATUS_RUNNING    = 'RUNNING';
 
     private $config = null;
 
@@ -30,7 +31,7 @@ class WorkflowManager extends Component implements WorkflowManagerInterface
     /**
      * Initialize workflow
      *
-     * @param string $workflowProcessId
+     * @param string $workflowProcessId the wf process identifier
      */
     public function init(string $workflowProcessId)
     {
@@ -47,8 +48,8 @@ class WorkflowManager extends Component implements WorkflowManagerInterface
     /**
      * Set workflow status
      *
-     * @param string $workflowProcessId
-     * @param string $status
+     * @param string $workflowProcessId the wf process identifier
+     * @param string $status wf status
      */
     public function setStatus(string $workflowProcessId, string $status)
     {
@@ -61,7 +62,7 @@ class WorkflowManager extends Component implements WorkflowManagerInterface
     /**
      * Get workflow status
      *
-     * @param string $workflowProcessId
+     * @param string $workflowProcessId the wf process identifier
      * @return string
      */
     public function getStatus(string $workflowProcessId) : string
@@ -76,7 +77,7 @@ class WorkflowManager extends Component implements WorkflowManagerInterface
     /**
      * Go to next step
      *
-     * @param string $workflowProcessId
+     * @param string $workflowProcessId the wf process identifier
      */
     public function initNextStep(string $workflowProcessId)
     {
@@ -87,7 +88,7 @@ class WorkflowManager extends Component implements WorkflowManagerInterface
     /**
      * Get next step if it exists
      *
-     * @param string $workflowProcessId
+     * @param string $workflowProcessId the wf process identifier
      * @return array
      */
     public function getNextStepList(string $workflowProcessId) : array
@@ -111,48 +112,87 @@ class WorkflowManager extends Component implements WorkflowManagerInterface
     /**
      * Check for a step if all related jobs have been succeed
      *
-     * @param array $step
-     * @return bool
+     * @param array $step context step hash
+     * @return string
      */
-    private function didAllStepJobsSucceeded(array $step) : bool
+    private function getStepStatusByJobStatus(array $step) : string
     {
-        $succeed = true;
+        $this->getDI()->get('logger')->debug(json_encode(func_get_args()));
+
+        $jobStatusList = [];
         $jobList = $step['jobList'];
+
         foreach ($jobList as $job) {
-            if ($job['status'] != self::STATUS_SUCCESS) {
-                $succeed = false;
-                break;
+            array_push($jobStatusList, $job['status']);
+        }
+
+        return $this->aggregateStatus($jobStatusList);
+    }
+
+    /**
+     * Get global status of a step / job
+     *
+     * @param array $statusList list of all step / job statuses
+     * @return string
+     */
+    private function aggregateStatus(array $statusList) : string
+    {
+        $nbJobs = sizeof($statusList);
+        $statusValueList = array_count_values($statusList);
+        $status = self::STATUS_FAILED;
+        // When all steps / jobs have the same status, return it
+        if (in_array($nbJobs, $statusValueList)) {
+            $status = $statusList[0];
+        } else {
+            // If there is one running
+            if (isset($statusValueList[self::STATUS_NO_STARTED])) {
+                $status = self::STATUS_RUNNING;
+            }
+            // If there is one fail
+            if (isset($statusValueList[self::STATUS_FAILED])) {
+                $status = self::STATUS_FAILED;
             }
         }
-        return $succeed;
+        return $status;
+    }
+
+    /**
+     * Return current step position in the workflow
+     *
+     * @param string $workflowProcessId the wf process identifier
+     * @return int
+     */
+    private function getWorkflowCurrentPosition(string $workflowProcessId) : int
+    {
+        $this->getDI()->get('logger')->debug(json_encode(func_get_args()));
+        return $this->tmpStorage[$workflowProcessId]['currentStepPos'];
     }
 
     /**
      * Check current step status and if we can go further in the workflow
      *
-     * @param string $workflowProcessId
-     * @return bool
+     * @param string $workflowProcessId the wf process identifier
+     * @return string
      */
-    public function isNextStepRunnable(string $workflowProcessId) : bool
+    public function getCurrentStepStatus(string $workflowProcessId) : string
     {
         $this->getDI()->get('logger')->debug(json_encode(func_get_args()));
-        $runnable = true;
-        $currentStepPos = $this->tmpStorage[$workflowProcessId]['currentStepPos'];
+        $currentStepPos = $this->getWorkflowCurrentPosition($workflowProcessId);
         $stepNode = $this->tmpStorage[$workflowProcessId]['workflow']['steps'][$currentStepPos];
+        $stepStatusList = [];
 
         if ($this->isStepParallelized($stepNode))
         {
             foreach ($stepNode as $stepHash)
             {
-                if (!$this->didAllStepJobsSucceeded($stepHash)) {
-                    $runnable = false;
-                    break;
-                }
+                array_push($stepStatusList, $this->getStepStatusByJobStatus($stepHash));
             }
+            $status = $this->aggregateStatus($stepStatusList);
         } else {
-            $runnable = $this->didAllStepJobsSucceeded($stepNode);
+            $status = $this->getStepStatusByJobStatus($stepNode);
         }
-        return $runnable;
+
+        return $status;
     }
 
     /**
@@ -189,8 +229,23 @@ class WorkflowManager extends Component implements WorkflowManagerInterface
         $stepHash['jobList'][$jobId]['result'] = $resultHash['data'] ?? [];
 
         if ($stepHash['jobList'][$jobId]['status'] == self::STATUS_FAILED) {
-            $this->tmpStorage[$workflowProcessId]['status'] = self::STATUS_FAILED;
+            $this->processStepJobFailure($workflowProcessId, $stepCode, $jobId, $resultHash);
         }
+    }
+
+    /**
+     * Process failure on step job
+     *
+     * @param string $workflowProcessId the wf process identifier to which belongs the step's job result
+     * @param string $stepCode          the step to which belongs the job
+     * @param int $jobId                the job identifier related to the step
+     * @param array $resultHash         the result data
+     */
+    private function processStepJobFailure(string $workflowProcessId, string $stepCode, int $jobId, array $resultHash)
+    {
+        // check step conf to see if the step is "blocking"
+        // set the WF status accordingly
+        $this->setStatus($workflowProcessId, self::STATUS_FAILED);
     }
 
     /**
@@ -220,6 +275,7 @@ class WorkflowManager extends Component implements WorkflowManagerInterface
         if (!isset($stepHash['jobList'])) {
             $stepHash['jobList'] = [];
         }
+        // TODO check if job hasn't been registered yet
         $stepHash['jobList'][] = [
             'id' => $jobId,
             'status' => self::STATUS_NO_STARTED,
