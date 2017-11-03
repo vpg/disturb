@@ -24,8 +24,6 @@ abstract class DisturbUnitTestCase extends TestCase implements InjectionAwareInt
      */
     public function setUp()
     {
-        $this->checkExtension('phalcon');
-
         // Reset the DI container
         Di::reset();
 
@@ -39,30 +37,6 @@ abstract class DisturbUnitTestCase extends TestCase implements InjectionAwareInt
         $di::reset();
 
         parent::tearDown();
-    }
-
-    /**
-     * Checks if a particular extension is loaded and if not it marks
-     * the tests skipped
-     *
-     * @param mixed $extension
-     */
-    private function checkExtension($extension)
-    {
-        $message = function ($ext) {
-            sprintf('Warning: %s extension is not loaded', $ext);
-        };
-
-        if (is_array($extension)) {
-            foreach ($extension as $ext) {
-                if (!extension_loaded($ext)) {
-                    $this->markTestSkipped($message($ext));
-                    break;
-                }
-            }
-        } elseif (!extension_loaded($extension)) {
-            $this->markTestSkipped($message($extension));
-        }
     }
 
     /**
