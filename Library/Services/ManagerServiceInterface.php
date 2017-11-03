@@ -1,7 +1,6 @@
 <?php
-// @codingStandardsIgnoreFile
 /**
- * A helper class for fixing errors.
+ * ManagerServiceInterface
  *
  * Provides helper functions that act upon a token array and modify the file
  * content.

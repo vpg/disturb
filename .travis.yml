@@ -25,8 +25,10 @@ before_install:
 # Default is specific to project language.
 # All commands must exit with code 0 on success. Anything else is considered failure.
 script:
-  - vendor/bin/phpcs ./Library/Services/ManagerServiceInterface.php
+  - vendor/bin/phpcs ./Library/
 
+# The cache’s purpose is to make installing language-specific dependencies easy and fast,
+# so everything related to tools like Bundler, pip, Composer, npm, Gradle, Maven, is what should go into the cache.
 cache:
   directories:
     - vendor
