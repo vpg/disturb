@@ -11,8 +11,9 @@
 namespace Vpg\Disturb\Commands;
 
 use \Vpg\Disturb\Dtos;
+use \Vpg\Disturb\Services\TopicService;
 
-class Workflow
+class WorkflowCommand
 {
     /**
      * Start workflow by sending a message in related topic
@@ -37,7 +38,7 @@ class Workflow
         //send message with givens params
         $kafkaProducer = new \RdKafka\Producer();
         $kafkaProducer->addBrokers($brokers);
-        $topicName = 'disturb-' . $workflowName . '-manager'; //xxx create service to manage topic name
+        $topicName = TopicService::getWorkflowManagerTopicName($workflowName);
 
         $kafkaTopic = $kafkaProducer->newTopic($topicName);
         $kafkaTopic->produce(RD_KAFKA_PARTITION_UA, 0, "$stepMessageDto");
