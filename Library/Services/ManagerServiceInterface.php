@@ -1,6 +1,32 @@
 <?php
+/**
+ * A helper class for fixing errors.
+ *
+ * Provides helper functions that act upon a token array and modify the file
+ * content.
+ *
+ * @category Test
+ * @package  Disturb
+ * @author   Maxime BRENGUIER <mbrenguier@voyageprive.com>
+ * @license  https://github.com/vpg/disturb/blob/poc/LICENSE MIT Licence
+ * @version  0.0.1
+ * @link     http://example.com/my/bar Documentation of Foo.
+ */
+
+
 namespace Vpg\Disturb\Services;
 
+/**
+ * ManagerServiceInterface
+ *
+ * @category Test
+ * @package  Disturb
+ * @author   Maxime BRENGUIER <mbrenguier@voyageprive.com>
+ * @license  https://github.com/vpg/disturb/blob/poc/LICENSE MIT Licence
+ * @version  0.0.1
+ * @link     http://example.com/my/bar Documentation of Foo.
+ * @see      \Disturb\Services\ManagerServiceInterface
+ */
 interface ManagerServiceInterface
 {
     /**

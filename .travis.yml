@@ -25,7 +25,7 @@ before_install:
 # Default is specific to project language.
 # All commands must exit with code 0 on success. Anything else is considered failure.
 script:
-  - vendor/bin/phpcs ./Library/
+  - vendor/bin/phpcs ./Library/Services/ManagerServiceInterface.php
 
 cache:
   directories:
