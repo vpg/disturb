@@ -35,6 +35,7 @@ script:
 cache:
   directories:
     - vendor
+    - ~/cphalcon
 
 # Receive notifications for build results.
 # @link https://docs.travis-ci.com/user/notifications/#Email-notifications
