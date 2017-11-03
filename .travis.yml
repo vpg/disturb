@@ -13,10 +13,10 @@ before_install:
   - sudo apt-get -qq update
   - sudo apt-get install -y libxml2-dev
   - git clone -q --depth=1 https://github.com/techpivot/phalcon-ci-installer.git
+  - composer self-update
   - bash ./phalcon-ci-installer/bin/install-phalcon.sh
 
 install:
-  - composer self-update
   - composer --prefer-source install
 
 # Use this to prepare your build for testing.
