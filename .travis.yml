@@ -12,14 +12,14 @@ php:
 before_install:
   - sudo apt-get -qq update
   - sudo apt-get install -y libxml2-dev
-  - vendor/bin/install-phalcon.sh 3.0.x
+  - composer self-update
+  - composer --prefer-source install
+  - vendor/bin/install-phalcon.sh 3.0.0
 
 # Use this to prepare your build for testing.
 # e.g. copy database configurations, environment variables, etc.
 # Failures in this section will result in build status 'errored'.
-before_script:
-  - composer self-update
-  - composer --prefer-source install
+# before_script:
 
 # Run test script commands.
 # Default is specific to project language.
