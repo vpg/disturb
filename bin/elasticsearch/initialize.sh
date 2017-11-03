@@ -1,11 +1,15 @@
 #!/bin/bash
 
-HOST="https://elasticsearch5.recette11.vpglabs.site"
-#HOST="192.168.100.100:9200"
-
 echo "------------------------------------------------"
 echo "- DISTURB Elasticsearch context initialization -"
 echo "------------------------------------------------"
+
+if [[ $# != 1  ]]; then
+    echo "You must set elasticsearch host as parameter (ex: http://localhost, https://localhost, http://localhost::443)"
+    exit 0
+fi
+
+HOST=$1
 
 INIT_FOLDER_PATH=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 
@@ -37,8 +41,3 @@ for index in $INDEX_LIST; do
     fi
 done;
 echo "------------------------------------------------"
-
-
-
-
-

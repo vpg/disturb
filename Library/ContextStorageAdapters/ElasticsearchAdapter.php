@@ -4,7 +4,7 @@ namespace Vpg\Disturb\ContextStorageAdapters;
 
 use Vpg\Disturb\Exceptions\ContextStorageException;
 
-use \Phalcon\Config\Adapter\Json;
+use Phalcon\Config\Adapter\Json;
 
 /**
  * Class Elasticsearch Adapter
@@ -16,7 +16,7 @@ class ElasticsearchAdapter implements ContextStorageAdapterInterface
     /**
      * @const string VENDOR_CLASSNAME
      */
-    const VENDOR_CLASSNAME = 'Elasticsearch';
+    const VENDOR_CLASSNAME = 'Elasticsearch\Client';
 
     /**
      * @const string DEFAULT_INDEX
@@ -87,6 +87,43 @@ class ElasticsearchAdapter implements ContextStorageAdapterInterface
     }
 
     /**
+     * Check if Elascticsearch dependencies library is available
+     *
+     * @param string $className
+     *
+     * @throws ContextStorageException
+     */
+    private function checkVendorLibraryAvailable($className)
+    {
+        if (!class_exists($className)) {
+            throw new ContextStorageException(
+                $className . ' lib not found. Please make "composer update"',
+                ContextStorageException::CODE_VENDOR
+            );
+        }
+    }
+
+    /**
+     * Check parameters
+     *
+     * @param array $parametersList
+     *
+     * @throws ContextStorageException
+     */
+    private function checkParameters(array $parametersList) {
+        foreach ($parametersList as $parameter) {
+            if (empty($parameter)) {
+                throw new ContextStorageException(
+                    'invalid parameter',
+                    ContextStorageException::CODE_INVALID_PARAMETER,
+                    null,
+                    2
+                );
+            }
+        }
+    }
+
+    /**
      * Init configuration
      *
      * @param Json $config
@@ -95,9 +132,7 @@ class ElasticsearchAdapter implements ContextStorageAdapterInterface
      */
     private function initConfig(Json $config)
     {
-        if (empty($config)) {
-            throw new ContextStorageException('Elasticsearch config not found');
-        }
+        $this->checkParameters([$config]);
 
         // get default values for document index / type
         $config[self::DOC_INDEX] = self::DEFAULT_DOC_INDEX;
@@ -106,7 +141,10 @@ class ElasticsearchAdapter implements ContextStorageAdapterInterface
         // check required config fields
         foreach (self::REQUIRED_CONFIG_FIELD_LIST as $configField) {
             if (empty($config[$configField])) {
-                throw new ContextStorageException('Elasticsearch config ' . $configField . ' not found');
+                throw new ContextStorageException(
+                    'config ' . $configField . ' not found',
+                    ContextStorageException::CODE_CONFIG
+                );
             }
             $this->config[$configField] = $config[$configField];
         }
@@ -133,34 +171,19 @@ class ElasticsearchAdapter implements ContextStorageAdapterInterface
      */
     private function initClient()
     {
-
         $this->client = \Elasticsearch\ClientBuilder::create()
             ->setHosts([$this->config[self::CONFIG_HOST]])
             ->build();
 
         // Check host connexion
         if (! $this->client->ping()) {
-            throw new ContextStorageException('Elasticsearch host : ' . $this->config[self::CONFIG_HOST] . ' not available');
+            throw new ContextStorageException('host : ' . $this->config[self::CONFIG_HOST] . ' not available');
         }
 
         $this->initCommonRequestParams();
 
         // Check index
         // TODO: check if index exists ?
-    }
-
-    /**
-     * Check if Elascticsearch dependencies library is available
-     *
-     * @param string $className
-     *
-     * @throws ContextStorageException
-     */
-    private function checkVendorLibraryAvailable($className)
-    {
-        if (!class_exists($className)) {
-            throw new ContextStorageException($className . ' lib not found. Please make "composer update"');
-        }
     }
 
     /**
@@ -174,16 +197,21 @@ class ElasticsearchAdapter implements ContextStorageAdapterInterface
      */
     public function get(string $key) : array
     {
-        if (empty($key)) {
-            throw new ContextStorageException('Elasticsearch get : invalid parameter');
+        $this->checkParameters([$key]);
+
+        try {
+            $requestParamHash = array_merge(
+                ['id' => $key],
+                $this->commonRequestParamHash
+            );
+            return $this->client->get($requestParamHash);
+        } catch (\Exception $exception) {
+            throw new ContextStorageException(
+                'document not found',
+                ContextStorageException::CODE_GET,
+                $exception
+            );
         }
-
-        $requestParamHash = array_merge(
-            ['id' => $key],
-            $this->commonRequestParamHash
-        );
-
-        return $this->client->get($requestParamHash);
     }
 
     /**
@@ -197,16 +225,21 @@ class ElasticsearchAdapter implements ContextStorageAdapterInterface
      */
     public function exist(string $key) : bool
     {
-        if (empty($key)) {
-            throw new ContextStorageException('Elasticsearch exist : invalid parameter');
+        $this->checkParameters([$key]);
+
+        try {
+            $requestParamHash = array_merge(
+                ['id' => $key],
+                $this->commonRequestParamHash
+            );
+            return $this->client->exists($requestParamHash);
+        } catch (\Exception $exception) {
+            throw new ContextStorageException(
+                'can not check if docuement exist',
+                ContextStorageException::CODE_EXIST,
+                $exception
+            );
         }
-
-        $requestParamHash = array_merge(
-            ['id' => $key],
-            $this->commonRequestParamHash
-        );
-
-        return $this->client->exists($requestParamHash);
     }
 
     /**
@@ -224,19 +257,25 @@ class ElasticsearchAdapter implements ContextStorageAdapterInterface
         // Specify how many times should the operation be retried when a conflict occurs (simultaneous doc update)
         // TODO : check for param "retry_on_conflict"
 
-        if (empty($key) || empty($documentHash)) {
-            throw new ContextStorageException('Elasticsearch save invalid parameter');
-        }
+        $this->checkParameters([$key, $documentHash]);
 
-        $requestParamHash = array_merge(
-            ['id' => $key],
-            $this->commonRequestParamHash
-        );
+        try {
+            $requestParamHash = array_merge(
+                ['id' => $key],
+                $this->commonRequestParamHash
+            );
 
-        if ($this->client->exists($requestParamHash)) {
-            return $this->client->update(array_merge($requestParamHash, ['body' => ['doc' => $documentHash]]));
-        } else {
-            return $this->client->index(array_merge($requestParamHash, ['body' => $documentHash]));
+            if ($this->client->exists($requestParamHash)) {
+                return $this->client->update(array_merge($requestParamHash, ['body' => ['doc' => $documentHash]]));
+            } else {
+                return $this->client->index(array_merge($requestParamHash, ['body' => $documentHash]));
+            }
+        } catch (\Exception $exception) {
+            throw new ContextStorageException(
+                'Fail to save document',
+                ContextStorageException::CODE_SAVE,
+                $exception
+            );
         }
     }
 
@@ -251,15 +290,20 @@ class ElasticsearchAdapter implements ContextStorageAdapterInterface
      */
     public function delete(string $key) : array
     {
-        if (empty($key)) {
-            throw new ContextStorageException('Elasticsearch delete invalid parameter');
+        $this->checkParameters([$key]);
+
+        try {
+            $requestParamHash = array_merge(
+                ['id' => $key],
+                $this->commonRequestParamHash
+            );
+            return $this->client->delete($requestParamHash);
+        } catch (\Exception $exception) {
+            throw new ContextStorageException(
+                'Fail to delete document',
+                ContextStorageException::CODE_DELETE,
+                $exception
+            );
         }
-
-        $requestParamHash = array_merge(
-            ['id' => $key],
-            $this->commonRequestParamHash
-        );
-
-        return $this->client->delete($requestParamHash);
     }
 }

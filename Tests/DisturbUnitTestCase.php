@@ -4,7 +4,7 @@ namespace Tests;
 
 use PHPUnit\Framework\TestCase as TestCase;
 
-use \Phalcon\DI;
+use Phalcon\DI;
 use Phalcon\DiInterface;
 use Phalcon\Di\InjectionAwareInterface;
 
