@@ -12,9 +12,10 @@ php:
 before_install:
   - sudo apt-get -qq update
   - sudo apt-get install -y libxml2-dev
+  - git clone -q --depth=1 https://github.com/techpivot/phalcon-ci-installer.git -b 1.0.7
+  - ./phalcon-ci-installer/bin/install-phalcon.sh
   - composer self-update
   - composer --prefer-source install
-  - vendor/bin/install-phalcon.sh 3.0.x
 
 # Use this to prepare your build for testing.
 # e.g. copy database configurations, environment variables, etc.
