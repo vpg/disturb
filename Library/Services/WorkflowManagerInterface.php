@@ -34,18 +34,19 @@ interface WorkflowManagerInterface
      * @return array the next workflow step hash
      * @throws \Disturb\WorkflowException
      */
-    public function getNextStepTaskList(string $workflowProcessId) : array;
+    public function getNextStepList(string $workflowProcessId) : array;
 
     /**
      * Finalizes the given step for the workflow related to the given process identifier
      *
      * @param string $workflowProcessId The workflow process identifier
      * @param string $stepCode          The step code related to the step to finalize
+     * @param int    $jobId             The job id related to the processed job
      * @param array  $resultHash        The result info returned by the step to finalize
      *
      * @return void
      * @throws \Disturb\WorkflowException
      */
-    public function finalizeStep(string $workflowProcessId, string $stepCode, array $resultHash);
+    public function processStepJobResult(string $workflowProcessId, string $stepCode, int $jobId, array $resultHash);
 
 }
