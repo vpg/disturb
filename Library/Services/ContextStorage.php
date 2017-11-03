@@ -2,8 +2,8 @@
 
 namespace Vpg\Disturb\Services;
 
-use Vpg\Disturb\ContextStorageAdapters;
 use Vpg\Disturb\Exceptions\ContextStorageException;
+use Vpg\Disturb\ContextStorageAdapters\ContextStorageAdapterInterface;
 
 use \Phalcon\Config\Adapter\Json;
 
@@ -25,18 +25,27 @@ class ContextStorage
     {
         // check adapter type
         if (empty($config->adapter)) {
-            throw new ContextStorageException('Adapter name not found');
+            throw new ContextStorageException(
+                'Adapter name not found',
+                ContextStorageException::CODE_ADAPTER
+            );
         }
 
         // check if adapter class exists
         $adapterClass = ucfirst($config->adapter) . 'Adapter';
         if (! class_exists($adapterClass)) {
-            throw new ContextStorageException('Adapter class not found');
+            throw new ContextStorageException(
+                'Adapter class not found',
+                ContextStorageException::CODE_ADAPTER
+            );
         }
 
         // check if adapter config exists
         if (empty($config->config)) {
-            throw new ContextStorageException('Adapter config not found');
+            throw new ContextStorageException(
+                'Adapter config not found',
+                ContextStorageException::CODE_ADAPTER
+            );
         }
 
         $this->adpater = new $adapterClass();

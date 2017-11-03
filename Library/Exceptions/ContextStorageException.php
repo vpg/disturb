@@ -12,9 +12,9 @@ use Throwable;
 class ContextStorageException extends \Phalcon\Exception
 {
     /**
-     * @const int CODE_GENERIC
+     * @const int CODE_ADAPTER
      */
-    const CODE_GENERIC = 0;
+    const CODE_ADAPTER = 0;
 
     /**
      * @const int CODE_CONFIG
