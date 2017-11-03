@@ -21,6 +21,15 @@ Add it to your project w/ compposer
         "vpg/disturb": "dev-poc"
     }
 ```
+
+### Configure Context Storage 
+Elasticsearch 
+
+Initialize index
+```
+   ./bin/elasticsearch/initialize.sh YOUR_ELASTICSEARCH_HOST
+```
+
 ### Define workflow
 ![see example](https://github.com/vpg/disturb/tree/poc/example/Config)
 
