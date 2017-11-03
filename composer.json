@@ -32,7 +32,8 @@
         }
     },
     "require": {
-        "php": ">=7.0"
+        "php": ">=7.0",
+        "ext-phalcon": "~3.0"
     },
     "require-dev": {
         "phalcon/devtools":"3.0.*",
