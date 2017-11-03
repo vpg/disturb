@@ -4,6 +4,7 @@ namespace Vpg\Disturb\Tasks;
 use \Phalcon\Cli\Task;
 
 use \Vpg\Disturb\Dtos;
+use \Vpg\Disturb\Services;
 use \Vpg\Disturb\Tasks\AbstractTask as AbstractTask;
 
 /**
@@ -50,7 +51,11 @@ class StepTask extends AbstractTask
                 'result' => json_encode($resultHash)
             ]
         );
-        $this->sendMessage('disturb-' . $this->workflowConfig['name']  . '-manager', $msgDto);
+
+        $this->sendMessage(
+            Services\TopicService::getWorkflowManagerTopicName($this->workflowConfig['name']),
+            $msgDto
+        );
     }
 
     /**
@@ -68,6 +73,7 @@ class StepTask extends AbstractTask
         parent::initWorker($paramHash);
         $serviceFullName = $this->workflowConfig['servicesClassNameSpace'] . '\\' . ucFirst($paramHash['step']);
         $this->service = new $serviceFullName($paramHash['workflow']);
-        $this->topicName = 'disturb-' . $paramHash['step'] . '-step';
+
+        $this->topicName = Services\TopicService::getWorkflowStepTopicName($paramHash['step'], $this->workflowConfig['name']);
     }
 }
