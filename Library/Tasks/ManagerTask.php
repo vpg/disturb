@@ -67,10 +67,17 @@ class ManagerTask extends AbstractTask
                         // xxx check timeout
                         break;
                     case Services\WorkflowManager::STATUS_SUCCESS:
-                        $this->runNextStep($messageDto->getId());
+                        if ($this->workflowManagerService->hasNextStep($messageDto->getId())) {
+                            $this->runNextStep($messageDto->getId());
+                        } else {
+                            $this->workflowManagerService->finalizeWorkflow(
+                                $messageDto->getId(),
+                                Services\WorkflowManager::STATUS_SUCCESS
+                            );
+                        }
                         break;
                     case Services\WorkflowManager::STATUS_FAILED:
-                        $this->workflowManagerService->setStatus(
+                        $this->workflowManagerService->finalizeWorkflow(
                             $messageDto->getId(),
                             Services\WorkflowManager::STATUS_FAILED
                         );
@@ -86,12 +93,7 @@ class ManagerTask extends AbstractTask
 
     protected function runNextStep(string $workflowProcessId)
     {
-
         $stepHashList = $this->workflowManagerService->getNextStepList($workflowProcessId);
-        if (empty($stepHashList)) {
-            $this->getDI()->get('logger')->info("No more step to run, WF ends");
-            var_dump($this->workflowManagerService->getContext($workflowProcessId));
-        }
         $this->workflowManagerService->initNextStep($workflowProcessId);
 
         // run through the next step(s)

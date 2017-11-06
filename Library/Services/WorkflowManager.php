@@ -49,6 +49,7 @@ class WorkflowManager extends Component implements WorkflowManagerInterface
      * Returns the context of the given workflow
      *
      * @param string $workflowProcessId the wf process identifier
+     * @return array
      */
     public function getContext(string $workflowProcessId)
     {
@@ -106,18 +107,43 @@ class WorkflowManager extends Component implements WorkflowManagerInterface
     {
         $this->getDI()->get('logger')->debug(json_encode(func_get_args()));
         $nextStepPos = $this->tmpStorage[$workflowProcessId]['currentStepPos'] + 1;
-
-        // Manage case when there is no more step to run
-        if(empty($this->config->steps[$nextStepPos])) {
-            $this->setStatus($workflowProcessId, self::STATUS_FINISHED);
-            return [];
-        }
-
         $stepNode = $this->config->steps[$nextStepPos]->toArray();
         if (!$this->isStepParallelized($stepNode)) {
             return [$stepNode];
         }
         return $stepNode;
+    }
+
+    /**
+     * Check if there are more steps to run
+     *
+     * @param string $workflowProcessId the wf process identifier
+     * @return bool
+     */
+    public function hasNextStep(string $workflowProcessId) : bool
+    {
+        $this->getDI()->get('logger')->debug(json_encode(func_get_args()));
+        $hasNextStep = true;
+        $nextStepPos = $this->tmpStorage[$workflowProcessId]['currentStepPos'] + 1;
+        // Check if there is another step to run
+        if (empty($this->config->steps[$nextStepPos])) {
+            $hasNextStep = false;
+        }
+        return $hasNextStep;
+    }
+
+    /**
+     * Finalize workflow by updating its context
+     *
+     * @param string $workflowProcessId the wf process identifier
+     * @param string $status
+     */
+    public function finalizeWorkflow(string $workflowProcessId, string $status)
+    {
+        $this->getDI()->get('logger')->debug(json_encode(func_get_args()));
+        $this->setStatus($workflowProcessId, $status);
+        $this->getDI()->get('logger')->debug('WF ended with status : ' . $status);
+        var_dump($this->getContext($workflowProcessId));
     }
 
     /**
@@ -256,7 +282,7 @@ class WorkflowManager extends Component implements WorkflowManagerInterface
     {
         // check step conf to see if the step is "blocking"
         // set the WF status accordingly
-        $this->setStatus($workflowProcessId, self::STATUS_FAILED);
+        $this->finalizeWorkflow($workflowProcessId, self::STATUS_FAILED);
     }
 
     /**

@@ -93,7 +93,7 @@ class Message
         return $this->rawHash['id'] ?? '';
     }
 
-    public function getJobId(): string {
+    public function getJobId(): int {
         return $this->rawHash['jobId'] ?? '';
     }
 
