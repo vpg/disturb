@@ -50,19 +50,18 @@ class ManagerTask extends AbstractTask
                 $this->getDI()->get('logger')->debug("Step {$messageDto->getStepCode()} says {$messageDto->getResult()}");
                 $stepResultHash = json_decode($messageDto->getResult(), true);
                 $this->workflowManagerService->processStepJobResult(
-                    $messageDto->getId(),
                     $messageDto->getStepCode(),
                     $messageDto->getJobId(),
                     $stepResultHash
                 );
 
-                $status = $this->workflowManagerService->getStatus($messageDto->getId());
+                $status = $this->workflowManagerService->getStatus();
                 $this->getDI()->get('logger')->debug("Id {$messageDto->getId()} is '$status'");
                 if ($status == Services\WorkflowManager::STATUS_FAILED) {
                     throw new WorkflowException("Id failed {$messageDto->getId()}");
                 }
 
-                switch($this->workflowManagerService->getCurrentStepStatus($messageDto->getId())) {
+                switch($this->workflowManagerService->getCurrentStepStatus()) {
                     case Services\WorkflowManager::STATUS_RUNNING:
                         // xxx check timeout
                         break;
@@ -71,7 +70,6 @@ class ManagerTask extends AbstractTask
                         break;
                     case Services\WorkflowManager::STATUS_FAILED:
                         $this->workflowManagerService->setStatus(
-                            $messageDto->getId(),
                             Services\WorkflowManager::STATUS_FAILED
                         );
                         break;
@@ -87,12 +85,12 @@ class ManagerTask extends AbstractTask
     protected function runNextStep(string $workflowProcessId)
     {
 
-        $stepHashList = $this->workflowManagerService->getNextStepList($workflowProcessId);
+        $stepHashList = $this->workflowManagerService->getNextStepList();
         if (empty($stepHashList)) {
             $this->getDI()->get('logger')->info("No more step to run, WF ends");
-            var_dump($this->workflowManagerService->getContext($workflowProcessId));
+            var_dump($this->workflowManagerService->getContext());
         }
-        $this->workflowManagerService->initNextStep($workflowProcessId);
+        $this->workflowManagerService->initNextStep();
 
         // run through the next step(s)
         foreach ($stepHashList as $stepHash) {
@@ -100,7 +98,7 @@ class ManagerTask extends AbstractTask
             $stepInputList = $this->service->getStepInput($workflowProcessId, $stepCode);
             // run through the "job" to send to each step
             foreach ($stepInputList as $jobId => $stepJobHash) {
-                $this->workflowManagerService->registerStepJob($workflowProcessId, $stepCode, $jobId);
+                $this->workflowManagerService->registerStepJob($stepCode, $jobId);
                 $messageHash = [
                     'id' => $workflowProcessId,
                     'type' => Dtos\Message::TYPE_STEP_CTRL,
