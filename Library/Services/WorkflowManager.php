@@ -17,6 +17,7 @@ class WorkflowManager extends Component implements WorkflowManagerInterface
     const STATUS_RUNNING    = 'RUNNING';
 
     private $config = null;
+    private $workflowProcessId = null;
 
     // xxx MUST be replaced by smthg like Redis
     // xxx MUST be abstracted (e.g. Disturb\Storage::set($k, $v)
@@ -36,6 +37,7 @@ class WorkflowManager extends Component implements WorkflowManagerInterface
     public function init(string $workflowProcessId)
     {
         $this->getDI()->get('logger')->debug(json_encode(func_get_args()));
+        $this->workflowProcessId = $workflowProcessId;
         $this->tmpStorage[$workflowProcessId] = [
             'workflow' => ['steps' => $this->config['steps']->toArray()],
             'status' => self::STATUS_STARTED,
@@ -47,69 +49,62 @@ class WorkflowManager extends Component implements WorkflowManagerInterface
 
     /**
      * Returns the context of the given workflow
-     *
-     * @param string $workflowProcessId the wf process identifier
      */
-    public function getContext(string $workflowProcessId)
+    public function getContext()
     {
         $this->getDI()->get('logger')->debug(json_encode(func_get_args()));
-        return $this->tmpStorage[$workflowProcessId];
+        return $this->tmpStorage[$this->workflowProcessId];
     }
 
     /**
      * Set workflow status
      *
-     * @param string $workflowProcessId the wf process identifier
      * @param string $status wf status
      */
-    public function setStatus(string $workflowProcessId, string $status)
+    public function setStatus(string $status)
     {
         $this->getDI()->get('logger')->debug(json_encode(func_get_args()));
-        if (isset($this->tmpStorage[$workflowProcessId])) {
-            $this->tmpStorage[$workflowProcessId]['status'] = $status;
+        if (isset($this->tmpStorage[$this->workflowProcessId])) {
+            $this->tmpStorage[$this->workflowProcessId]['status'] = $status;
         }
     }
 
     /**
      * Get workflow status
      *
-     * @param string $workflowProcessId the wf process identifier
      * @return string
      */
-    public function getStatus(string $workflowProcessId) : string
+    public function getStatus() : string
     {
         $this->getDI()->get('logger')->debug(json_encode(func_get_args()));
-        if (!isset($this->tmpStorage[$workflowProcessId]) || empty($this->tmpStorage[$workflowProcessId]['status'])) {
+        if (!isset($this->tmpStorage[$this->workflowProcessId]) || empty($this->tmpStorage[$this->workflowProcessId]['status'])) {
             return self::STATUS_NO_STARTED;
         }
-        return $this->tmpStorage[$workflowProcessId]['status'];
+        return $this->tmpStorage[$this->workflowProcessId]['status'];
     }
 
     /**
      * Go to next step
-     *
-     * @param string $workflowProcessId the wf process identifier
      */
-    public function initNextStep(string $workflowProcessId)
+    public function initNextStep()
     {
         $this->getDI()->get('logger')->debug(json_encode(func_get_args()));
-        $this->tmpStorage[$workflowProcessId]['currentStepPos']++;
+        $this->tmpStorage[$this->workflowProcessId]['currentStepPos']++;
     }
 
     /**
      * Get next step if it exists
      *
-     * @param string $workflowProcessId the wf process identifier
      * @return array
      */
-    public function getNextStepList(string $workflowProcessId) : array
+    public function getNextStepList() : array
     {
         $this->getDI()->get('logger')->debug(json_encode(func_get_args()));
-        $nextStepPos = $this->tmpStorage[$workflowProcessId]['currentStepPos'] + 1;
+        $nextStepPos = $this->tmpStorage[$this->workflowProcessId]['currentStepPos'] + 1;
 
         // Manage case when there is no more step to run
         if(empty($this->config->steps[$nextStepPos])) {
-            $this->setStatus($workflowProcessId, self::STATUS_FINISHED);
+            $this->setStatus($this->workflowProcessId, self::STATUS_FINISHED);
             return [];
         }
 
@@ -170,26 +165,24 @@ class WorkflowManager extends Component implements WorkflowManagerInterface
     /**
      * Return current step position in the workflow
      *
-     * @param string $workflowProcessId the wf process identifier
      * @return int
      */
-    private function getWorkflowCurrentPosition(string $workflowProcessId) : int
+    private function getWorkflowCurrentPosition() : int
     {
         $this->getDI()->get('logger')->debug(json_encode(func_get_args()));
-        return $this->tmpStorage[$workflowProcessId]['currentStepPos'];
+        return $this->tmpStorage[$this->workflowProcessId]['currentStepPos'];
     }
 
     /**
      * Check current step status and if we can go further in the workflow
      *
-     * @param string $workflowProcessId the wf process identifier
      * @return string
      */
-    public function getCurrentStepStatus(string $workflowProcessId) : string
+    public function getCurrentStepStatus() : string
     {
         $this->getDI()->get('logger')->debug(json_encode(func_get_args()));
-        $currentStepPos = $this->getWorkflowCurrentPosition($workflowProcessId);
-        $stepNode = $this->tmpStorage[$workflowProcessId]['workflow']['steps'][$currentStepPos];
+        $currentStepPos = $this->getWorkflowCurrentPosition($this->workflowProcessId);
+        $stepNode = $this->tmpStorage[$this->workflowProcessId]['workflow']['steps'][$currentStepPos];
         $stepStatusList = [];
 
         if ($this->isStepParallelized($stepNode))
@@ -221,7 +214,6 @@ class WorkflowManager extends Component implements WorkflowManagerInterface
      *      ]
      *  }
      *
-     * @param string $workflowProcessId the wf process identifier to which belongs the step's job result
      * @param string $stepCode          the step to which belongs the job
      * @param int    $jobId             the job identifier related to the step
      * @param array  $resultHash        the result data
@@ -229,10 +221,10 @@ class WorkflowManager extends Component implements WorkflowManagerInterface
      *
      * @return void
      */
-    public function processStepJobResult(string $workflowProcessId, string $stepCode, int $jobId, array $resultHash)
+    public function processStepJobResult(string $stepCode, int $jobId, array $resultHash)
     {
         $this->getDI()->get('logger')->debug(json_encode(func_get_args()));
-        $stepHash = &$this->getContextStepHashRef($workflowProcessId, $stepCode);
+        $stepHash = &$this->getContextStepHashRef($this->workflowProcessId, $stepCode);
         if (!isset($stepHash['jobList']) || !isset($stepHash['jobList'][$jobId])) {
             throw new Exceptions\WorkflowException('Cannot find any job');
         }
@@ -240,23 +232,22 @@ class WorkflowManager extends Component implements WorkflowManagerInterface
         $stepHash['jobList'][$jobId]['result'] = $resultHash['data'] ?? [];
 
         if ($stepHash['jobList'][$jobId]['status'] == self::STATUS_FAILED) {
-            $this->processStepJobFailure($workflowProcessId, $stepCode, $jobId, $resultHash);
+            $this->processStepJobFailure($this->workflowProcessId, $stepCode, $jobId, $resultHash);
         }
     }
 
     /**
      * Process failure on step job
      *
-     * @param string $workflowProcessId the wf process identifier to which belongs the step's job result
      * @param string $stepCode          the step to which belongs the job
      * @param int $jobId                the job identifier related to the step
      * @param array $resultHash         the result data
      */
-    private function processStepJobFailure(string $workflowProcessId, string $stepCode, int $jobId, array $resultHash)
+    private function processStepJobFailure(string $stepCode, int $jobId, array $resultHash)
     {
         // check step conf to see if the step is "blocking"
         // set the WF status accordingly
-        $this->setStatus($workflowProcessId, self::STATUS_FAILED);
+        $this->setStatus($this->workflowProcessId, self::STATUS_FAILED);
     }
 
     /**
@@ -272,17 +263,16 @@ class WorkflowManager extends Component implements WorkflowManagerInterface
      *      ]
      *  }
      *
-     * @param string $workflowProcessId the wf process identifier to which belongs the step's job result
      * @param string $stepCode          the step to which belongs the job
      * @param int    $jobId             the job identifier related to the step
      *
      * @return void
      */
-    public function registerStepJob($workflowProcessId, $stepCode, $jobId)
+    public function registerStepJob($stepCode, $jobId)
     {
         $this->getDI()->get('logger')->debug(json_encode(func_get_args()));
         // q&d search in context the job for which saving the result
-        $stepHash = &$this->getContextStepHashRef($workflowProcessId, $stepCode);
+        $stepHash = &$this->getContextStepHashRef($this->workflowProcessId, $stepCode);
         if (!isset($stepHash['jobList'])) {
             $stepHash['jobList'] = [];
         }
@@ -297,14 +287,13 @@ class WorkflowManager extends Component implements WorkflowManagerInterface
     /**
      * Access step
      *
-     * @param $workflowProcessId
      * @param $stepCode
      * @return mixed
      */
-    private function &getContextStepHashRef($workflowProcessId, $stepCode)
+    private function &getContextStepHashRef($stepCode)
     {
         $this->getDI()->get('logger')->debug(json_encode(func_get_args()));
-        foreach ($this->tmpStorage[$workflowProcessId]['workflow']['steps'] as &$stepNode) {
+        foreach ($this->tmpStorage[$this->workflowProcessId]['workflow']['steps'] as &$stepNode) {
             if ($this->isStepParallelized($stepNode)) {
                 foreach ($stepNode as &$stepHash) {
                     if ($stepHash['name'] == $stepCode) {
@@ -323,13 +312,12 @@ class WorkflowManager extends Component implements WorkflowManagerInterface
     /**
      * Check whether the workflow is running or not
      *
-     * @param string $workflowProcessId
      * @return bool
      */
-    private function isRunning(string $workflowProcessId) : bool
+    private function isRunning() : bool
     {
         $this->getDI()->get('logger')->debug(json_encode(func_get_args()));
-        return ($this->tmpStorage[$workflowProcessId]['status'] == self::STATUS_STARTED);
+        return ($this->tmpStorage[$this->workflowProcessId]['status'] == self::STATUS_STARTED);
     }
 
     /**
