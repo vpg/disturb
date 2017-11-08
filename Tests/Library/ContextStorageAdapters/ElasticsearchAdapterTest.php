@@ -15,6 +15,11 @@ use Phalcon\Config\Adapter\Json;
 class ElasticsearchAdapterTest extends \Tests\DisturbUnitTestCase
 {
     /**
+     * @const string TEST_DOCUMENT_EMPTY_ID
+     */
+    const TEST_DOCUMENT_EMPTY_ID = '';
+
+    /**
      * @const string TEST_DOCUMENT_ID
      */
     const TEST_DOCUMENT_ID = 'doc_test';
@@ -220,7 +225,7 @@ class ElasticsearchAdapterTest extends \Tests\DisturbUnitTestCase
             $this->invokeMethod(
                 $this->elasticsearchAdapter,
                 'save',
-                ['', []]
+                [self::TEST_DOCUMENT_EMPTY_ID, []]
             );
         } catch (\Exception $exception) {
             if ($exception) {
@@ -256,7 +261,7 @@ class ElasticsearchAdapterTest extends \Tests\DisturbUnitTestCase
             $this->invokeMethod(
                 $this->elasticsearchAdapter,
                 'get',
-                ['']
+                [self::TEST_DOCUMENT_EMPTY_ID]
             );
         } catch (\Exception $exception) {
             if ($exception) {
@@ -311,7 +316,7 @@ class ElasticsearchAdapterTest extends \Tests\DisturbUnitTestCase
             $this->invokeMethod(
                 $this->elasticsearchAdapter,
                 'exist',
-                ['']
+                [self::TEST_DOCUMENT_EMPTY_ID]
             );
         } catch (\Exception $exception) {
             if ($exception) {
@@ -366,7 +371,7 @@ class ElasticsearchAdapterTest extends \Tests\DisturbUnitTestCase
             $this->invokeMethod(
                 $this->elasticsearchAdapter,
                 'delete',
-                ['']
+                [self::TEST_DOCUMENT_EMPTY_ID]
             );
         } catch (\Exception $exception) {
             if ($exception) {

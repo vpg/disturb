@@ -187,21 +187,21 @@ class ElasticsearchAdapter implements ContextStorageAdapterInterface
     }
 
     /**
-     * Get document identified by id ($key)
+     * Get document identified by id ($workflowProcessId)
      *
-     * @param string $key
+     * @param string $workflowProcessId
      *
      * @return array
      *
      * @throws ContextStorageException
      */
-    public function get(string $key) : array
+    public function get(string $workflowProcessId) : array
     {
-        $this->checkParameters([$key]);
+        $this->checkParameters([$workflowProcessId]);
 
         try {
             $requestParamHash = array_merge(
-                ['id' => $key],
+                ['id' => $workflowProcessId],
                 $this->commonRequestParamHash
             );
             return $this->client->get($requestParamHash);
@@ -215,21 +215,34 @@ class ElasticsearchAdapter implements ContextStorageAdapterInterface
     }
 
     /**
-     * Check if a document identified by id ($key) exists
+     * Search document by query $queryParameterHash
      *
-     * @param string $key
+     * @param array $queryParameterHash
+     *
+     * @return array
+     */
+    public function search(array $queryParameterHash) : array
+    {
+        // TODO
+        return [];
+    }
+
+    /**
+     * Check if a document identified by id ($workflowProcessId) exists
+     *
+     * @param string $workflowProcessId
      *
      * @return bool
      *
      * @throws ContextStorageException
      */
-    public function exist(string $key) : bool
+    public function exist(string $workflowProcessId) : bool
     {
-        $this->checkParameters([$key]);
+        $this->checkParameters([$workflowProcessId]);
 
         try {
             $requestParamHash = array_merge(
-                ['id' => $key],
+                ['id' => $workflowProcessId],
                 $this->commonRequestParamHash
             );
             return $this->client->exists($requestParamHash);
@@ -243,25 +256,25 @@ class ElasticsearchAdapter implements ContextStorageAdapterInterface
     }
 
     /**
-     * Save document  with id ($key)
+     * Save document  with id ($workflowProcessId)
      *
-     * @param string $key
+     * @param string $workflowProcessId
      * @param array $documentHash
      *
      * @return array
      *
      * @throws ContextStorageException
      */
-    public function save(string $key, array $documentHash) : array
+    public function save(string $workflowProcessId, array $documentHash) : array
     {
         // Specify how many times should the operation be retried when a conflict occurs (simultaneous doc update)
         // TODO : check for param "retry_on_conflict"
 
-        $this->checkParameters([$key, $documentHash]);
+        $this->checkParameters([$workflowProcessId, $documentHash]);
 
         try {
             $requestParamHash = array_merge(
-                ['id' => $key],
+                ['id' => $workflowProcessId],
                 $this->commonRequestParamHash
             );
 
@@ -280,21 +293,21 @@ class ElasticsearchAdapter implements ContextStorageAdapterInterface
     }
 
     /**
-     * Delete document identified by key
+     * Delete document identified by $workflowProcessId
      *
-     * @param string $key
+     * @param string $workflowProcessId
      *
      * @return array
      *
      * @throws ContextStorageException
      */
-    public function delete(string $key) : array
+    public function delete(string $workflowProcessId) : array
     {
-        $this->checkParameters([$key]);
+        $this->checkParameters([$workflowProcessId]);
 
         try {
             $requestParamHash = array_merge(
-                ['id' => $key],
+                ['id' => $workflowProcessId],
                 $this->commonRequestParamHash
             );
             return $this->client->delete($requestParamHash);

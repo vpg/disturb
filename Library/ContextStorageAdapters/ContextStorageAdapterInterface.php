@@ -21,39 +21,48 @@ interface ContextStorageAdapterInterface
     public function initialize(Json $config);
 
     /**
-     * Get storage data identified by key
+     * Get storage data identified by $workflowProcessId
      *
-     * @param string $key
+     * @param string $workflowProcessId
      *
      * @return mixed
      */
-    public function get(string $key);
+    public function get(string $workflowProcessId);
 
     /**
-     * Check if storage date key exists
+     * Search storage data identified by $queryHash
      *
-     * @param string $key
+     * @param array $queryHash
+     *
+     * @return mixed
+     */
+    public function search(array $queryHash);
+
+    /**
+     * Check if storage date $workflowProcessId exists
+     *
+     * @param string $workflowProcessId
      *
      * @return bool
      */
-    public function exist(string $key) : bool;
+    public function exist(string $workflowProcessId) : bool;
 
     /**
-     * Save storage data identified by key
+     * Save storage data identified by $workflowProcessId
      *
-     * @param string $key
+     * @param string $workflowProcessId
      * @param array $valueHash
      *
      * @return mixed
      */
-    public function save(string $key, array $valueHash);
+    public function save(string $workflowProcessId, array $valueHash);
 
     /**
-     * Delete storage data identified by key
+     * Delete storage data identified by $workflowProcessId
      *
-     * @param string $key
+     * @param string $workflowProcessId
      *
      * @return mixed
      */
-    public function delete(string $key);
+    public function delete(string $workflowProcessId);
 }

@@ -10,6 +10,11 @@ use \Phalcon\Config\Adapter\Json;
 class ContextStorage
 {
     /**
+     * @const string ADAPTER_ELASTICSEARCH
+     */
+    const ADAPTER_ELASTICSEARCH = 'elasticsearch';
+
+    /**
      * @var ContextStorageAdapterInterface $adapter
      */
     private $adpater;
@@ -32,7 +37,17 @@ class ContextStorage
         }
 
         // check if adapter class exists
-        $adapterClass = ucfirst($config->adapter) . 'Adapter';
+        switch ($config->adapter) {
+            case self::ADAPTER_ELASTICSEARCH:
+                $adapterClass = 'ElasticsearchAdapter';
+                break;
+            default:
+                throw new ContextStorageException(
+                    'Adapter class not found',
+                    ContextStorageException::CODE_ADAPTER
+                );
+        }
+
         if (! class_exists($adapterClass)) {
             throw new ContextStorageException(
                 'Adapter class not found',
