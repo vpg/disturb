@@ -12,10 +12,7 @@ php:
 before_install:
   - sudo apt-get -qq update
   - sudo apt-get install -y libxml2-dev
-  - git clone -q --depth=1 https://github.com/techpivot/phalcon-ci-installer.git
-  - bash ./phalcon-ci-installer/bin/install-phalcon.sh
-
-install:
+  - vendor/bin/install-phalcon.sh 3.0.x
   - composer self-update
   - composer --prefer-source install
 
