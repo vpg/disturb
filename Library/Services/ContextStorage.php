@@ -15,6 +15,26 @@ class ContextStorage
     const ADAPTER_ELASTICSEARCH = 'elasticsearch';
 
     /**
+     * @const string WORKFLOW
+     */
+    const WORKFLOW = 'workflow';
+
+    /**
+     * @const string WORKFLOW_STEPS
+     */
+    const WORKFLOW_STEPS = 'steps';
+
+    /**
+     * @const string WORKFLOW_STATUS
+     */
+    const WORKFLOW_STATUS = 'status';
+
+    /**
+     * @const string WORKFLOW_CURRENT_STEP_POS
+     */
+    const WORKFLOW_CURRENT_STEP_POS = 'currentStepPos';
+
+    /**
      * @var ContextStorageAdapterInterface $adapter
      */
     private $adpater;
@@ -68,47 +88,149 @@ class ContextStorage
     }
 
     /**
-     * Get storage data identified by key
+     * Get storage data identified by $workflowProcessId
      *
-     * @param string $key
+     * @param string $workflowProcessId
      *
      * @return mixed
      */
-    public function get(string $key) {
-        return $this->adpater->get($key);
+    public function get(string $workflowProcessId) {
+        return $this->adpater->get($workflowProcessId);
     }
 
     /**
-     * Check if storage date key exists
+     * Check if storage date $workflowProcessId exists
      *
-     * @param string $key
+     * @param string $workflowProcessId
      *
      * @return bool
      */
-    public function exist(string $key) {
-        return $this->adpater->exist($key);
+    public function exist(string $workflowProcessId) {
+        return $this->adpater->exist($workflowProcessId);
     }
 
     /**
-     * Save storage data identified by key
+     * Save storage data identified by $workflowProcessId
      *
-     * @param string $key
+     * @param string $workflowProcessId
      * @param array $valueHash
      *
      * @return mixed
      */
-    public function save(string $key, array $valueHash) {
-        return $this->adpater->save($key, $valueHash);
+    public function save(string $workflowProcessId, array $valueHash) {
+        return $this->adpater->save($workflowProcessId, $valueHash);
     }
 
     /**
-     * Delete storage data identified by key
+     * Delete storage data identified by $workflowProcessId
      *
-     * @param string $key
+     * @param string $workflowProcessId
      *
-     * @return mixed
+     * @returns mixed
      */
-    public function delete(string $key) {
-        return $this->adpater->delete($key);
+    public function delete(string $workflowProcessId) {
+        return $this->adpater->delete($workflowProcessId);
     }
+
+    /**
+     * Set workflow status
+     *
+     * @param string $workflowProcessId
+     * @param string $status
+     */
+    public function setWorkflowStatus(string $workflowProcessId, string $status) {
+        $contextHash = $this->get($workflowProcessId);
+        $contextHash[self::WORKFLOW_STATUS] = $status;
+        $this->save($workflowProcessId, $contextHash);
+
+    }
+
+    /**
+     * Get workflow status
+     *
+     * @param string $workflowProcessId
+     *
+     * @returns string
+     */
+    public function getWorkflowStatus(string $workflowProcessId) : string {
+        $contextHash = $this->get($workflowProcessId);
+        return isset($contextHash[self::WORKFLOW_STATUS]) ?
+            $contextHash[self::WORKFLOW_STATUS] : \Disturb\Services\WorkflowManager::STATUS_NO_STARTED;
+    }
+
+    /**
+     * Init workflow next step
+     *
+     * @param string $workflowProcessId
+     */
+    public function initWorkflowNextStep(string $workflowProcessId) {
+        $contextHash = $this->get($workflowProcessId);
+        $contextHash[self::WORKFLOW_CURRENT_STEP_POS]++;
+        $this->save($workflowProcessId, $contextHash);
+    }
+
+    /**
+     * Get workflow next step position
+     *
+     * @param string $workflowProcessId
+     *
+     * @returns int
+     */
+    public function getWorkflowNextStepPosition(string $workflowProcessId) : int {
+        $contextHash = $this->get($workflowProcessId);
+        return $contextHash[self::WORKFLOW_CURRENT_STEP_POS] + 1;
+    }
+
+    /**
+     * Get workflow current step position
+     *
+     * @param string $workflowProcessId
+     *
+     * @returns int
+     */
+    public function getWorkflowCurrentStepPosition(string $workflowProcessId) : int {
+        $contextHash = $this->get($workflowProcessId);
+        return $contextHash[self::WORKFLOW_CURRENT_STEP_POS];
+    }
+
+    /**
+     * Get workflow current step list
+     *
+     * @param string $workflowProcessId
+     * @param int $currentWorkflowPosition
+     *
+     * @returns array
+     */
+    public function getWorkflowCurrentStepList(string $workflowProcessId, int $currentWorkflowPosition) : array {
+        $contextHash = $this->get($workflowProcessId);
+        return $contextHash[self::WORKFLOW][self::WORKFLOW_STEPS][$currentWorkflowPosition];
+    }
+
+    /**
+     * Get workflow step list
+     *
+     * @param string $workflowProcessId
+     *
+     * @returns array
+     */
+    public function getWorkflowStepList(string $workflowProcessId) : array {
+        $contextHash = $this->get($workflowProcessId);
+        return $contextHash[self::WORKFLOW][self::WORKFLOW_STEPS];
+    }
+
+    /**
+     * Set workflow step list
+     *
+     * @param string $workflowProcessId
+     * @param array $workflowStepList
+     *
+     * @returns array
+     */
+    public function setWorkflowStepList(string $workflowProcessId, $workflowStepList) {
+        $contextHash = $this->get($workflowProcessId);
+        $contextHash[self::WORKFLOW][self::WORKFLOW_STEPS] = $workflowStepList;
+        $this->save($workflowProcessId, $contextHash);
+    }
+
+
 }
