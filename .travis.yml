@@ -6,18 +6,43 @@ php:
   - 7.0
   - 7.1
 
+# The cache’s purpose is to make installing language-specific dependencies easy and fast,
+# so everything related to tools like Bundler, pip, Composer, npm, Gradle, Maven, is what should go into the cache.
+cache:
+  apt: true
+  ccache: true
+  timeout: 691200
+  directories:
+    - vendor
+    - $HOME/.composer/cache
+    - $HOME/pear
+    - $HOME/cphalcon
+    - $HOME/ext
+
+env:
+  global:
+    - ZEND_DONT_UNLOAD_MODULES=1
+    - CC="ccache gcc"
+    - PATH="$PATH:~/bin"
+    - PHALCON_VERSION="v3.2.1"
+
 # Use this to prepare the system to install prerequisites or dependencies.
 # e.g. sudo apt-get update.
 # Failures in this section will result in build status 'errored'.
 before_install:
   - sudo apt-get -qq update
-  - sudo apt-get install -y libxml2-dev
-  - git clone -q --depth=1 https://github.com/techpivot/phalcon-ci-installer.git
-  - composer self-update
-  - bash ./phalcon-ci-installer/bin/install-phalcon.sh
+  - export PHP_MAJOR="$(echo $TRAVIS_PHP_VERSION | cut -d '.' -f 1)"
+  - export PHP_EXTENSION_DIR=$(php-config --extension-dir)
+  - if [ ! -z "${GH_TOKEN}" ]; then composer config github-oauth.github.com ${GH_TOKEN}; echo "Configured Github token"; fi;
+  - if [ ! -f "$HOME/cphalcon/$PHALCON_VERSION/tests/_ci/phalcon.ini" ]; then mkdir -p $HOME/cphalcon/$PHALCON_VERSION && git clone -q --depth=1 https://github.com/phalcon/cphalcon.git $HOME/cphalcon/$PHALCON_VERSION >/dev/null 2>&1; fi;
 
 install:
-  - composer --prefer-source install
+  - travis_retry composer install --prefer-dist --no-interaction --quiet --no-ansi --no-progress --optimize-autoloader --dev --no-suggest --ignore-platform-reqs
+  - if [ ! -f $HOME/ext/$PHP_VERSION/$PHALCON_VERSION/phalcon.so ]; then cd $HOME/cphalcon/$PHALCON_VERSION/build && bash ./install --phpize $(phpenv which phpize) --php-config $(phpenv which php-config) && mkdir -p $HOME/ext/$PHP_VERSION/$PHALCON_VERSION && cp $PHP_EXTENSION_DIR/phalcon.so $HOME/ext/$PHP_VERSION/$PHALCON_VERSION/phalcon.so; fi;
+  - if [ -f $HOME/ext/$PHP_VERSION/$PHALCON_VERSION/phalcon.so ]; then cp $HOME/ext/$PHP_VERSION/$PHALCON_VERSION/phalcon.so $PHP_EXTENSION_DIR/phalcon.so; fi;
+  - phpenv config-add $HOME/cphalcon/$PHALCON_VERSION/tests/_ci/phalcon.ini
+  - cd $TRAVIS_BUILD_DIR
+  - $(phpenv which php) --ri phalcon
 
 # Use this to prepare your build for testing.
 # e.g. copy database configurations, environment variables, etc.
@@ -29,13 +54,6 @@ install:
 # All commands must exit with code 0 on success. Anything else is considered failure.
 script:
   - vendor/bin/phpcs ./Library/
-
-# The cache’s purpose is to make installing language-specific dependencies easy and fast,
-# so everything related to tools like Bundler, pip, Composer, npm, Gradle, Maven, is what should go into the cache.
-cache:
-  directories:
-    - vendor
-    - ~/cphalcon
 
 # Receive notifications for build results.
 # @link https://docs.travis-ci.com/user/notifications/#Email-notifications
