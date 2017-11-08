@@ -54,6 +54,8 @@ install:
 # All commands must exit with code 0 on success. Anything else is considered failure.
 script:
   - vendor/bin/phpcs ./Library/
+  - vendor/bin/phpcs ./Tests/
+  - vendor/phpunit/phpunit/phpunit -c Tests/phpunit.xml
 
 # Receive notifications for build results.
 # @link https://docs.travis-ci.com/user/notifications/#Email-notifications
