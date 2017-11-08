@@ -19,5 +19,11 @@
         {
             "name" : "step3"
         }
-    ]
+    ],
+    "contextStorage" : {
+        "adapter": "elasticsearch",
+        "config": {
+            "host": "http://elasticsearch5.recette11.vpglabs.site"
+        }
+    }
 }

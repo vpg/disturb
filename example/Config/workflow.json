@@ -22,5 +22,15 @@
             "severity" : "blocking",
             "type" : "serie"
         }
-    ]
+    ],
+    "contextStorage" : {
+        "adapter": "elasticsearch",
+        "config": {
+            "host": "https://elasticsearch5.recette12.vpglabs.site"/*,
+            "index": "disturb_context",
+            "type": "loading"
+            */
+        }
+    }
+
 }

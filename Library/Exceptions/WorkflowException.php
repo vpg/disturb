@@ -7,7 +7,7 @@ namespace Vpg\Disturb\Exceptions;
  *
  * @package Disturb\ContextStorage
  */
-class WorkflowException extends \Phalcon\Exception
+class WorkflowException extends Exception
 {
 
 }

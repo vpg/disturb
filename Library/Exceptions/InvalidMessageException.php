@@ -7,7 +7,7 @@ namespace Vpg\Disturb\Exceptions;
  *
  * @package Disturb\ContextStorage
  */
-class InvalidMessageException extends \Phalcon\Exception
+class InvalidMessageException extends Exception
 {
 
 }

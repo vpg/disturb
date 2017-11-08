@@ -1,0 +1,10 @@
+{
+  "actions": [
+    {
+      "add": {
+        "index": "disturb_context_2017_11_06",
+        "alias": "disturb_context"
+      }
+    }
+  ]
+}
