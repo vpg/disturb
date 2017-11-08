@@ -30,13 +30,6 @@ install:
 script:
   - vendor/bin/phpcs ./Library/
 
-# The cache’s purpose is to make installing language-specific dependencies easy and fast,
-# so everything related to tools like Bundler, pip, Composer, npm, Gradle, Maven, is what should go into the cache.
-cache:
-  directories:
-    - vendor
-    - ~/cphalcon
-
 # Receive notifications for build results.
 # @link https://docs.travis-ci.com/user/notifications/#Email-notifications
 notifications:
