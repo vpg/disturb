@@ -12,9 +12,9 @@ php:
 before_install:
   - sudo apt-get -qq update
   - sudo apt-get install -y libxml2-dev
-  - vendor/bin/install-phalcon.sh 3.0.x
   - composer self-update
   - composer --prefer-source install
+  - vendor/bin/install-phalcon.sh 3.0.x
 
 # Use this to prepare your build for testing.
 # e.g. copy database configurations, environment variables, etc.
@@ -26,6 +26,12 @@ before_install:
 # All commands must exit with code 0 on success. Anything else is considered failure.
 script:
   - vendor/bin/phpcs ./Library/
+
+# The cache’s purpose is to make installing language-specific dependencies easy and fast,
+# so everything related to tools like Bundler, pip, Composer, npm, Gradle, Maven, is what should go into the cache.
+cache:
+  directories:
+    - vendor
 
 # Receive notifications for build results.
 # @link https://docs.travis-ci.com/user/notifications/#Email-notifications
