@@ -34,7 +34,6 @@ before_install:
   - sudo apt-get install -y libxml2-dev
   - export PHP_MAJOR="$(echo $TRAVIS_PHP_VERSION | cut -d '.' -f 1)"
   - export PHP_EXTENSION_DIR=$(php-config --extension-dir)
-  - bash tests/_ci/pear_setup.sh
   - bash tests/_ci/install_prereqs_$PHP_MAJOR.sh
   - if [ ! -z "${GH_TOKEN}" ]; then composer config github-oauth.github.com ${GH_TOKEN}; echo "Configured Github token"; fi;
   - if [ ! -f "$HOME/cphalcon/$PHALCON_VERSION/tests/_ci/phalcon.ini" ]; then mkdir -p $HOME/cphalcon/$PHALCON_VERSION && git clone -q --depth=1 https://github.com/phalcon/cphalcon.git $HOME/cphalcon/$PHALCON_VERSION >/dev/null 2>&1; fi;
