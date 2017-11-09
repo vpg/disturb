@@ -2,7 +2,7 @@
 
 namespace Vpg\Disturb\ContextStorageAdapters;
 
-use \Phalcon\Config\Adapter\Json;
+use \Phalcon\Config;
 
 /**
  * Interface ContextStorageAdapterInterface
@@ -14,11 +14,11 @@ interface ContextStorageAdapterInterface
     /**
      * Initialize
      *
-     * @param Json $config
+     * @param Config $config
      *
      * @return mixed
      */
-    public function initialize(Json $config);
+    public function initialize(Config $config);
 
     /**
      * Get storage data identified by $workflowProcessId

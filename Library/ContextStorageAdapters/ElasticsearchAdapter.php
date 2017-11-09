@@ -4,19 +4,21 @@ namespace Vpg\Disturb\ContextStorageAdapters;
 
 use Vpg\Disturb\Exceptions\ContextStorageException;
 
-use Phalcon\Config\Adapter\Json;
+use \Phalcon\Mvc\User\Component;
+use \Phalcon\Config;
+use \Elasticsearch;
 
 /**
  * Class Elasticsearch Adapter
  *
  * @package Vpg\Disturb\ContextStorageAdapters
  */
-class ElasticsearchAdapter implements ContextStorageAdapterInterface
+class ElasticsearchAdapter extends Component implements ContextStorageAdapterInterface
 {
     /**
      * @const string VENDOR_CLASSNAME
      */
-    const VENDOR_CLASSNAME = 'Elasticsearch\Client';
+    const VENDOR_CLASSNAME = '\\Elasticsearch\\Client';
 
     /**
      * @const string DEFAULT_INDEX
@@ -79,8 +81,9 @@ class ElasticsearchAdapter implements ContextStorageAdapterInterface
      *
      * @return void
      */
-    public function initialize(Json $config)
+    public function initialize(Config $config)
     {
+        $this->di->get('logger')->debug(json_encode(func_get_args()));
         $this->checkVendorLibraryAvailable(self::VENDOR_CLASSNAME);
         $this->initConfig($config);
         $this->initClient();
@@ -95,7 +98,8 @@ class ElasticsearchAdapter implements ContextStorageAdapterInterface
      */
     private function checkVendorLibraryAvailable($className)
     {
-        if (!class_exists($className)) {
+        //$f = new $className;
+        if (!class_exists($className) && false) {
             throw new ContextStorageException(
                 $className . ' lib not found. Please make "composer update"',
                 ContextStorageException::CODE_VENDOR
@@ -130,7 +134,7 @@ class ElasticsearchAdapter implements ContextStorageAdapterInterface
      *
      * @throws ContextStorageException
      */
-    private function initConfig(Json $config)
+    private function initConfig(Config $config)
     {
         $this->checkParameters([$config]);
 
@@ -171,6 +175,7 @@ class ElasticsearchAdapter implements ContextStorageAdapterInterface
      */
     private function initClient()
     {
+        $this->di->get('logger')->debug(json_encode($this->config[self::CONFIG_HOST]));
         $this->client = \Elasticsearch\ClientBuilder::create()
             ->setHosts([$this->config[self::CONFIG_HOST]])
             ->build();
@@ -197,6 +202,7 @@ class ElasticsearchAdapter implements ContextStorageAdapterInterface
      */
     public function get(string $workflowProcessId) : array
     {
+        $this->di->get('logger')->debug(json_encode(func_get_args()));
         $this->checkParameters([$workflowProcessId]);
 
         try {
@@ -204,7 +210,8 @@ class ElasticsearchAdapter implements ContextStorageAdapterInterface
                 ['id' => $workflowProcessId],
                 $this->commonRequestParamHash
             );
-            return $this->client->get($requestParamHash);
+            $resultHash = $this->client->get($requestParamHash);
+            return $resultHash['_source'];
         } catch (\Exception $exception) {
             throw new ContextStorageException(
                 'document not found',
@@ -223,6 +230,7 @@ class ElasticsearchAdapter implements ContextStorageAdapterInterface
      */
     public function search(array $queryParameterHash) : array
     {
+        $this->di->get('logger')->debug(json_encode(func_get_args()));
         // TODO
         return [];
     }
@@ -238,6 +246,7 @@ class ElasticsearchAdapter implements ContextStorageAdapterInterface
      */
     public function exist(string $workflowProcessId) : bool
     {
+        $this->di->get('logger')->debug(json_encode(func_get_args()));
         $this->checkParameters([$workflowProcessId]);
 
         try {
@@ -267,6 +276,7 @@ class ElasticsearchAdapter implements ContextStorageAdapterInterface
      */
     public function save(string $workflowProcessId, array $documentHash) : array
     {
+        $this->di->get('logger')->debug(json_encode(func_get_args()));
         // Specify how many times should the operation be retried when a conflict occurs (simultaneous doc update)
         // TODO : check for param "retry_on_conflict"
 
@@ -284,6 +294,7 @@ class ElasticsearchAdapter implements ContextStorageAdapterInterface
                 return $this->client->index(array_merge($requestParamHash, ['body' => $documentHash]));
             }
         } catch (\Exception $exception) {
+            echo $exception->getMessage();
             throw new ContextStorageException(
                 'Fail to save document',
                 ContextStorageException::CODE_SAVE,
@@ -303,6 +314,7 @@ class ElasticsearchAdapter implements ContextStorageAdapterInterface
      */
     public function delete(string $workflowProcessId) : array
     {
+        $this->di->get('logger')->debug(json_encode(func_get_args()));
         $this->checkParameters([$workflowProcessId]);
 
         try {
