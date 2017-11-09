@@ -331,4 +331,36 @@ class ElasticsearchAdapter extends Component implements ContextStorageAdapterInt
             );
         }
     }
+
+    /**
+     * Updates the document with id ($workflowProcessId)
+     *
+     * @param string $workflowProcessId
+     * @param array $documentHash
+     *
+     * @return array
+     *
+     * @throws ContextStorageException
+     */
+    public function update(string $workflowProcessId, array $updateHash) : array
+    {
+        $this->di->get('logger')->debug(json_encode(func_get_args()));
+        $this->checkParameters([$workflowProcessId, $updateHash]);
+
+        try {
+            $requestParamHash = array_merge(
+                ['id' => $workflowProcessId],
+                $this->commonRequestParamHash
+            );
+            $this->di->get('logger')->error(json_encode(array_merge($requestParamHash, ['body' => $updateHash])));
+            return $this->client->update(array_merge($requestParamHash, ['body' => $updateHash]));
+        } catch (\Exception $exception) {
+            echo $exception->getMessage();
+            throw new ContextStorageException(
+                'Fail to update document',
+                ContextStorageException::CODE_SAVE,
+                $exception
+            );
+        }
+    }
 }
