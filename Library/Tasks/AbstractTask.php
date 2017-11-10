@@ -3,8 +3,10 @@ namespace Vpg\Disturb\Tasks;
 
 use \Phalcon\Cli\Task;
 use \Phalcon\Loader;
-use \Vpg\Disturb\Dtos;
 use \Phalcon\Config\Adapter\Json;
+
+use \Vpg\Disturb\Dtos;
+use \Vpg\Disturb\Cli;
 
 abstract class AbstractTask extends Task implements TaskInterface
 {
@@ -57,8 +59,7 @@ abstract class AbstractTask extends Task implements TaskInterface
     private function parseOpt(array $paramList)
     {
         $this->getDI()->get('logger')->debug(json_encode(func_get_args()));
-        preg_match_all('/--(?P<optKeys>\w+)(?:=(?P<optVals>[^ ]*))?/', join($paramList, ' '), $paramMatchHash);
-        $paramHash = array_combine(array_values($paramMatchHash['optKeys']), array_values($paramMatchHash['optVals']));
+        $paramHash = Cli\Console::parseLongOpt(join($paramList, ' '));
         // check required options
         foreach(array_merge($this->taskOptionBaseList, $this->taskOptionList) as $option) {
             if (
