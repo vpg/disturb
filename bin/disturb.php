@@ -20,6 +20,7 @@ $loader->registerNamespaces(
     true
 );
 
+$loader->registerFiles([__DIR__ . '/../vendor/autoload.php']);
 $loader->register();
 $di->setShared('loader', $loader);
 

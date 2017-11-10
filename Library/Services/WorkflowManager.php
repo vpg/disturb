@@ -269,12 +269,13 @@ class WorkflowManager extends Component implements WorkflowManagerInterface
     public function processStepJobResult(string $workflowProcessId, string $stepCode, int $jobId, array $resultHash)
     {
         $this->di->get('logger')->debug(json_encode(func_get_args()));
-        $stepHash = &$this->getContextStepHashRef($workflowProcessId, $stepCode);
+        $stepHash = $this->getContextWorkflowStep($workflowProcessId, $stepCode);
         if (!isset($stepHash['jobList']) || !isset($stepHash['jobList'][$jobId])) {
-            throw new WorkflowException('Cannot find any job');
+            throw new Exceptions\WorkflowException('Cannot find any job');
         }
         $stepHash['jobList'][$jobId]['status'] = $resultHash['status'] ?? self::STATUS_FAILED;
         $stepHash['jobList'][$jobId]['result'] = $resultHash['data'] ?? [];
+        $this->di->get('contextStorage')->updateWorkflowStep($workflowProcessId, $stepCode, $stepHash);
 
         if ($stepHash['jobList'][$jobId]['status'] == self::STATUS_FAILED) {
             $this->processStepJobFailure($workflowProcessId, $stepCode, $jobId, $resultHash);
@@ -319,7 +320,7 @@ class WorkflowManager extends Component implements WorkflowManagerInterface
     {
         $this->di->get('logger')->debug(json_encode(func_get_args()));
         // q&d search in context the job for which saving the result
-        $stepHash = &$this->getContextStepHashRef($workflowProcessId, $stepCode);
+        $stepHash = $this->getContextWorkflowStep($workflowProcessId, $stepCode);
         if (!isset($stepHash['jobList'])) {
             $stepHash['jobList'] = [];
         }
@@ -329,6 +330,7 @@ class WorkflowManager extends Component implements WorkflowManagerInterface
             'status' => self::STATUS_NO_STARTED,
             'result' => []
         ];
+        $this->di->get('contextStorage')->updateWorkflowStep($workflowProcessId, $stepCode, $stepHash);
     }
 
     /**
@@ -338,7 +340,7 @@ class WorkflowManager extends Component implements WorkflowManagerInterface
      * @param $stepCode
      * @return mixed
      */
-    private function &getContextStepHashRef($workflowProcessId, $stepCode)
+    private function getContextWorkflowStep($workflowProcessId, $stepCode)
     {
         $this->di->get('logger')->debug(json_encode(func_get_args()));
         $workflowStepList = $this->di->get('contextStorage')->getWorkflowStepList($workflowProcessId);
@@ -350,13 +352,12 @@ class WorkflowManager extends Component implements WorkflowManagerInterface
                     }
                 }
             } else {
-                $stepHash = &$stepNode;
+                $stepHash = $stepNode;
                 if ($stepHash['name'] == $stepCode) {
                     return $stepHash;
                 }
             }
         }
-        $this->di->get('contextStorage')->setWorkflowStepList($workflowProcessId, $workflowStepList);
     }
 
     /**

@@ -4,10 +4,12 @@ namespace Vpg\Disturb\Services;
 
 use Vpg\Disturb\Exceptions\ContextStorageException;
 use Vpg\Disturb\ContextStorageAdapters\ContextStorageAdapterInterface;
+use Vpg\Disturb\ContextStorageAdapters\ElasticsearchAdapter;
 
-use \Phalcon\Config\Adapter\Json;
+use \Phalcon\Config;
+use \Phalcon\Mvc\User\Component;
 
-class ContextStorage
+class ContextStorage extends Component
 {
     /**
      * @const string ADAPTER_ELASTICSEARCH
@@ -37,7 +39,7 @@ class ContextStorage
     /**
      * @var ContextStorageAdapterInterface $adapter
      */
-    private $adpater;
+    private $adapter;
 
     /**
      * ContextStorage constructor
@@ -46,8 +48,9 @@ class ContextStorage
      *
      * @throws ContextStorageException
      */
-    public function __construct(Json $config)
+    public function __construct(Config $config)
     {
+        $this->di->get('logger')->debug(json_encode(func_get_args()));
         // check adapter type
         if (empty($config->adapter)) {
             throw new ContextStorageException(
@@ -59,7 +62,7 @@ class ContextStorage
         // check if adapter class exists
         switch ($config->adapter) {
             case self::ADAPTER_ELASTICSEARCH:
-                $adapterClass = 'ElasticsearchAdapter';
+                $adapterClass = 'Vpg\\Disturb\\ContextStorageAdapters\\ElasticsearchAdapter';
                 break;
             default:
                 throw new ContextStorageException(
@@ -70,7 +73,7 @@ class ContextStorage
 
         if (! class_exists($adapterClass)) {
             throw new ContextStorageException(
-                'Adapter class not found',
+                'Adapter class not found : ' . $adapterClass,
                 ContextStorageException::CODE_ADAPTER
             );
         }
@@ -83,8 +86,8 @@ class ContextStorage
             );
         }
 
-        $this->adpater = new $adapterClass();
-        $this->adpater->initialize($config->config);
+        $this->adapter = new $adapterClass();
+        $this->adapter->initialize($config->config);
     }
 
     /**
@@ -95,7 +98,8 @@ class ContextStorage
      * @return mixed
      */
     public function get(string $workflowProcessId) {
-        return $this->adpater->get($workflowProcessId);
+        $this->di->get('logger')->debug(json_encode(func_get_args()));
+        return $this->adapter->get($workflowProcessId);
     }
 
     /**
@@ -106,7 +110,8 @@ class ContextStorage
      * @return bool
      */
     public function exist(string $workflowProcessId) {
-        return $this->adpater->exist($workflowProcessId);
+        $this->di->get('logger')->debug(json_encode(func_get_args()));
+        return $this->adapter->exist($workflowProcessId);
     }
 
     /**
@@ -118,7 +123,8 @@ class ContextStorage
      * @return mixed
      */
     public function save(string $workflowProcessId, array $valueHash) {
-        return $this->adpater->save($workflowProcessId, $valueHash);
+        $this->di->get('logger')->debug(json_encode(func_get_args()));
+        return $this->adapter->save($workflowProcessId, $valueHash);
     }
 
     /**
@@ -129,7 +135,8 @@ class ContextStorage
      * @returns mixed
      */
     public function delete(string $workflowProcessId) {
-        return $this->adpater->delete($workflowProcessId);
+        $this->di->get('logger')->debug(json_encode(func_get_args()));
+        return $this->adapter->delete($workflowProcessId);
     }
 
     /**
@@ -139,6 +146,7 @@ class ContextStorage
      * @param string $status
      */
     public function setWorkflowStatus(string $workflowProcessId, string $status) {
+        $this->di->get('logger')->debug(json_encode(func_get_args()));
         $contextHash = $this->get($workflowProcessId);
         $contextHash[self::WORKFLOW_STATUS] = $status;
         $this->save($workflowProcessId, $contextHash);
@@ -153,6 +161,7 @@ class ContextStorage
      * @returns string
      */
     public function getWorkflowStatus(string $workflowProcessId) : string {
+        $this->di->get('logger')->debug(json_encode(func_get_args()));
         $contextHash = $this->get($workflowProcessId);
         return isset($contextHash[self::WORKFLOW_STATUS]) ?
             $contextHash[self::WORKFLOW_STATUS] : \Disturb\Services\WorkflowManager::STATUS_NO_STARTED;
@@ -164,6 +173,7 @@ class ContextStorage
      * @param string $workflowProcessId
      */
     public function initWorkflowNextStep(string $workflowProcessId) {
+        $this->di->get('logger')->debug(json_encode(func_get_args()));
         $contextHash = $this->get($workflowProcessId);
         $contextHash[self::WORKFLOW_CURRENT_STEP_POS]++;
         $this->save($workflowProcessId, $contextHash);
@@ -177,6 +187,7 @@ class ContextStorage
      * @returns int
      */
     public function getWorkflowNextStepPosition(string $workflowProcessId) : int {
+        $this->di->get('logger')->debug(json_encode(func_get_args()));
         $contextHash = $this->get($workflowProcessId);
         return $contextHash[self::WORKFLOW_CURRENT_STEP_POS] + 1;
     }
@@ -189,6 +200,7 @@ class ContextStorage
      * @returns int
      */
     public function getWorkflowCurrentStepPosition(string $workflowProcessId) : int {
+        $this->di->get('logger')->debug(json_encode(func_get_args()));
         $contextHash = $this->get($workflowProcessId);
         return $contextHash[self::WORKFLOW_CURRENT_STEP_POS];
     }
@@ -202,6 +214,7 @@ class ContextStorage
      * @returns array
      */
     public function getWorkflowCurrentStepList(string $workflowProcessId, int $currentWorkflowPosition) : array {
+        $this->di->get('logger')->debug(json_encode(func_get_args()));
         $contextHash = $this->get($workflowProcessId);
         return $contextHash[self::WORKFLOW][self::WORKFLOW_STEPS][$currentWorkflowPosition];
     }
@@ -214,6 +227,7 @@ class ContextStorage
      * @returns array
      */
     public function getWorkflowStepList(string $workflowProcessId) : array {
+        $this->di->get('logger')->debug(json_encode(func_get_args()));
         $contextHash = $this->get($workflowProcessId);
         return $contextHash[self::WORKFLOW][self::WORKFLOW_STEPS];
     }
@@ -226,10 +240,52 @@ class ContextStorage
      *
      * @returns array
      */
-    public function setWorkflowStepList(string $workflowProcessId, $workflowStepList) {
+    public function setWorkflowStepList(string $workflowProcessId, array $workflowStepList) {
+        $this->di->get('logger')->debug(json_encode(func_get_args()));
         $contextHash = $this->get($workflowProcessId);
         $contextHash[self::WORKFLOW][self::WORKFLOW_STEPS] = $workflowStepList;
         $this->save($workflowProcessId, $contextHash);
+    }
+
+    /**
+     * Update the given step related to the given workflow/stepcode
+     *
+     * @param string $workflowProcessId the workflow identifier
+     * @param string $stepCode          the step code
+     * @param array  $stepHash          the step data to save
+     *
+     * @returns array
+     */
+    public function updateWorkflowStep(string $workflowProcessId, string $stepCode, array $stepHash)
+    {
+        $this->di->get('logger')->debug(json_encode(func_get_args()));
+        $script = <<<EOT
+        def nbStep = ctx._source.workflow.steps.size();
+        for (stepIndex = 0; stepIndex < nbStep; stepIndex++) {
+            if (ctx._source.workflow.steps[stepIndex] instanceof List) {
+                def nbParallelizedStep = ctx._source.workflow.steps[stepIndex].size();
+                for (parallelizedStepIndex = 0; parallelizedStepIndex < nbParallelizedStep; parallelizedStepIndex++) {
+                    if (ctx._source.workflow.steps[stepIndex][parallelizedStepIndex].name == stepCode) {
+                        ctx._source.workflow.steps[stepIndex][parallelizedStepIndex] = stepHash;
+                        break;
+                    }
+                }
+            } else if (ctx._source.workflow.steps[stepIndex].name == stepCode) {
+                ctx._source.workflow.steps[stepIndex] =stepHash;
+            }
+        }
+EOT;
+        $updateHash = [
+            'script' => [
+                'lang' => 'groovy',
+                'inline' => $script,
+                'params' => [
+                    'stepCode' => $stepCode,
+                    'stepHash' => $stepHash
+                ]
+            ]
+        ];
+        return $this->adapter->update($workflowProcessId, $updateHash);
     }
 
 

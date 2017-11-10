@@ -14,7 +14,7 @@ HOST=$1
 INIT_FOLDER_PATH=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 
 # Elasticsearch indexes to create
-INDEX_LIST=('disturb_context')
+INDEX_LIST=('disturb_context-1.0.0-beta')
 
 for index in $INDEX_LIST; do
 
@@ -40,4 +40,3 @@ for index in $INDEX_LIST; do
        echo "-> $index : Error on create alias $ALIAS_HTTP_CODE"
     fi
 done;
-echo "------------------------------------------------"

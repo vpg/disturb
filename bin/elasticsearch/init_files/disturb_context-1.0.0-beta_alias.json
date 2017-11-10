@@ -2,7 +2,7 @@
   "actions": [
     {
       "add": {
-        "index": "disturb_context_2017_11_06",
+        "index": "disturb_context-1.0.0-beta",
         "alias": "disturb_context"
       }
     }
