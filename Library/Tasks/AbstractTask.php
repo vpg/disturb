@@ -147,9 +147,7 @@ abstract class AbstractTask extends Task implements TaskInterface
     private function registerClientNS(string $clientServicesNamespace, string $clientServicesPath) {
         $this->getDI()->get('logger')->debug(json_encode(func_get_args()));
         $loader = $this->getDI()->getShared('loader');
-        $loader->registerNamespaces(array(
-            $clientServicesNamespace => $clientServicesPath,
-        ), true);
+        $loader->registerNamespaces([$clientServicesNamespace => $clientServicesPath], true);
         $loader->register();
     }
 

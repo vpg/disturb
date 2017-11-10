@@ -71,7 +71,8 @@ class StepTask extends AbstractTask
     {
         $this->getDI()->get('logger')->debug(json_encode(func_get_args()));
         parent::initWorker($paramHash);
-        $serviceFullName = $this->workflowConfig['servicesClassNameSpace'] . '\\' . ucFirst($paramHash['step']);
+        $serviceFullName = $this->workflowConfig['servicesClassNameSpace'] . '\\' .
+            ucFirst($paramHash['step']) . 'Step';
         $this->service = new $serviceFullName($paramHash['workflow']);
 
         $this->topicName = Services\TopicService::getWorkflowStepTopicName($paramHash['step'], $this->workflowConfig['name']);
