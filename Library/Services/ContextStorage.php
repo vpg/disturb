@@ -240,7 +240,7 @@ class ContextStorage extends Component
      *
      * @returns array
      */
-    public function setWorkflowStepList(string $workflowProcessId, $workflowStepList) {
+    public function setWorkflowStepList(string $workflowProcessId, array $workflowStepList) {
         $this->di->get('logger')->debug(json_encode(func_get_args()));
         $contextHash = $this->get($workflowProcessId);
         $contextHash[self::WORKFLOW][self::WORKFLOW_STEPS] = $workflowStepList;
@@ -256,22 +256,22 @@ class ContextStorage extends Component
      *
      * @returns array
      */
-    public function updateWorkflowStep(string $workflowProcessId, $stepCode, $stepHash)
+    public function updateWorkflowStep(string $workflowProcessId, string $stepCode, array $stepHash)
     {
         $this->di->get('logger')->debug(json_encode(func_get_args()));
         $script = <<<EOT
-        def nbi=ctx._source.workflow.steps.size();
-        for (i=0; i < nbi; i++) {
-            if (ctx._source.workflow.steps[i] instanceof List) {
-                def nbj=ctx._source.workflow.steps[i].size();
-                for (j=0; j < nbj; j++) {
-                    if (ctx._source.workflow.steps[i][j].name == stepCode) {
-                        ctx._source.workflow.steps[i][j] = stepHash;
+        def nbStep = ctx._source.workflow.steps.size();
+        for (stepIndex = 0; stepIndex < nbStep; stepIndex++) {
+            if (ctx._source.workflow.steps[stepIndex] instanceof List) {
+                def nbParallelizedStep = ctx._source.workflow.steps[stepIndex].size();
+                for (parallelizedStepIndex = 0; parallelizedStepIndex < nbParallelizedStep; parallelizedStepIndex++) {
+                    if (ctx._source.workflow.steps[stepIndex][parallelizedStepIndex].name == stepCode) {
+                        ctx._source.workflow.steps[stepIndex][parallelizedStepIndex] = stepHash;
                         break;
                     }
                 }
-            } else if (ctx._source.workflow.steps[i].name == stepCode) {
-                ctx._source.workflow.steps[i] =stepHash;
+            } else if (ctx._source.workflow.steps[stepIndex].name == stepCode) {
+                ctx._source.workflow.steps[stepIndex] =stepHash;
             }
         }
 EOT;

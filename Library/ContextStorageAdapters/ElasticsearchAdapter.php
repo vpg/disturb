@@ -31,6 +31,11 @@ class ElasticsearchAdapter extends Component implements ContextStorageAdapterInt
     const DEFAULT_DOC_TYPE = 'workflow';
 
     /**
+     * @const string DEFAULT_DOC_SOURCE
+     */
+    const DEFAULT_DOC_SOURCE = '_source';
+
+    /**
      * @const string DOC_INDEX
      */
     const DOC_INDEX = 'index';
@@ -98,8 +103,7 @@ class ElasticsearchAdapter extends Component implements ContextStorageAdapterInt
      */
     private function checkVendorLibraryAvailable($className)
     {
-        //$f = new $className;
-        if (!class_exists($className) && false) {
+        if (!class_exists($className)) {
             throw new ContextStorageException(
                 $className . ' lib not found. Please make "composer update"',
                 ContextStorageException::CODE_VENDOR
@@ -211,7 +215,7 @@ class ElasticsearchAdapter extends Component implements ContextStorageAdapterInt
                 $this->commonRequestParamHash
             );
             $resultHash = $this->client->get($requestParamHash);
-            return $resultHash['_source'];
+            return $resultHash[self::DEFAULT_DOC_SOURCE];
         } catch (\Exception $exception) {
             throw new ContextStorageException(
                 'document not found',
@@ -294,7 +298,6 @@ class ElasticsearchAdapter extends Component implements ContextStorageAdapterInt
                 return $this->client->index(array_merge($requestParamHash, ['body' => $documentHash]));
             }
         } catch (\Exception $exception) {
-            echo $exception->getMessage();
             throw new ContextStorageException(
                 'Fail to save document',
                 ContextStorageException::CODE_SAVE,
@@ -352,7 +355,6 @@ class ElasticsearchAdapter extends Component implements ContextStorageAdapterInt
                 ['id' => $workflowProcessId],
                 $this->commonRequestParamHash
             );
-            $this->di->get('logger')->error(json_encode(array_merge($requestParamHash, ['body' => $updateHash])));
             return $this->client->update(array_merge($requestParamHash, ['body' => $updateHash]));
         } catch (\Exception $exception) {
             echo $exception->getMessage();
