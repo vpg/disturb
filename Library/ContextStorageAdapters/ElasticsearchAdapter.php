@@ -1,5 +1,16 @@
 <?php
 
+/**
+ * ElasticsearchAdapter
+ *
+ * @category ContextStorageAdapters
+ * @package  Disturb\ContextStorageAdapters
+ * @author   Alexandre DEFRETIN <adefretin@voyageprive.com>
+ * @license  https://github.com/vpg/disturb/blob/poc/LICENSE MIT Licence
+ * @version  0.1.0
+ * @link     http://example.com/my/bar Documentation of Foo.
+ */
+
 namespace Vpg\Disturb\ContextStorageAdapters;
 
 use Vpg\Disturb\Exceptions\ContextStorageException;
@@ -9,48 +20,69 @@ use \Phalcon\Config;
 use \Elasticsearch;
 
 /**
- * Class Elasticsearch Adapter
+ * Class ElasticsearchAdapter
  *
- * @package Vpg\Disturb\ContextStorageAdapters
+ * @category ContextStorageAdapters
+ * @package  Disturb\ContextStorageAdapters
+ * @author   Alexandre DEFRETIN <adefretin@voyageprive.com>
+ * @license  https://github.com/vpg/disturb/blob/poc/LICENSE MIT Licence
+ * @version  0.1.0
+ * @link     http://example.com/my/bar Documentation of Foo.
  */
 class ElasticsearchAdapter extends Component implements ContextStorageAdapterInterface
 {
     /**
+     * Vendor class name const
+     *
      * @const string VENDOR_CLASSNAME
      */
     const VENDOR_CLASSNAME = '\\Elasticsearch\\Client';
 
     /**
+     * Default doc index const
+     *
      * @const string DEFAULT_INDEX
      */
     const DEFAULT_DOC_INDEX = 'disturb_context';
 
     /**
+     * Default type const
+     *
      * @const string DEFAULT_TYPE
      */
     const DEFAULT_DOC_TYPE = 'workflow';
 
     /**
+     * Doc source const
+     *
      * @const string DEFAULT_DOC_SOURCE
      */
     const DEFAULT_DOC_SOURCE = '_source';
 
     /**
+     * Doc index const
+     *
      * @const string DOC_INDEX
      */
     const DOC_INDEX = 'index';
 
     /**
+     * Doc type const
+     *
      * @const string DOC_TYPE
      */
     const DOC_TYPE = 'type';
 
     /**
+     * Config host const
+     *
      * @const string CONFIG_HOST
      */
     const CONFIG_HOST = 'host';
 
     /**
+     * Required config field list const
+     *
      * @const array REQUIRED_CONFIG_FIELD_LIST
      */
     const REQUIRED_CONFIG_FIELD_LIST = [
@@ -59,30 +91,40 @@ class ElasticsearchAdapter extends Component implements ContextStorageAdapterInt
         self::DOC_TYPE
     ];
 
-    /*
-     * @var Json $config
+    /**
+     * Config JSON
+     *
+     * @var Json $_config
      */
-    private $config;
+    private $_config;
 
     /**
-     * @var \Elasticsearch\Client $client
+     * Elasticsearch client
+     *
+     * @var \Elasticsearch\Client $client client
      */
-    private $client;
+    private $_client;
 
     /**
-     * @var array $commonRequestParamHash
+     * Common Request params
+     *
+     * @var array $_commonRequestParamHash commonRequestParamHash
      */
-    private $commonRequestParamHash = [];
+    private $_commonRequestParamHash = [];
 
     /**
      * Constructor
+     *
+     * @return void
      */
-    public function construct() {}
+    public function construct() 
+    {
+    }
 
     /**
      * Initialize
      *
-     * @param Json $config
+     * @param Json $config config
      *
      * @return void
      */
@@ -97,9 +139,10 @@ class ElasticsearchAdapter extends Component implements ContextStorageAdapterInt
     /**
      * Check if Elascticsearch dependencies library is available
      *
-     * @param string $className
+     * @param string $className className
      *
      * @throws ContextStorageException
+     * @return void
      */
     private function checkVendorLibraryAvailable($className)
     {
@@ -114,11 +157,13 @@ class ElasticsearchAdapter extends Component implements ContextStorageAdapterInt
     /**
      * Check parameters
      *
-     * @param array $parametersList
+     * @param array $parametersList parametersList
      *
      * @throws ContextStorageException
+     * @return void
      */
-    private function checkParameters(array $parametersList) {
+    private function checkParameters(array $parametersList)
+    {
         foreach ($parametersList as $parameter) {
             if (empty($parameter)) {
                 throw new ContextStorageException(
@@ -134,9 +179,10 @@ class ElasticsearchAdapter extends Component implements ContextStorageAdapterInt
     /**
      * Init configuration
      *
-     * @param Json $config
+     * @param Json $config config
      *
      * @throws ContextStorageException
+     * @return void
      */
     private function initConfig(Config $config)
     {
@@ -161,6 +207,8 @@ class ElasticsearchAdapter extends Component implements ContextStorageAdapterInt
     /**
      * Init common request parameters
      *
+     * @return void
+     *
      * @throws ContextStorageException
      */
     private function initCommonRequestParams()
@@ -177,7 +225,7 @@ class ElasticsearchAdapter extends Component implements ContextStorageAdapterInt
      *
      * @throws ContextStorageException
      */
-    private function initClient()
+    private function _initClient()
     {
         $this->di->get('logger')->debug(json_encode($this->config[self::CONFIG_HOST]));
         $this->client = \Elasticsearch\ClientBuilder::create()
@@ -198,7 +246,7 @@ class ElasticsearchAdapter extends Component implements ContextStorageAdapterInt
     /**
      * Get document identified by id ($workflowProcessId)
      *
-     * @param string $workflowProcessId
+     * @param string $workflowProcessId workflowProcessId
      *
      * @return array
      *
@@ -228,7 +276,7 @@ class ElasticsearchAdapter extends Component implements ContextStorageAdapterInt
     /**
      * Search document by query $queryParameterHash
      *
-     * @param array $queryParameterHash
+     * @param array $queryParameterHash queryParameterHash
      *
      * @return array
      */
@@ -242,7 +290,7 @@ class ElasticsearchAdapter extends Component implements ContextStorageAdapterInt
     /**
      * Check if a document identified by id ($workflowProcessId) exists
      *
-     * @param string $workflowProcessId
+     * @param string $workflowProcessId workflowProcessId
      *
      * @return bool
      *
@@ -271,8 +319,8 @@ class ElasticsearchAdapter extends Component implements ContextStorageAdapterInt
     /**
      * Save document  with id ($workflowProcessId)
      *
-     * @param string $workflowProcessId
-     * @param array $documentHash
+     * @param string $workflowProcessId workflowProcessId
+     * @param array  $documentHash      document hash
      *
      * @return array
      *
@@ -309,7 +357,7 @@ class ElasticsearchAdapter extends Component implements ContextStorageAdapterInt
     /**
      * Delete document identified by $workflowProcessId
      *
-     * @param string $workflowProcessId
+     * @param string $workflowProcessId workflowProcessId
      *
      * @return array
      *
@@ -338,8 +386,8 @@ class ElasticsearchAdapter extends Component implements ContextStorageAdapterInt
     /**
      * Updates the document with id ($workflowProcessId)
      *
-     * @param string $workflowProcessId
-     * @param array $documentHash
+     * @param string $workflowProcessId workflowProcessId
+     * @param array  $updateHash        document hash
      *
      * @return array
      *

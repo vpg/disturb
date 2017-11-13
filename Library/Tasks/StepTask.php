@@ -1,4 +1,16 @@
 <?php
+
+/**
+ * StepTask
+ *
+ * @category Tasks
+ * @package  Disturb\Tasks
+ * @author   Jérome BOURGEAIS <jbourgeais@voyageprive.com>
+ * @license  https://github.com/vpg/disturb/blob/poc/LICENSE MIT Licence
+ * @version  0.1.0
+ * @link     http://example.com/my/bar Documentation of Foo.
+ */
+
 namespace Vpg\Disturb\Tasks;
 
 use \Phalcon\Cli\Task;
@@ -11,8 +23,13 @@ use \Vpg\Disturb\Tasks\AbstractTask as AbstractTask;
  * Generic Step task
  * Dedicated to one step, given in argv with --step argument
  *
- *
- * @see \Disturb\Tasks\AbstractTask
+ * @category Tasks
+ * @package  Disturb\Tasks
+ * @author   Jérome BOURGEAIS <jbourgeais@voyageprive.com>
+ * @license  https://github.com/vpg/disturb/blob/poc/LICENSE MIT Licence
+ * @version  0.1.0
+ * @link     http://example.com/my/bar Documentation of Foo.
+ * @see      \Disturb\Tasks\AbstractTask
  */
 class StepTask extends AbstractTask
 {
@@ -21,7 +38,11 @@ class StepTask extends AbstractTask
         'step:',     // required step code config file
     ];
 
-    // xxx improve usage handling
+    /**
+     * Todo : improve usage handling
+     *
+     * @return void
+     */
     protected function usage()
     {
         $this->getDI()->get('logger')->debug('Usage : ');
