@@ -23,7 +23,8 @@ class StepTask extends AbstractTask
 {
 
     protected $taskOptionList = [
-        'step:',     // required step code config file
+        'step:',      // required step code config file
+        '?workerId:0' // required worker id, in case of multiple instance of the same worker
     ];
 
     /**
@@ -75,20 +76,19 @@ class StepTask extends AbstractTask
      *  - Sets the topic
      *  - Instanciates the "Client" service
      *
-     * @param array $paramHash the parsed step task argv
-     *
      * @return void
      */
-    protected function initWorker(array $paramHash)
+    protected function initWorker()
     {
         $this->getDI()->get('logger')->debug(json_encode(func_get_args()));
-        parent::initWorker($paramHash);
+        parent::initWorker($this->paramHash);
         $serviceFullName = $this->workflowConfig['servicesClassNameSpace'] . '\\' .
-            ucFirst($paramHash['step']) . 'Step';
-        $this->service = new $serviceFullName($paramHash['workflow']);
+            ucFirst($this->paramHash['step']) . 'Step';
+        $this->service = new $serviceFullName($this->paramHash['workflow']);
 
         $this->topicName = Services\TopicService::getWorkflowStepTopicName(
-            $paramHash['step'], $this->workflowConfig['name']
+            $paramHash['step'],
+            $this->workflowConfig['name']
         );
     }
 }

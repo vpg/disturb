@@ -40,18 +40,16 @@ class ManagerTask extends AbstractTask
     /**
      * Init work with parameters
      *
-     * @param array $paramHash params list
-     *
      * @return void
      */
-    protected function initWorker(array $paramHash)
+    protected function initWorker()
     {
         $this->getDI()->get('logger')->debug(json_encode(func_get_args()));
-        parent::initWorker($paramHash);
+        parent::initWorker();
         $serviceFullName = $this->workflowConfig['servicesClassNameSpace'] . "\\" .
             ucFirst($this->workflowConfig['name']) . 'Manager';
         // xxx Allow client to overwrite ?
-        $this->workflowManagerService = new Services\WorkflowManager($paramHash['workflow']);
+        $this->workflowManagerService = new Services\WorkflowManager($this->paramHash['workflow']);
         $this->getDI()->get('logger')->debug('Loading ' . $serviceFullName);
         $this->service = new $serviceFullName();
 
