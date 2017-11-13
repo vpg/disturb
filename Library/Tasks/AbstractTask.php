@@ -13,7 +13,7 @@ abstract class AbstractTask extends Task implements TaskInterface
 {
     protected $taskOptionBaseList = [
         'workflow:', // required step code config file
-        '?force',    // Optional step code config file
+        '?force',    // Optional force run even if lockfile exists
     ];
 
     protected $topicPartitionNo = 0;
