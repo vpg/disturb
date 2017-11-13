@@ -37,7 +37,7 @@ class Console extends Cli\Console {
             $argv,
             $paramMatchHash
         );
-        $paramHash = array_combine(array_values($paramMatchHash['optKeys']), array_values($paramMatchHash['optVals']));
+        $paramHash = array_combine(array_values($paramMatchHash[self::OPT_KEYS_GROUP_NAME]), array_values($paramMatchHash[self::OPT_VALS_GROUP_NAME]));
         return $paramHash;
     }
 }
