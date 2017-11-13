@@ -25,7 +25,8 @@ class ManagerTask extends AbstractTask
     {
         $this->getDI()->get('logger')->debug(json_encode(func_get_args()));
         parent::initWorker($paramHash);
-        $serviceFullName = $this->workflowConfig['servicesClassNameSpace'] . '\\' . ucFirst($this->workflowConfig['name']);
+        $serviceFullName = $this->workflowConfig['servicesClassNameSpace'] . "\\" .
+            ucFirst($this->workflowConfig['name']) . 'Manager';
         // xxx Allow client to overwrite ?
         $this->workflowManagerService = new Services\WorkflowManager($paramHash['workflow']);
         $this->getDI()->get('logger')->debug('Loading ' . $serviceFullName);

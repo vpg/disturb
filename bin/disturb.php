@@ -1,8 +1,9 @@
 <?php
 
-use Phalcon\Di\FactoryDefault\Cli as CliDI;
-use Phalcon\Cli\Console as ConsoleApp;
-use Phalcon\Loader;
+use \Phalcon\Di\FactoryDefault\Cli as CliDI;
+use \Phalcon\Config\Adapter\Json;
+use \Phalcon\Loader;
+use \Vpg\Disturb\Cli\Console as ConsoleApp;
 
 define('DISTURB_DEBUG', getenv('DISTURB_DEBUG'));
 
@@ -65,7 +66,6 @@ $di->set(
 $console = new ConsoleApp();
 $console->setDI($di);
 
-
 /**
  * Process the console arguments
  */
@@ -81,12 +81,20 @@ foreach ($argv as $k => $arg) {
     }
 }
 
+// Load client boostrap file
+$paramHash = ConsoleApp::parseLongOpt(join($arguments['params'], ' '));
+$workflowConfig = new Json($paramHash['workflow']);
+$projectBootstrapFilePath = $workflowConfig['projectBootstrap'] ?? '';
+if (is_readable($projectBootstrapFilePath)) {
+    $di->get('logger')->info('Loading Bootstrap : ' . $projectBootstrapFilePath);
+    require_once($projectBootstrapFilePath);
+}
+
 try {
     // Handle incoming arguments
     $console->handle($arguments);
 } catch (\Phalcon\Exception $e) {
     // Do Phalcon related stuff here
-    // ..
     fwrite(STDERR, $e->getMessage() . PHP_EOL);
     exit(1);
 } catch (\Throwable $throwable) {
