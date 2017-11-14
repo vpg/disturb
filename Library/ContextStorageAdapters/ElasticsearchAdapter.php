@@ -96,21 +96,21 @@ class ElasticsearchAdapter extends Component implements ContextStorageAdapterInt
      *
      * @var Json $_config
      */
-    private $_config;
+    private $config;
 
     /**
      * Elasticsearch client
      *
      * @var \Elasticsearch\Client $client client
      */
-    private $_client;
+    private $client;
 
     /**
      * Common Request params
      *
      * @var array $_commonRequestParamHash commonRequestParamHash
      */
-    private $_commonRequestParamHash = [];
+    private $commonRequestParamHash = [];
 
     /**
      * Constructor
@@ -225,7 +225,7 @@ class ElasticsearchAdapter extends Component implements ContextStorageAdapterInt
      *
      * @throws ContextStorageException
      */
-    private function _initClient()
+    private function initClient()
     {
         $this->di->get('logger')->debug(json_encode($this->config[self::CONFIG_HOST]));
         $this->client = \Elasticsearch\ClientBuilder::create()

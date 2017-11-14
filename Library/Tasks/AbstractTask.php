@@ -192,15 +192,7 @@ abstract class AbstractTask extends Task implements TaskInterface
     {
         $this->getDI()->get('logger')->debug(json_encode(func_get_args()));
         $loader = $this->getDI()->getShared('loader');
-<<<<<<< HEAD
         $loader->registerNamespaces([$clientServicesNamespace => $clientServicesPath], true);
-=======
-        $loader->registerNamespaces(
-            array(
-            $clientServicesNamespace => $clientServicesPath,
-            ), true
-        );
->>>>>>> refs #55 - code compliance with code sniffer
         $loader->register();
     }
 
