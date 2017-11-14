@@ -1,16 +1,5 @@
 <?php
 
-/**
- * ContextStorage Service
- *
- * @category Services
- * @package  Disturb\Services
- * @author   Alexandre DEFRETIN <adefretin@voyageprive.com>
- * @license  https://github.com/vpg/disturb/blob/poc/LICENSE MIT Licence
- * @version  0.1.0
- * @link     http://example.com/my/bar Documentation of Foo.
- */
-
 namespace Vpg\Disturb\Services;
 
 use Vpg\Disturb\Exceptions\ContextStorageException;
@@ -26,8 +15,7 @@ use \Phalcon\Mvc\User\Component;
  * @category Services
  * @package  Disturb\Services
  * @author   Alexandre DEFRETIN <adefretin@voyageprive.com>
- * @license  https://github.com/vpg/disturb/blob/poc/LICENSE MIT Licence
- * @version  0.1.0
+ * @license  https://github.com/vpg/disturb/blob/master/LICENSE MIT Licence
  * @link     http://example.com/my/bar Documentation of Foo.
  */
 class ContextStorage extends Component
@@ -94,10 +82,10 @@ class ContextStorage extends Component
 
         // check if adapter class exists
         switch ($config->adapter) {
-        case self::ADAPTER_ELASTICSEARCH:
-            $adapterClass = 'Vpg\\Disturb\\ContextStorageAdapters\\ElasticsearchAdapter';
+            case self::ADAPTER_ELASTICSEARCH:
+                $adapterClass = 'Vpg\\Disturb\\ContextStorageAdapters\\ElasticsearchAdapter';
             break;
-        default:
+            default:
             throw new ContextStorageException(
                 'Adapter class not found',
                 ContextStorageException::CODE_ADAPTER
@@ -130,7 +118,7 @@ class ContextStorage extends Component
      *
      * @return mixed
      */
-    public function get(string $workflowProcessId) 
+    public function get(string $workflowProcessId)
     {
         $this->di->get('logger')->debug(json_encode(func_get_args()));
         return $this->adapter->get($workflowProcessId);
@@ -143,7 +131,7 @@ class ContextStorage extends Component
      *
      * @return bool
      */
-    public function exist(string $workflowProcessId) 
+    public function exist(string $workflowProcessId)
     {
         $this->di->get('logger')->debug(json_encode(func_get_args()));
         return $this->adapter->exist($workflowProcessId);
@@ -157,7 +145,7 @@ class ContextStorage extends Component
      *
      * @return mixed
      */
-    public function save(string $workflowProcessId, array $valueHash) 
+    public function save(string $workflowProcessId, array $valueHash)
     {
         $this->di->get('logger')->debug(json_encode(func_get_args()));
         return $this->adapter->save($workflowProcessId, $valueHash);
@@ -170,7 +158,7 @@ class ContextStorage extends Component
      *
      * @return mixed
      */
-    public function delete(string $workflowProcessId) 
+    public function delete(string $workflowProcessId)
     {
         $this->di->get('logger')->debug(json_encode(func_get_args()));
         return $this->adapter->delete($workflowProcessId);
@@ -184,7 +172,7 @@ class ContextStorage extends Component
      *
      * @return void
      */
-    public function setWorkflowStatus(string $workflowProcessId, string $status) 
+    public function setWorkflowStatus(string $workflowProcessId, string $status)
     {
         $this->di->get('logger')->debug(json_encode(func_get_args()));
         $contextHash = $this->get($workflowProcessId);
@@ -200,12 +188,15 @@ class ContextStorage extends Component
      *
      * @return string
      */
-    public function getWorkflowStatus(string $workflowProcessId) : string 
+    public function getWorkflowStatus(string $workflowProcessId) : string
     {
         $this->di->get('logger')->debug(json_encode(func_get_args()));
         $contextHash = $this->get($workflowProcessId);
-        return isset($contextHash[self::WORKFLOW_STATUS]) ?
-            $contextHash[self::WORKFLOW_STATUS] : \Disturb\Services\WorkflowManager::STATUS_NO_STARTED;
+        if (isset($contextHash[self::WORKFLOW_STATUS])) {
+            return $contextHash[self::WORKFLOW_STATUS];
+        } else {
+            return \Disturb\Services\WorkflowManager::STATUS_NO_STARTED;
+        }
     }
 
     /**
@@ -215,7 +206,7 @@ class ContextStorage extends Component
      *
      * @return void
      */
-    public function initWorkflowNextStep(string $workflowProcessId) 
+    public function initWorkflowNextStep(string $workflowProcessId)
     {
         $this->di->get('logger')->debug(json_encode(func_get_args()));
         $contextHash = $this->get($workflowProcessId);
@@ -230,7 +221,7 @@ class ContextStorage extends Component
      *
      * @return int
      */
-    public function getWorkflowNextStepPosition(string $workflowProcessId) : int 
+    public function getWorkflowNextStepPosition(string $workflowProcessId) : int
     {
         $this->di->get('logger')->debug(json_encode(func_get_args()));
         $contextHash = $this->get($workflowProcessId);
@@ -244,7 +235,7 @@ class ContextStorage extends Component
      *
      * @return int
      */
-    public function getWorkflowCurrentStepPosition(string $workflowProcessId) : int 
+    public function getWorkflowCurrentStepPosition(string $workflowProcessId) : int
     {
         $this->di->get('logger')->debug(json_encode(func_get_args()));
         $contextHash = $this->get($workflowProcessId);
@@ -259,7 +250,7 @@ class ContextStorage extends Component
      *
      * @return array
      */
-    public function getWorkflowCurrentStepList(string $workflowProcessId, int $currentWorkflowPosition) : array 
+    public function getWorkflowCurrentStepList(string $workflowProcessId, int $currentWorkflowPosition) : array
     {
         $this->di->get('logger')->debug(json_encode(func_get_args()));
         $contextHash = $this->get($workflowProcessId);
@@ -273,7 +264,7 @@ class ContextStorage extends Component
      *
      * @return array
      */
-    public function getWorkflowStepList(string $workflowProcessId) : array 
+    public function getWorkflowStepList(string $workflowProcessId) : array
     {
         $this->di->get('logger')->debug(json_encode(func_get_args()));
         $contextHash = $this->get($workflowProcessId);
@@ -288,7 +279,7 @@ class ContextStorage extends Component
      *
      * @return array
      */
-    public function setWorkflowStepList(string $workflowProcessId, array $workflowStepList) 
+    public function setWorkflowStepList(string $workflowProcessId, array $workflowStepList)
     {
         $this->di->get('logger')->debug(json_encode(func_get_args()));
         $contextHash = $this->get($workflowProcessId);

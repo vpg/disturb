@@ -1,20 +1,8 @@
 <?php
 
-/**
- * ContextStorageAdapterInterface
- *
- * @category ContextStorageAdapters
- * @package  Disturb\ContextStorageAdapters
- * @author   Alexandre DEFRETIN <adefretin@voyageprive.com>
- * @license  https://github.com/vpg/disturb/blob/poc/LICENSE MIT Licence
- * @version  0.1.0
- * @link     http://example.com/my/bar Documentation of Foo.
- */
-
 namespace Vpg\Disturb\ContextStorageAdapters;
 
 use \Phalcon\Config;
-
 
 /**
  * Interface ContextStorageAdapterInterface
@@ -22,8 +10,7 @@ use \Phalcon\Config;
  * @category ContextStorageAdapters
  * @package  Disturb\ContextStorageAdapters
  * @author   Alexandre DEFRETIN <adefretin@voyageprive.com>
- * @license  https://github.com/vpg/disturb/blob/poc/LICENSE MIT Licence
- * @version  0.1.0
+ * @license  https://github.com/vpg/disturb/blob/master/LICENSE MIT Licence
  * @link     http://example.com/my/bar Documentation of Foo.
  */
 interface ContextStorageAdapterInterface

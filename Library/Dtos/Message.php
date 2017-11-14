@@ -1,16 +1,5 @@
 <?php
 
-/**
- * Message
- *
- * @category Dtos
- * @package  Disturb\Dtos
- * @author   Jérome BOURGEAIS <jbourgeais@voyageprive.com>
- * @license  https://github.com/vpg/disturb/blob/poc/LICENSE MIT Licence
- * @version  0.1.0
- * @link     http://example.com/my/bar Documentation of Foo.
- */
-
 namespace Vpg\Disturb\Dtos;
 
 use Vpg\Disturb\Exceptions;
@@ -21,8 +10,7 @@ use Vpg\Disturb\Exceptions;
  * @category Dtos
  * @package  Disturb\Dtos
  * @author   Jérome BOURGEAIS <jbourgeais@voyageprive.com>
- * @license  https://github.com/vpg/disturb/blob/poc/LICENSE MIT Licence
- * @version  0.1.0
+ * @license  https://github.com/vpg/disturb/blob/master/LICENSE MIT Licence
  * @link     http://example.com/my/bar Documentation of Foo.
  */
 class Message
@@ -56,7 +44,7 @@ class Message
      *
      * @throws Exceptions\InvalidMessageException
      */
-    public function __construct($rawMixed) 
+    public function __construct($rawMixed)
     {
         if (is_array($rawMixed)) {
             $this->rawHash = $rawMixed;
@@ -75,7 +63,8 @@ class Message
     /**
      * Validates the current message is valid
      *
-     * @throws \Exception in case of invalid message
+     * @throws Exceptions\InvalidMessageException
+     * @throws Exception
      *
      * @return void
      */
@@ -88,20 +77,22 @@ class Message
 
         $propHashRequired = [];
         switch ($this->rawHash['type']) {
-        case self::TYPE_WF_CTRL:
-            $propHashRequired = self::WF_REQUIRED_PROP_HASH;
+            case self::TYPE_WF_CTRL:
+                $propHashRequired = self::WF_REQUIRED_PROP_HASH;
             break;
-        case self::TYPE_STEP_CTRL:
-            $propHashRequired = self::STEP_REQUIRED_PROP_HASH;
+            case self::TYPE_STEP_CTRL:
+                $propHashRequired = self::STEP_REQUIRED_PROP_HASH;
             break;
-        case self::TYPE_STEP_ACK:
-            $propHashRequired = self::STEP_ACK_REQUIRED_PROP_HASH;
+            case self::TYPE_STEP_ACK:
+                $propHashRequired = self::STEP_ACK_REQUIRED_PROP_HASH;
             break;
-        default:
-            throw new \Exception(
+            default:
+            throw new Exception(
                 'Validation of message type ' . $this->rawHash['type'] . ' is not implemented yet, please do'
             );
-                throw new Exceptions\InvalidMessageException('Validation of message type ' . $this->rawHash['type'] . ' is not implemented yet, please do');
+                throw new Exceptions\InvalidMessageException(
+                    'Validation of message type ' . $this->rawHash['type'] . ' is not implemented yet, please do'
+                );
         }
         $matchPropList = array_intersect_key($this->rawHash, array_flip($propHashRequired));
         $isValid = (count($propHashRequired) == count($matchPropList));
@@ -118,7 +109,7 @@ class Message
      *
      * @return string
      */
-    public function getId(): string 
+    public function getId(): string
     {
         return $this->rawHash['id'] ?? '';
     }
@@ -128,7 +119,7 @@ class Message
      *
      * @return string
      */
-    public function getJobId(): string 
+    public function getJobId(): string
     {
         return $this->rawHash['jobId'] ?? '';
     }
@@ -138,7 +129,7 @@ class Message
      *
      * @return string
      */
-    public function getType(): string 
+    public function getType(): string
     {
         return $this->rawHash['type'] ?? '';
     }
@@ -148,7 +139,7 @@ class Message
      *
      * @return string
      */
-    public function __toString() 
+    public function __toString()
     {
         return json_encode($this->rawHash);
     }
@@ -158,7 +149,7 @@ class Message
      *
      * @return array
      */
-    public function getPayload() : array 
+    public function getPayload() : array
     {
         return !empty($this->rawHash['payload']) ? $this->rawHash['payload'] : [];
     }
@@ -168,7 +159,7 @@ class Message
      *
      * @return string
      */
-    public function getFrom(): string 
+    public function getFrom(): string
     {
         return $this->rawHash['from'] ?? '';
     }
@@ -178,7 +169,7 @@ class Message
      *
      * @return string
      */
-    public function getAction(): string 
+    public function getAction(): string
     {
         return $this->rawHash['action'] ?? '';
     }
@@ -188,7 +179,7 @@ class Message
      *
      * @return string
      */
-    public function getContract(): string 
+    public function getContract(): string
     {
         return $this->rawHash['contract'] ?? '';
     }
@@ -198,7 +189,7 @@ class Message
      *
      * @return string
      */
-    public function getStepCode(): string 
+    public function getStepCode(): string
     {
         return $this->rawHash['stepCode'] ?? '';
     }
@@ -208,7 +199,7 @@ class Message
      *
      * @return string
      */
-    public function getResult(): string 
+    public function getResult(): string
     {
         return $this->rawHash['result'] ?? '';
     }

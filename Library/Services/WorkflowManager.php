@@ -1,16 +1,5 @@
 <?PHP
 
-/**
- * WorkflowManager
- *
- * @category Services
- * @package  Disturb\Services
- * @author   Jérome BOURGEAIS <jbourgeais@voyageprive.com>
- * @license  https://github.com/vpg/disturb/blob/poc/LICENSE MIT Licence
- * @version  0.1.0
- * @link     http://example.com/my/bar Documentation of Foo.
- */
-
 namespace Vpg\Disturb\Services;
 
 use Vpg\Disturb\Exceptions;
@@ -24,8 +13,7 @@ use \Phalcon\Mvc\User\Component;
  * @category Services
  * @package  Disturb\Services
  * @author   Jérome BOURGEAIS <jbourgeais@voyageprive.com>
- * @license  https://github.com/vpg/disturb/blob/poc/LICENSE MIT Licence
- * @version  0.1.0
+ * @license  https://github.com/vpg/disturb/blob/master/LICENSE MIT Licence
  * @link     http://example.com/my/bar Documentation of Foo.
  */
 class WorkflowManager extends Component implements WorkflowManagerInterface
@@ -106,7 +94,7 @@ class WorkflowManager extends Component implements WorkflowManagerInterface
      *
      * @return void
      */
-    public function init(string $workflowProcessId) 
+    public function init(string $workflowProcessId)
     {
         $this->di->get('logger')->debug(json_encode(func_get_args()));
         $this->di->get('contextStorage')->save(
@@ -155,7 +143,7 @@ class WorkflowManager extends Component implements WorkflowManagerInterface
      *
      * @return string
      */
-    public function getStatus(string $workflowProcessId) : string 
+    public function getStatus(string $workflowProcessId) : string
     {
         $this->di->get('logger')->debug(json_encode(func_get_args()));
         return $this->di->get('contextStorage')->getWorkflowStatus($workflowProcessId);
@@ -265,7 +253,7 @@ class WorkflowManager extends Component implements WorkflowManagerInterface
      * Check current step status and if we can go further in the workflow
      *
      * @param string $workflowProcessId the wf process identifier
-     * 
+     *
      * @return string
      */
     public function getCurrentStepStatus(string $workflowProcessId) : string
@@ -307,7 +295,7 @@ class WorkflowManager extends Component implements WorkflowManagerInterface
      * @param int    $jobId             the job identifier related to the step
      * @param array  $resultHash        the result data
      *
-     * @throws \Exception in case of invalid message
+     * @throws Exceptions\WorkflowException in case of no job found
      *
      * @return void
      */
