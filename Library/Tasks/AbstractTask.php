@@ -6,8 +6,8 @@ use \Phalcon\Cli\Task;
 use \Phalcon\Loader;
 use \Phalcon\Config\Adapter\Json;
 
-use \Vpg\Disturb\Dtos;
 use \Vpg\Disturb\Cli;
+use \Vpg\Disturb\Dtos;
 use \Vpg\Disturb\Exceptions;
 
 /**
