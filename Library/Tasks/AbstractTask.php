@@ -5,8 +5,10 @@ namespace Vpg\Disturb\Tasks;
 use \Phalcon\Cli\Task;
 use \Phalcon\Loader;
 use \Phalcon\Config\Adapter\Json;
-use \Vpg\Disturb\Dtos;
+
 use \Vpg\Disturb\Cli;
+use \Vpg\Disturb\Dtos;
+use \Vpg\Disturb\Exceptions;
 
 /**
  * Abstract task
@@ -20,7 +22,8 @@ use \Vpg\Disturb\Cli;
 abstract class AbstractTask extends Task implements TaskInterface
 {
     protected $taskOptionBaseList = [
-        'workflow:',  // required step code config file
+        'workflow:', // required step code config file
+        '?force',    // Optional force run even if lockfile exists
     ];
 
     protected $topicPartitionNo = 0;
@@ -45,15 +48,12 @@ abstract class AbstractTask extends Task implements TaskInterface
      *  - Register Client biz classes
      *  - Init MQ sys
      *
-     * @param array $paramHash The parsed options hash
-     *
      * @return void
      */
-    protected function initWorker(array $paramHash)
-    {
+    protected function initWorker() {
         $this->getDI()->get('logger')->debug(json_encode(func_get_args()));
         // xxx check if file exists, throw exc on err
-        $this->workflowConfig = new Json($paramHash['workflow']);
+        $this->workflowConfig = new Json($this->paramHash['workflow']);
         $this->registerClientNS(
             $this->workflowConfig['servicesClassNameSpace'],
             $this->workflowConfig['servicesClassPath']
@@ -63,6 +63,7 @@ abstract class AbstractTask extends Task implements TaskInterface
 
     /**
      * Parses and validates the given argv according to the worker options config
+     * xxx should be moved in Disturb\Cli\Console class
      *
      * @param array $paramList The argv list
      *
@@ -72,15 +73,28 @@ abstract class AbstractTask extends Task implements TaskInterface
     {
         $this->getDI()->get('logger')->debug(json_encode(func_get_args()));
         $paramHash = Cli\Console::parseLongOpt(join($paramList, ' '));
-        // check required options
-        foreach (array_merge($this->taskOptionBaseList, $this->taskOptionList) as $option) {
-            if (preg_match('/^(?<opt>\w+):?/', $option, $matchHash)
-                && !array_key_exists($matchHash['opt'], $paramHash)
+        foreach(array_merge($this->taskOptionBaseList, $this->taskOptionList) as $option) {
+            $optionMatch = preg_match('/^(?<optionnal>\?)?(?<opt>\w+):?(?<val>\w+)?/', $option, $matchHash);
+            // default values
+            if (
+                $optionMatch &&
+                isset($matchHash['val']) &&
+                empty($paramHash[$matchHash['opt']])
+            ) {
+                $this->getDI()->get('logger')->debug(
+                    'Setting default value "' . $matchHash['val'] . '" for "' . $matchHash['opt'] . '"'
+                );
+                $paramHash[$matchHash['opt']] = $matchHash['val'];
+            }
+            // Required params
+            if (
+                $optionMatch &&
+                empty($matchHash['optionnal']) &&
+                !array_key_exists($matchHash['opt'], $paramHash)
             ) {
                 $this->usage();
                 exit(1);
             }
-
         }
         return $paramHash;
     }
@@ -95,8 +109,9 @@ abstract class AbstractTask extends Task implements TaskInterface
     public final function startAction(array $paramList)
     {
         $this->getDI()->get('logger')->debug(json_encode(func_get_args()));
-        $paramHash = $this->parseOpt($paramList);
-        $this->initWorker($paramHash);
+        $this->paramHash = $this->parseOpt($paramList);
+        $this->lock();
+        $this->initWorker();
 
         $this->kafkaTopicConsumer = $this->kafkaConsumer->newTopic($this->topicName, $this->kafkaTopicConf);
         $this->kafkaTopicConsumer->consumeStart($this->topicPartitionNo, RD_KAFKA_OFFSET_STORED);
@@ -214,5 +229,42 @@ abstract class AbstractTask extends Task implements TaskInterface
 
         $this->kafkaProducer = new \RdKafka\Producer();
         $this->kafkaProducer->addBrokers($brokers);
+    }
+
+    /**
+     * Sets a lock for the current process according to its params
+     *
+     * @throws Exceptions\WorkflowException if lock exists or perm issue
+     * @return void
+     */
+    private function lock() {
+        $this->getDI()->get('logger')->debug(json_encode(func_get_args()));
+        $pid = getMyPid();
+        $lockFileName = $this->getLockFilePath();
+        if (file_exists($lockFileName) && !isset($this->paramHash['force'])) {
+            throw new Exceptions\WorkflowException('Failed to lock process, already running or zombie');
+        }
+        if(!file_put_contents($lockFileName, $pid, LOCK_EX)) {
+            throw new Exceptions\WorkflowException('Failed to lock process : failed to write file ' . $lockFileName);
+        }
+    }
+
+    /**
+     * Returns a lock file path related to the current process
+     *
+     * @return string a log file path. e.g. : /var/run/disturb-step-checkInfraGroupLodging-0.pid
+     */
+    private function getLockFilePath() {
+        $this->getDI()->get('logger')->debug(json_encode(func_get_args()));
+        $lockDirPath = '/var/run/';
+        $taskFullName = get_called_class();
+        // xxx We will probably have to deal w/ the BU
+        if (strpos($taskFullName, 'Manager')) {
+            $lockFileName = 'disturb-manager';
+        }
+        else {
+            $lockFileName = 'disturb-step-' . $this->paramHash['step'] . '-' . $this->paramHash['workerId'];
+        }
+        return $lockDirPath . $lockFileName . '.pid';
     }
 }
