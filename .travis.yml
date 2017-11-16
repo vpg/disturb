@@ -2,6 +2,12 @@
 # @link https://about.travis-ci.org/docs/user/languages/php/
 language: php
 
+# All branches should trigger test build.
+# xxx depending on the br the ci flow could be different
+branches:
+  only:
+  - /.*/
+
 php:
   - 7.0
   - 7.1
