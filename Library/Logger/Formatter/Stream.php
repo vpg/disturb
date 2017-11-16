@@ -5,6 +5,15 @@ namespace Vpg\Disturb\Logger\Formatter;
 use \Phalcon\Logger\FormatterInterface;
 use \Phalcon\Logger;
 
+/**
+ * Class Stream
+ *
+ * @category Formatter
+ * @package  Disturb\Logger|Formatter
+ * @author   Maxime BRENGUIER <mbrenguier@voyageprive.com>
+ * @license  https://github.com/vpg/disturb/blob/master/LICENSE MIT Licence
+ * @link     http://example.com/my/bar Documentation of Foo.
+ */
 class Stream implements FormatterInterface
 {
     const LOG_DATE_FORMAT = 'Y-m-d H:i:s';
@@ -53,7 +62,8 @@ class Stream implements FormatterInterface
         $dateLog->setTimestamp($timestamp);
 
         return $dateLog->format(self::LOG_DATE_FORMAT) .
-            " \033[" . $this->constType[$type]['color'] . "m[" . $this->constType[$type]['label'] . "]\033[" . $this->constType[$type]['color'] . "m" . "\033[0m " .
+            " \033[" . $this->constType[$type]['color'] . "m[" . $this->constType[$type]['label'] . "]\033[" .
+            $this->constType[$type]['color'] . "m" . "\033[0m " .
             $message.
             "\n";
     }

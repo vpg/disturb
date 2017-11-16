@@ -1,4 +1,5 @@
 <?php
+
 namespace Vpg\Disturb\Tasks;
 
 use \Phalcon\Cli\Task;
@@ -11,8 +12,12 @@ use \Vpg\Disturb\Tasks\AbstractTask as AbstractTask;
  * Generic Step task
  * Dedicated to one step, given in argv with --step argument
  *
- *
- * @see \Disturb\Tasks\AbstractTask
+ * @category Tasks
+ * @package  Disturb\Tasks
+ * @author   Jérome BOURGEAIS <jbourgeais@voyageprive.com>
+ * @license  https://github.com/vpg/disturb/blob/master/LICENSE MIT Licence
+ * @link     http://example.com/my/bar Documentation of Foo.
+ * @see      \Disturb\Tasks\AbstractTask
  */
 class StepTask extends AbstractTask
 {
@@ -21,11 +26,18 @@ class StepTask extends AbstractTask
         'step:',     // required step code config file
     ];
 
-    // xxx improve usage handling
+    /**
+     * Todo : improve usage handling
+     *
+     * @return void
+     */
     protected function usage()
     {
         $this->getDI()->get('logger')->debug('Usage : ');
-        $this->getDI()->get('logger')->debug('disturb.php "Tasks\\Step" start --step="stepName" --workflow="/path/to/workflow/config/file.json" [--name="workflowName"]');
+        $this->getDI()->get('logger')->debug(
+            'disturb.php "Tasks\\Step" start --step="stepName" '.
+            '--workflow="/path/to/workflow/config/file.json" [--name="workflowName"]'
+        );
     }
 
     /**
@@ -75,6 +87,8 @@ class StepTask extends AbstractTask
             ucFirst($paramHash['step']) . 'Step';
         $this->service = new $serviceFullName($paramHash['workflow']);
 
-        $this->topicName = Services\TopicService::getWorkflowStepTopicName($paramHash['step'], $this->workflowConfig['name']);
+        $this->topicName = Services\TopicService::getWorkflowStepTopicName(
+            $paramHash['step'], $this->workflowConfig['name']
+        );
     }
 }

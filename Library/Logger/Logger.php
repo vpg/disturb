@@ -5,7 +5,11 @@ namespace Vpg\Disturb\Logger;
 /**
  * Class Logger
  *
- * @namespace Disturb\Logger
+ * @category Logger
+ * @package  Disturb\Logger
+ * @author   Maxime BRENGUIER <mbrenguier@voyageprive.com>
+ * @license  https://github.com/vpg/disturb/blob/master/LICENSE MIT Licence
+ * @link     http://example.com/my/bar Documentation of Foo.
  */
 class Logger extends \Phalcon\Logger\Multiple
 {
@@ -78,8 +82,7 @@ class Logger extends \Phalcon\Logger\Multiple
     {
         if (defined('DISTURB_DEBUG') && DISTURB_DEBUG == true) {
             $dbt = debug_backtrace();
-            $message =
-                '> ' .
+            $message = '> ' .
                 $dbt[2]['class'] .
                 '\\' .
                 $dbt[2]['function'] .

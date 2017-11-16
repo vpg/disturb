@@ -1,4 +1,5 @@
 <?php
+
 namespace Vpg\Disturb\Tasks;
 
 use Phalcon\Cli\Task;
@@ -7,20 +8,42 @@ use \Vpg\Disturb\Services;
 use \Vpg\Disturb\Dtos;
 use \Vpg\Disturb\Tasks\AbstractTask as AbstractTask;
 
-
+/**
+ * Manager task
+ *
+ * @category Tasks
+ * @package  Disturb\Tasks
+ * @author   Jérome BOURGEAIS <jbourgeais@voyageprive.com>
+ * @license  https://github.com/vpg/disturb/blob/master/LICENSE MIT Licence
+ * @link     http://example.com/my/bar Documentation of Foo.
+ * @see      Vpg\Disturb\Tasks\AbstractTask
+ */
 class ManagerTask extends AbstractTask
 {
     protected $taskOptionList = [
         '?name:'    // optional workflow name
     ];
-    
+
+    /**
+     * Todo : improve usage handling
+     *
+     * @return void
+     */
     protected function usage()
     {
-        // xxx improve usage handling
         $this->getDI()->get('logger')->debug('Usage : ');
-        $this->getDI()->get('logger')->debug('disturb.php "Tasks\\Manager" start --workflow="/path/to/workflow/config/file.json" [--name="workflowName"]');
+        $this->getDI()->get('logger')->debug(
+            'disturb.php "Tasks\\Manager" start --workflow="/path/to/workflow/config/file.json" [--name="workflowName"]'
+        );
     }
 
+    /**
+     * Init work with parameters
+     *
+     * @param array $paramHash params list
+     *
+     * @return void
+     */
     protected function initWorker(array $paramHash)
     {
         $this->getDI()->get('logger')->debug(json_encode(func_get_args()));
@@ -35,26 +58,37 @@ class ManagerTask extends AbstractTask
         $this->topicName = Services\TopicService::getWorkflowManagerTopicName($this->workflowConfig['name']);
     }
 
+    /**
+     * Process Dtos message
+     *
+     * @param array $messageDto message object
+     *
+     * @throws WorkflowException
+     *
+     * @return void
+     */
     protected function processMessage(Dtos\Message $messageDto)
     {
         $this->getDI()->get('logger')->info('messageDto : ' . $messageDto);
-        switch($messageDto->getType()) {
+        switch ($messageDto->getType()) {
             case Dtos\Message::TYPE_WF_CTRL:
-                switch($messageDto->getAction()) {
+                switch ($messageDto->getAction()) {
                     case 'start':
                         $this->workflowManagerService->init($messageDto->getId());
                         $this->runNextStep($messageDto->getId());
                     break;
                 }
-                break;
+            break;
             case Dtos\Message::TYPE_STEP_ACK:
-                $this->getDI()->get('logger')->debug("Step {$messageDto->getStepCode()} says {$messageDto->getResult()}");
+                $this->getDI()->get('logger')->debug(
+                    "Step {$messageDto->getStepCode()} says {$messageDto->getResult()}"
+                );
                 $stepResultHash = json_decode($messageDto->getResult(), true);
                 $this->workflowManagerService->processStepJobResult(
-                    $messageDto->getId(),
-                    $messageDto->getStepCode(),
-                    $messageDto->getJobId(),
-                    $stepResultHash
+                $messageDto->getId(),
+                $messageDto->getStepCode(),
+                $messageDto->getJobId(),
+                $stepResultHash
                 );
 
                 $status = $this->workflowManagerService->getStatus($messageDto->getId());
@@ -63,28 +97,35 @@ class ManagerTask extends AbstractTask
                     throw new WorkflowException("Id failed {$messageDto->getId()}");
                 }
 
-                switch($this->workflowManagerService->getCurrentStepStatus($messageDto->getId())) {
+                switch ($this->workflowManagerService->getCurrentStepStatus($messageDto->getId())) {
                     case Services\WorkflowManager::STATUS_RUNNING:
                         // xxx check timeout
-                        break;
+                    break;
                     case Services\WorkflowManager::STATUS_SUCCESS:
                         $this->runNextStep($messageDto->getId());
-                        break;
+                    break;
                     case Services\WorkflowManager::STATUS_FAILED:
                         $this->workflowManagerService->setStatus(
-                            $messageDto->getId(),
-                            Services\WorkflowManager::STATUS_FAILED
+                        $messageDto->getId(),
+                        Services\WorkflowManager::STATUS_FAILED
                         );
-                        break;
+                    break;
                     default:
-                        throw new WorkflowException('Can\'t retrieve current step status');
+                    throw new WorkflowException('Can\'t retrieve current step status');
                 }
-                break;
+            break;
             default:
                 $this->getDI()->get('logger')->error("ERR : Unknown message type : {$messageDto->getType()}");
         }
     }
 
+    /**
+     * Run next step with previous workflow process id
+     *
+     * @param string $workflowProcessId workflow process id
+     *
+     * @return void
+     */
     protected function runNextStep(string $workflowProcessId)
     {
 

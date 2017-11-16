@@ -1,23 +1,28 @@
 <?php
-/*
- * This file is part of the Disturb package.
- *
- * (c) Matthieu Ventura <mventura@voyageprive.com>
- *
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
 
 namespace Vpg\Disturb\Services;
 
+/**
+ * Class TopicService
+ *
+ * @category Services
+ * @package  Disturb\Services
+ * @author   Matthieu VENTURA <mventura@voyageprive.com>
+ * @license  https://github.com/vpg/disturb/blob/master/LICENSE MIT Licence
+ * @link     http://example.com/my/bar Documentation of Foo.
+ */
 class TopicService
 {
     /**
+     * Topic workflow manager name
+     *
      * @const String TOPIC_WORKFLOW_MANAGER_NAME
      */
     const TOPIC_WORKFLOW_MANAGER_NAME = 'disturb-@workflow_name@-manager';
 
     /**
+     * Topic workflow manager step name
+     *
      * @const String TOPIC_WORKFLOW_MANAGER_STEP_NAME
      */
     const TOPIC_WORKFLOW_MANAGER_STEP_NAME = 'disturb-@workflow_name@-@step_name@-step';
@@ -32,7 +37,7 @@ class TopicService
      * @throws \Exception Required parameters
      * @return String
      */
-    public static function getWorkflowManagerTopicName (string $workflowName) : string
+    public static function getWorkflowManagerTopicName(string $workflowName) : string
     {
         if (empty($workflowName)) {
             throw new \Exception('Parameters required - workflow name can not be null or empty');
@@ -56,7 +61,7 @@ class TopicService
      * @throws \Exception Required parameters
      * @return String
      */
-    public static function getWorkflowStepTopicName (string $stepName, string $workflowName) : string
+    public static function getWorkflowStepTopicName(string $stepName, string $workflowName) : string
     {
         if (empty($stepName) || empty($workflowName)) {
             throw new \Exception('Parameters required - step name or workflow name can not be null or empty');

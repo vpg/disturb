@@ -1,9 +1,24 @@
 <?php
+
 namespace Vpg\Disturb\Services;
 
+/**
+ * Interface WorkflowManagerInterface
+ *
+ * @category Services
+ * @package  Disturb\Services
+ * @author   Jérome BOURGEAIS <jbourgeais@voyageprive.com>
+ * @license  https://github.com/vpg/disturb/blob/master/LICENSE MIT Licence
+ * @link     http://example.com/my/bar Documentation of Foo.
+ */
 interface WorkflowManagerInterface
 {
 
+    /**
+     * Constructor
+     *
+     * @param string $workflowConfigFilePath workflow config file path
+     */
     public function __construct(string $workflowConfigFilePath);
 
     /**
@@ -12,7 +27,7 @@ interface WorkflowManagerInterface
      * @param string $workflowProcessId The workflow process identifier
      *
      * @return void
-     * @throws \Disturb\WorkflowException
+     * @throws Vpg\Disturb\Exceptions|WorkflowException
      */
     public function init(string $workflowProcessId);
 
@@ -22,7 +37,7 @@ interface WorkflowManagerInterface
      * @param string $workflowProcessId The workflow process identifier
      *
      * @return string the workflow status code
-     * @throws \Disturb\WorkflowException
+     * @throws Vpg\Disturb\Exceptions\WorkflowException
      */
     public function getStatus(string $workflowProcessId) : string;
 
@@ -32,7 +47,7 @@ interface WorkflowManagerInterface
      * @param string $workflowProcessId The workflow process identifier
      *
      * @return array the next workflow step hash
-     * @throws \Disturb\WorkflowException
+     * @throws Vpg\Disturb\Exceptions\WorkflowException
      */
     public function getNextStepList(string $workflowProcessId) : array;
 

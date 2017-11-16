@@ -7,14 +7,18 @@ use \Phalcon\Config;
 /**
  * Interface ContextStorageAdapterInterface
  *
- * @package Disturb\ContextStorageAdapters
+ * @category ContextStorageAdapters
+ * @package  Disturb\ContextStorageAdapters
+ * @author   Alexandre DEFRETIN <adefretin@voyageprive.com>
+ * @license  https://github.com/vpg/disturb/blob/master/LICENSE MIT Licence
+ * @link     http://example.com/my/bar Documentation of Foo.
  */
 interface ContextStorageAdapterInterface
 {
     /**
      * Initialize
      *
-     * @param Config $config
+     * @param Config $config config
      *
      * @return mixed
      */
@@ -23,7 +27,7 @@ interface ContextStorageAdapterInterface
     /**
      * Get storage data identified by $workflowProcessId
      *
-     * @param string $workflowProcessId
+     * @param string $workflowProcessId workflowProcessorId
      *
      * @return mixed
      */
@@ -32,7 +36,7 @@ interface ContextStorageAdapterInterface
     /**
      * Search storage data identified by $queryHash
      *
-     * @param array $queryHash
+     * @param array $queryHash queryHash
      *
      * @return mixed
      */
@@ -41,7 +45,7 @@ interface ContextStorageAdapterInterface
     /**
      * Check if storage date $workflowProcessId exists
      *
-     * @param string $workflowProcessId
+     * @param string $workflowProcessId workflowProcessorId
      *
      * @return bool
      */
@@ -50,8 +54,8 @@ interface ContextStorageAdapterInterface
     /**
      * Save storage data identified by $workflowProcessId
      *
-     * @param string $workflowProcessId
-     * @param array $valueHash
+     * @param string $workflowProcessId workflowProcessorId
+     * @param array  $valueHash         valueHash
      *
      * @return mixed
      */
@@ -60,7 +64,7 @@ interface ContextStorageAdapterInterface
     /**
      * Delete storage data identified by $workflowProcessId
      *
-     * @param string $workflowProcessId
+     * @param string $workflowProcessId workflowProcessorId
      *
      * @return mixed
      */

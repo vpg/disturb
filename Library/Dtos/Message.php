@@ -1,8 +1,18 @@
-<?
+<?php
+
 namespace Vpg\Disturb\Dtos;
 
 use Vpg\Disturb\Exceptions;
 
+/**
+ * Class Message
+ *
+ * @category Dtos
+ * @package  Disturb\Dtos
+ * @author   Jérome BOURGEAIS <jbourgeais@voyageprive.com>
+ * @license  https://github.com/vpg/disturb/blob/master/LICENSE MIT Licence
+ * @link     http://example.com/my/bar Documentation of Foo.
+ */
 class Message
 {
     const TYPE_STEP_CTRL = 'STEP-CTRL';
@@ -34,7 +44,8 @@ class Message
      *
      * @throws Exceptions\InvalidMessageException
      */
-    public function __construct($rawMixed) {
+    public function __construct($rawMixed)
+    {
         if (is_array($rawMixed)) {
             $this->rawHash = $rawMixed;
         } elseif (is_string($rawMixed)) {
@@ -52,7 +63,8 @@ class Message
     /**
      * Validates the current message is valid
      *
-     * @throws \Exception in case of invalid message
+     * @throws Exceptions\InvalidMessageException
+     * @throws Exception
      *
      * @return void
      */
@@ -75,57 +87,120 @@ class Message
                 $propHashRequired = self::STEP_ACK_REQUIRED_PROP_HASH;
             break;
             default:
-                throw new \Exception(
+            throw new Exception(
+                'Validation of message type ' . $this->rawHash['type'] . ' is not implemented yet, please do'
+            );
+                throw new Exceptions\InvalidMessageException(
                     'Validation of message type ' . $this->rawHash['type'] . ' is not implemented yet, please do'
                 );
-                throw new Exceptions\InvalidMessageException('Validation of message type ' . $this->rawHash['type'] . ' is not implemented yet, please do');
         }
         $matchPropList = array_intersect_key($this->rawHash, array_flip($propHashRequired));
         $isValid = (count($propHashRequired) == count($matchPropList));
         if (!$isValid) {
-            throw new Exceptions\InvalidMessageException('Missing properties for message ' . $this->rawHash['type'] . ' : ' .
+            throw new Exceptions\InvalidMessageException(
+                'Missing properties for message ' . $this->rawHash['type'] . ' : ' .
                 implode(',', $propHashRequired)
             );
         }
     }
 
-    public function getId(): string {
+    /**
+     * Get message id
+     *
+     * @return string
+     */
+    public function getId(): string
+    {
         return $this->rawHash['id'] ?? '';
     }
 
-    public function getJobId(): string {
+    /**
+     * Get message job id
+     *
+     * @return string
+     */
+    public function getJobId(): string
+    {
         return $this->rawHash['jobId'] ?? '';
     }
 
-    public function getType(): string {
+    /**
+     * Get message type
+     *
+     * @return string
+     */
+    public function getType(): string
+    {
         return $this->rawHash['type'] ?? '';
     }
 
-    public function __toString() {
+    /**
+     * Get rawHash encoded
+     *
+     * @return string
+     */
+    public function __toString()
+    {
         return json_encode($this->rawHash);
     }
 
-    public function getPayload() : array {
+    /**
+     * Get message payload
+     *
+     * @return array
+     */
+    public function getPayload() : array
+    {
         return !empty($this->rawHash['payload']) ? $this->rawHash['payload'] : [];
     }
 
-    public function getFrom(): string {
+    /**
+     * Get message sender
+     *
+     * @return string
+     */
+    public function getFrom(): string
+    {
         return $this->rawHash['from'] ?? '';
     }
 
-    public function getAction(): string {
+    /**
+     * Get message action
+     *
+     * @return string
+     */
+    public function getAction(): string
+    {
         return $this->rawHash['action'] ?? '';
     }
 
-    public function getContract(): string {
+    /**
+     * Get contract id
+     *
+     * @return string
+     */
+    public function getContract(): string
+    {
         return $this->rawHash['contract'] ?? '';
     }
 
-    public function getStepCode(): string {
+    /**
+     * Get step code
+     *
+     * @return string
+     */
+    public function getStepCode(): string
+    {
         return $this->rawHash['stepCode'] ?? '';
     }
 
-    public function getResult(): string {
+    /**
+     * Get encoded result
+     *
+     * @return string
+     */
+    public function getResult(): string
+    {
         return $this->rawHash['result'] ?? '';
     }
 

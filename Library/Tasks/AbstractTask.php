@@ -1,13 +1,22 @@
 <?php
+
 namespace Vpg\Disturb\Tasks;
 
 use \Phalcon\Cli\Task;
 use \Phalcon\Loader;
 use \Phalcon\Config\Adapter\Json;
-
 use \Vpg\Disturb\Dtos;
 use \Vpg\Disturb\Cli;
 
+/**
+ * Abstract task
+ *
+ * @category Tasks
+ * @package  Disturb\Tasks
+ * @author   Jérome BOURGEAIS <jbourgeais@voyageprive.com>
+ * @license  https://github.com/vpg/disturb/blob/master/LICENSE MIT Licence
+ * @link     http://example.com/my/bar Documentation of Foo.
+ */
 abstract class AbstractTask extends Task implements TaskInterface
 {
     protected $taskOptionBaseList = [
@@ -37,8 +46,11 @@ abstract class AbstractTask extends Task implements TaskInterface
      *  - Init MQ sys
      *
      * @param array $paramHash The parsed options hash
+     *
+     * @return void
      */
-    protected function initWorker(array $paramHash) {
+    protected function initWorker(array $paramHash)
+    {
         $this->getDI()->get('logger')->debug(json_encode(func_get_args()));
         // xxx check if file exists, throw exc on err
         $this->workflowConfig = new Json($paramHash['workflow']);
@@ -61,10 +73,9 @@ abstract class AbstractTask extends Task implements TaskInterface
         $this->getDI()->get('logger')->debug(json_encode(func_get_args()));
         $paramHash = Cli\Console::parseLongOpt(join($paramList, ' '));
         // check required options
-        foreach(array_merge($this->taskOptionBaseList, $this->taskOptionList) as $option) {
-            if (
-                preg_match('/^(?<opt>\w+):?/', $option, $matchHash) &&
-                !array_key_exists($matchHash['opt'], $paramHash)
+        foreach (array_merge($this->taskOptionBaseList, $this->taskOptionList) as $option) {
+            if (preg_match('/^(?<opt>\w+):?/', $option, $matchHash)
+                && !array_key_exists($matchHash['opt'], $paramHash)
             ) {
                 $this->usage();
                 exit(1);
@@ -74,6 +85,13 @@ abstract class AbstractTask extends Task implements TaskInterface
         return $paramHash;
     }
 
+    /**
+     * Start action
+     *
+     * @param array $paramList The argv list
+     *
+     * @return void
+     */
     public final function startAction(array $paramList)
     {
         $this->getDI()->get('logger')->debug(json_encode(func_get_args()));
@@ -83,7 +101,9 @@ abstract class AbstractTask extends Task implements TaskInterface
         $this->kafkaTopicConsumer = $this->kafkaConsumer->newTopic($this->topicName, $this->kafkaTopicConf);
         $this->kafkaTopicConsumer->consumeStart($this->topicPartitionNo, RD_KAFKA_OFFSET_STORED);
         // xxx Factorize stdout/err support
-        $this->getDI()->get('logger')->info("Worker listening on \033[32m" . implode(',', $this->workflowConfig['brokerServerList']->toArray()) . ":\033[32m" . $this->topicName . "\033[0m");
+        $this->getDI()->get('logger')->info("Worker listening on \033[32m" .
+            implode(',', $this->workflowConfig['brokerServerList']->toArray()) .
+            ":\033[32m" . $this->topicName . "\033[0m");
         while (true) {
             $msg = $this->kafkaTopicConsumer->consume($this->topicPartitionNo, 100);
             // xxx q&d err handling
@@ -91,7 +111,7 @@ abstract class AbstractTask extends Task implements TaskInterface
                 if (!$msg) {
                     continue;
                 }
-                switch($msg->err) {
+                switch ($msg->err) {
                     case '-191': // no more msg
                     break;
                     default:
@@ -102,9 +122,10 @@ abstract class AbstractTask extends Task implements TaskInterface
             $this->getDI()->get('logger')->info("RECEIVE msg on {$this->topicName} : $msg->payload");
             try {
                 $msgDto = new Dtos\Message($msg->payload);
-            }
-            catch(\Exception $dtoException) {
-                $this->getDI()->get('logger')->error("Invalid message : \033[31m" . $dtoException->getMessage() . "\033[0m");
+            } catch (\Exception $dtoException) {
+                $this->getDI()->get('logger')->error(
+                    "Invalid message : \033[31m" . $dtoException->getMessage() . "\033[0m"
+                );
                 continue;
             }
             if ($msgDto->getType() == Dtos\Message::TYPE_WF_MONITOR) {
@@ -115,12 +136,20 @@ abstract class AbstractTask extends Task implements TaskInterface
         }
     }
 
-    private function processMonitoringMessage(Dtos\Message $messageDto) {
+    /**
+     * Process monitoring message
+     *
+     * @param Vpg|Dtos|Message $messageDto Dtos message
+     *
+     * @return void
+     */
+    private function processMonitoringMessage(Dtos\Message $messageDto)
+    {
         $this->getDI()->get('logger')->debug($messageDto);
-        switch($messageDto->getAction()) {
-        case Dtos\Message::ACTION_WF_MONITOR_PING:
-            $this->getDI()->get('logger')->debug("PING receive from {$messageDto->getFrom()}");
-            $this->sendMessage($messageDto->getFrom(), Dtos\Message::ACTION_WF_MONITOR_PONG);
+        switch ($messageDto->getAction()) {
+            case Dtos\Message::ACTION_WF_MONITOR_PING:
+                $this->getDI()->get('logger')->debug("PING receive from {$messageDto->getFrom()}");
+                $this->sendMessage($messageDto->getFrom(), Dtos\Message::ACTION_WF_MONITOR_PONG);
             break;
         }
     }
@@ -128,10 +157,13 @@ abstract class AbstractTask extends Task implements TaskInterface
     /**
      * Sends the given message to the specified topic
      *
-     * @param string $topicName     Topic name on which send the message
-     * @param Dtos\Message $message The message to send
+     * @param string       $topicName Topic name on which send the message
+     * @param Dtos\Message $message   The message to send
+     *
+     * @return void
      */
-    protected function sendMessage(string $topicName, Dtos\Message $message) {
+    protected function sendMessage(string $topicName, Dtos\Message $message)
+    {
         $this->getDI()->get('logger')->debug("($topicName, $message)");
         if (!isset($this->kafkaTopicProducerHash[$topicName])) {
             $this->kafkaTopicProducerHash[$topicName] = $this->kafkaProducer->newTopic($topicName);
@@ -144,14 +176,22 @@ abstract class AbstractTask extends Task implements TaskInterface
      *
      * @param string $clientServicesNamespace Absolute NS of the client logic service
      * @param string $clientServicesPath      Absolute file path to the service classes
+     *
+     * @return void
      */
-    private function registerClientNS(string $clientServicesNamespace, string $clientServicesPath) {
+    private function registerClientNS(string $clientServicesNamespace, string $clientServicesPath)
+    {
         $this->getDI()->get('logger')->debug(json_encode(func_get_args()));
         $loader = $this->getDI()->getShared('loader');
         $loader->registerNamespaces([$clientServicesNamespace => $clientServicesPath], true);
         $loader->register();
     }
 
+    /**
+     * Init MQ
+     *
+     * @return void
+     */
     private function initMq()
     {
         $this->getDI()->get('logger')->debug(json_encode(func_get_args()));

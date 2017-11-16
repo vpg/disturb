@@ -3,12 +3,16 @@ namespace Vpg\Disturb\Cli;
 
 use Phalcon\Cli;
 
+
 /**
  * Console
  * Provides generic func related to PHP CLI
  *
- * @package    Disturb
- * @subpackage Cli
+ * @category Cli
+ * @package  Disturb\Cli
+ * @author   Jérome BOURGEAIS <jbourgeais@voyageprive.com>
+ * @license  https://github.com/vpg/disturb/blob/master/LICENSE MIT Licence
+ * @link     http://example.com/my/bar Documentation of Foo.
  */
 class Console extends Cli\Console {
 
@@ -26,7 +30,6 @@ class Console extends Cli\Console {
      * Parses and validates the given argv according to the worker options config
      *
      * @param string $argv The argv list as string
-     * @param array  $longOptKeyList The argv list
      *
      * @return array The parsed options hash
      */
@@ -37,7 +40,9 @@ class Console extends Cli\Console {
             $argv,
             $paramMatchHash
         );
-        $paramHash = array_combine(array_values($paramMatchHash[self::OPT_KEYS_GROUP_NAME]), array_values($paramMatchHash[self::OPT_VALS_GROUP_NAME]));
+        $paramHash = array_combine(array_values($paramMatchHash[self::OPT_KEYS_GROUP_NAME]), array_values(
+            $paramMatchHash[self::OPT_VALS_GROUP_NAME])
+        );
         return $paramHash;
     }
 }
