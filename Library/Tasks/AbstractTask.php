@@ -113,14 +113,14 @@ abstract class AbstractTask extends Task implements TaskInterface
         $this->lock();
         $this->initWorker();
 
-        $this->kafkaTopicConsumer = $this->kafkaConsumer->newTopic($this->topicName, $this->kafkaTopicConf);
-        $this->kafkaTopicConsumer->consumeStart($this->topicPartitionNo, RD_KAFKA_OFFSET_STORED);
         // xxx Factorize stdout/err support
         $this->getDI()->get('logger')->info("Worker listening on \033[32m" .
             implode(',', $this->workflowConfig['brokerServerList']->toArray()) .
             ":\033[32m" . $this->topicName . "\033[0m");
+        $this->kafkaConsumer->subscribe([$this->topicName]);
         while (true) {
-            $msg = $this->kafkaTopicConsumer->consume($this->topicPartitionNo, 100);
+            sleep(1);
+            $msg = $this->kafkaConsumer->consume(10000);
             // xxx q&d err handling
             if (!$msg ||  $msg->err) {
                 if (!$msg) {
@@ -211,21 +211,23 @@ abstract class AbstractTask extends Task implements TaskInterface
     {
         $this->getDI()->get('logger')->debug(json_encode(func_get_args()));
         $brokers = implode(',', $this->workflowConfig['brokerServerList']->toArray());
-        // xxx put kafka\Conf in DI and config in a config file
-        $this->kafkaConf = new \RdKafka\Conf();
-        $this->kafkaConf->set('group.id', 'foo');
-        // xxx put Consumer in a DI service
-        $this->kafkaConsumer = new \RdKafka\Consumer($this->kafkaConf);
-        $this->kafkaConsumer->setLogLevel(LOG_DEBUG);
-        $this->kafkaConsumer->addBrokers($brokers);
+
         // xxx put kafka\TopicConf in DI and config in a config file
         $this->kafkaTopicConf = new \RdKafka\TopicConf();
         $this->kafkaTopicConf->set('offset.store.method', 'file');
         $this->kafkaTopicConf->set('auto.commit.interval.ms', 100);
         $this->kafkaTopicConf->set('offset.store.sync.interval.ms', 100);
-        $this->kafkaTopicConf->set('offset.store.method', 'file');
-        $this->kafkaTopicConf->set('offset.store.path', sys_get_temp_dir());
+        $this->kafkaTopicConf->set('offset.store.method', 'broker');
         $this->kafkaTopicConf->set('auto.offset.reset', 'smallest');
+
+        // xxx put kafka\Conf in DI and config in a config file
+        $this->kafkaConf = new \RdKafka\Conf();
+        $this->kafkaConf->set('metadata.broker.list', $brokers);
+        $this->kafkaConf->set('group.id', 'foo');
+        $this->kafkaConf->setDefaultTopicConf($this->kafkaTopicConf);
+
+        // xxx put Consumer in a DI service
+        $this->kafkaConsumer = new \RdKafka\KafkaConsumer($this->kafkaConf);
 
         $this->kafkaProducer = new \RdKafka\Producer();
         $this->kafkaProducer->addBrokers($brokers);
