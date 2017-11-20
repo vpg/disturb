@@ -83,10 +83,10 @@ class ManagerTask extends AbstractTask
                 );
                 $stepResultHash = json_decode($messageDto->getResult(), true);
                 $this->workflowManagerService->processStepJobResult(
-                $messageDto->getId(),
-                $messageDto->getStepCode(),
-                $messageDto->getJobId(),
-                $stepResultHash
+                    $messageDto->getId(),
+                    $messageDto->getStepCode(),
+                    $messageDto->getJobId(),
+                    $stepResultHash
                 );
 
                 $status = $this->workflowManagerService->getStatus($messageDto->getId());
@@ -104,8 +104,8 @@ class ManagerTask extends AbstractTask
                     break;
                     case Services\WorkflowManager::STATUS_FAILED:
                         $this->workflowManagerService->setStatus(
-                        $messageDto->getId(),
-                        Services\WorkflowManager::STATUS_FAILED
+                            $messageDto->getId(),
+                            Services\WorkflowManager::STATUS_FAILED
                         );
                     break;
                     default:
