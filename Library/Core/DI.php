@@ -1,15 +1,12 @@
 <?php
 
-use \Phalcon\Di\FactoryDefault\Cli as CliDI;
-use \Phalcon\Loader;
-
 // Using the CLI factory default services container
-$di = new CliDI();
+$di = new \Phalcon\Di\FactoryDefault\Cli();
 
 /**
  * Register the autoloader and tell it to register the tasks directory
  */
-$loader = new Loader();
+$loader = new \Phalcon\Loader();
 $loader->registerNamespaces(
     [
         'Vpg\Disturb' => realpath(__DIR__ . '/../../Library/')
@@ -34,7 +31,7 @@ if (is_readable($configFile)) {
 $di->set(
     'logger',
     function () use ($di) {
-        $logger = new \Vpg\Disturb\Logger\Logger();
+        $logger = new \Vpg\Disturb\Core\Logger\Logger();
 
         // xxx - syslog
         /*$syslog = new \Phalcon\Logger\Adapter\Syslog(
@@ -51,7 +48,7 @@ $di->set(
         $stdoutLogger = new \Phalcon\Logger\Adapter\Stream(
             'php://stdout'
         );
-        $stdoutLogger->setFormatter(new \Vpg\Disturb\Logger\Formatter\Stream());
+        $stdoutLogger->setFormatter(new \Vpg\Disturb\Core\Logger\Formatter\Stream());
         $logger->push($stdoutLogger);
         return $logger;
     },
