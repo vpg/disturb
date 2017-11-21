@@ -87,9 +87,6 @@ class Message
                 $propHashRequired = self::STEP_ACK_REQUIRED_PROP_HASH;
             break;
             default:
-            throw new Exception(
-                'Validation of message type ' . $this->rawHash['type'] . ' is not implemented yet, please do'
-            );
                 throw new Exceptions\InvalidMessageException(
                     'Validation of message type ' . $this->rawHash['type'] . ' is not implemented yet, please do'
                 );

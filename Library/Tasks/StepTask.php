@@ -87,7 +87,7 @@ class StepTask extends AbstractTask
         $this->service = new $serviceFullName($this->paramHash['workflow']);
 
         $this->topicName = Services\TopicService::getWorkflowStepTopicName(
-            $paramHash['step'],
+            $this->paramHash['step'],
             $this->workflowConfig['name']
         );
     }
