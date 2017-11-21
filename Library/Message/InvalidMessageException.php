@@ -1,6 +1,8 @@
 <?php
 
-namespace Vpg\Disturb\Exceptions;
+namespace Vpg\Disturb\Message;
+
+use Vpg\Disturb\Core;
 
 /**
  * Class InvalidMessageException
@@ -11,7 +13,7 @@ namespace Vpg\Disturb\Exceptions;
  * @license  https://github.com/vpg/disturb/blob/master/LICENSE MIT Licence
  * @link     http://example.com/my/bar Documentation of Foo.
  */
-class InvalidMessageException extends Exception
+class InvalidMessageException extends Core\Exception
 {
 
 }

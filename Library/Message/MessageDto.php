@@ -1,8 +1,7 @@
 <?php
 
-namespace Vpg\Disturb\Dtos;
+namespace Vpg\Disturb\Message;
 
-use Vpg\Disturb\Exceptions;
 
 /**
  * Class Message
@@ -13,7 +12,7 @@ use Vpg\Disturb\Exceptions;
  * @license  https://github.com/vpg/disturb/blob/master/LICENSE MIT Licence
  * @link     http://example.com/my/bar Documentation of Foo.
  */
-class Message
+class MessageDto
 {
     const TYPE_STEP_CTRL = 'STEP-CTRL';
     const TYPE_STEP_ACK = 'STEP-ACK';

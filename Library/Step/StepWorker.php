@@ -1,25 +1,25 @@
 <?php
 
-namespace Vpg\Disturb\Tasks;
+namespace Vpg\Disturb\Step;
 
 use \Phalcon\Cli\Task;
 
-use \Vpg\Disturb\Dtos;
+use \Vpg\Disturb\Message;
 use \Vpg\Disturb\Services;
-use \Vpg\Disturb\Tasks\AbstractTask as AbstractTask;
+use \Vpg\Disturb\Core\AbstractWorker;
 
 /**
  * Generic Step task
  * Dedicated to one step, given in argv with --step argument
  *
- * @category Tasks
- * @package  Disturb\Tasks
+ * @category Step
+ * @package  Disturb\Step
  * @author   Jérome BOURGEAIS <jbourgeais@voyageprive.com>
  * @license  https://github.com/vpg/disturb/blob/master/LICENSE MIT Licence
  * @link     http://example.com/my/bar Documentation of Foo.
- * @see      \Disturb\Tasks\AbstractTask
+ * @see      \Disturb\Core\AbstractTask
  */
-class StepTask extends AbstractTask
+class StepWorker extends AbstractWorker
 {
 
     protected $taskOptionList = [
@@ -44,21 +44,21 @@ class StepTask extends AbstractTask
     /**
      * Uses the business service related to the current step to process the given message
      *  - The message processing is fully delegated to the "client" service implementing the
-     * \Disturb\Services\StepServiceInterface.php by calling the execute method
+     * \Disturb\Step\StepServiceInterface.php by calling the execute method
      *  - the process result (returned by the service) is sent back to the manager
      *
-     * @param Vpg\Disturb\Dtos\Message $messageDto the message to process
+     * @param Vpg\Disturb\Message\MessageDto $messageDto the message to process
      *
      * @return void
      */
-    protected function processMessage(Dtos\Message $messageDto)
+    protected function processMessage(Message\MessageDto $messageDto)
     {
         $this->getDI()->get('logger')->info('messageDto : ' . $messageDto);
         $resultHash = $this->service->execute($messageDto->getPayload());
-        $msgDto = new Dtos\Message(
+        $msgDto = new Message\MessageDto(
             [
                 'id' => $messageDto->getId(),
-                'type' => Dtos\Message::TYPE_STEP_ACK,
+                'type' => Message\MessageDto::TYPE_STEP_ACK,
                 'stepCode' => $messageDto->getStepCode(),
                 'jobId' => $messageDto->getJobId(),
                 'result' => json_encode($resultHash)
