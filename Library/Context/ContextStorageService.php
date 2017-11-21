@@ -1,13 +1,12 @@
 <?php
-
-namespace Vpg\Disturb\Services;
-
-use Vpg\Disturb\Exceptions\ContextStorageException;
-use Vpg\Disturb\ContextStorageAdapters\ContextStorageAdapterInterface;
-use Vpg\Disturb\ContextStorageAdapters\ElasticsearchAdapter;
+namespace Vpg\Disturb\Context;
 
 use \Phalcon\Config;
 use \Phalcon\Mvc\User\Component;
+
+use Vpg\Disturb\Contex\ContextStorageException;
+use Vpg\Disturb\Context\ContextStorageAdapterInterface;
+use Vpg\Disturb\Context\ElasticsearchAdapter;
 
 /**
  * Class ContextStorage
@@ -83,7 +82,7 @@ class ContextStorage extends Component
         // check if adapter class exists
         switch ($config->adapter) {
             case self::ADAPTER_ELASTICSEARCH:
-                $adapterClass = 'Vpg\\Disturb\\ContextStorageAdapters\\ElasticsearchAdapter';
+                $adapterClass = 'Vpg\\Disturb\\Context\\ElasticsearchAdapter';
             break;
             default:
             throw new ContextStorageException(

@@ -1,17 +1,15 @@
 <?php
 
-namespace Vpg\Disturb\ContextStorageAdapters;
+namespace Vpg\Disturb\Context;
 
 use \Phalcon\Config;
 
 /**
  * Interface ContextStorageAdapterInterface
  *
- * @category ContextStorageAdapters
- * @package  Disturb\ContextStorageAdapters
+ * @package  Disturb\Context
  * @author   Alexandre DEFRETIN <adefretin@voyageprive.com>
  * @license  https://github.com/vpg/disturb/blob/master/LICENSE MIT Licence
- * @link     http://example.com/my/bar Documentation of Foo.
  */
 interface ContextStorageAdapterInterface
 {
