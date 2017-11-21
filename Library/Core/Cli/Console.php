@@ -1,8 +1,7 @@
 <?php
-namespace Vpg\Disturb\Cli;
+namespace Vpg\Disturb\Core\Cli;
 
-use Phalcon\Cli;
-
+use \Phalcon\Cli;
 
 /**
  * Console

@@ -1,6 +1,6 @@
 <?php
 
-namespace Vpg\Disturb\Tasks;
+namespace Vpg\Disturb\Core;
 
 /**
  * Interface Task
@@ -9,7 +9,6 @@ namespace Vpg\Disturb\Tasks;
  * @package  Disturb\Tasks
  * @author   Jérome BOURGEAIS <jbourgeais@voyageprive.com>
  * @license  https://github.com/vpg/disturb/blob/master/LICENSE MIT Licence
- * @link     http://example.com/my/bar Documentation of Foo.
  */
 interface TaskInterface
 {

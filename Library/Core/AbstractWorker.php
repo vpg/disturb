@@ -6,9 +6,8 @@ use \Phalcon\Cli\Task;
 use \Phalcon\Loader;
 use \Phalcon\Config\Adapter\Json;
 
-use \Vpg\Disturb\Message\MessageDto;
-use \Vpg\Disturb\Workflow\WorkflowException;
-use \Vpg\Disturb\Core\Cli;
+use Vpg\Disturb\Message\MessageDto;
+use Vpg\Disturb\Workflow\WorkflowException;
 
 /**
  * Abstract task
@@ -17,7 +16,6 @@ use \Vpg\Disturb\Core\Cli;
  * @package  Disturb\Tasks
  * @author   Jérome BOURGEAIS <jbourgeais@voyageprive.com>
  * @license  https://github.com/vpg/disturb/blob/master/LICENSE MIT Licence
- * @link     http://example.com/my/bar Documentation of Foo.
  */
 abstract class AbstractWorker extends Task implements WorkerInterface
 {
