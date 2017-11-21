@@ -1,15 +1,13 @@
 <?php
 
-namespace Vpg\Disturb\Services;
+namespace Vpg\Disturb\Topic;
 
 /**
  * Class TopicService
  *
- * @category Services
- * @package  Disturb\Services
+ * @package  Disturb\Topic
  * @author   Matthieu VENTURA <mventura@voyageprive.com>
  * @license  https://github.com/vpg/disturb/blob/master/LICENSE MIT Licence
- * @link     http://example.com/my/bar Documentation of Foo.
  */
 class TopicService
 {
