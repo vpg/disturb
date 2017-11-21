@@ -1,6 +1,6 @@
 <?php
 
-namespace Vpg\Disturb\Services;
+namespace Vpg\Disturb\Workflow;
 
 /**
  * Interface WorkflowManagerInterface
@@ -27,7 +27,7 @@ interface WorkflowManagerInterface
      * @param string $workflowProcessId The workflow process identifier
      *
      * @return void
-     * @throws Vpg\Disturb\Exceptions|WorkflowException
+     * @throws Vpg\Disturb\Workflow\WorkflowException
      */
     public function init(string $workflowProcessId);
 
@@ -37,7 +37,7 @@ interface WorkflowManagerInterface
      * @param string $workflowProcessId The workflow process identifier
      *
      * @return string the workflow status code
-     * @throws Vpg\Disturb\Exceptions\WorkflowException
+     * @throws Vpg\Disturb\Workflow\WorkflowException
      */
     public function getStatus(string $workflowProcessId) : string;
 
@@ -47,7 +47,7 @@ interface WorkflowManagerInterface
      * @param string $workflowProcessId The workflow process identifier
      *
      * @return array the next workflow step hash
-     * @throws Vpg\Disturb\Exceptions\WorkflowException
+     * @throws Vpg\Disturb\Workflow\WorkflowException
      */
     public function getNextStepList(string $workflowProcessId) : array;
 
