@@ -27,6 +27,13 @@ if (is_readable($configFile)) {
     $di->set('config', $config);
 }
 
+$di->set('dispatcher', function () {
+    $dispatcher = new \Phalcon\Cli\Dispatcher();
+    $dispatcher->setTaskSuffix('Worker');
+
+    return $dispatcher;
+});
+
 // Register logger
 $di->set(
     'logger',

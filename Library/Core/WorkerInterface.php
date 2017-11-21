@@ -3,17 +3,17 @@
 namespace Vpg\Disturb\Core;
 
 /**
- * Interface Task
+ * Interface Worker
  *
- * @category Tasks
- * @package  Disturb\Tasks
+ * @category Worker
+ * @package  Disturb\Core
  * @author   Jérome BOURGEAIS <jbourgeais@voyageprive.com>
  * @license  https://github.com/vpg/disturb/blob/master/LICENSE MIT Licence
  */
-interface TaskInterface
+interface WorkerInterface
 {
     /**
-     * Start task action
+     * Start worker action
      *
      * @param array $paramHash the params
      *
