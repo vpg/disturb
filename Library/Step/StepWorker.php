@@ -4,20 +4,17 @@ namespace Vpg\Disturb\Step;
 
 use \Phalcon\Cli\Task;
 
-use \Vpg\Disturb\Message;
-use \Vpg\Disturb\Services;
-use \Vpg\Disturb\Core\AbstractWorker;
+use Vpg\Disturb\Core\AbstractWorker;
+use Vpg\Disturb\Message;
+use Vpg\Disturb\Topic;
 
 /**
  * Generic Step task
  * Dedicated to one step, given in argv with --step argument
  *
- * @category Step
  * @package  Disturb\Step
  * @author   Jérome BOURGEAIS <jbourgeais@voyageprive.com>
  * @license  https://github.com/vpg/disturb/blob/master/LICENSE MIT Licence
- * @link     http://example.com/my/bar Documentation of Foo.
- * @see      \Disturb\Core\AbstractTask
  */
 class StepWorker extends AbstractWorker
 {
@@ -66,7 +63,7 @@ class StepWorker extends AbstractWorker
         );
 
         $this->sendMessage(
-            Services\TopicService::getWorkflowManagerTopicName($this->workflowConfig['name']),
+            Topic\TopicService::getWorkflowManagerTopicName($this->workflowConfig['name']),
             $msgDto
         );
     }
@@ -86,7 +83,7 @@ class StepWorker extends AbstractWorker
             ucFirst($this->paramHash['step']) . 'Step';
         $this->service = new $serviceFullName($this->paramHash['workflow']);
 
-        $this->topicName = Services\TopicService::getWorkflowStepTopicName(
+        $this->topicName = Topic\TopicService::getWorkflowStepTopicName(
             $this->paramHash['step'],
             $this->workflowConfig['name']
         );
