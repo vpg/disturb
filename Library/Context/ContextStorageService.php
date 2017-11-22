@@ -7,6 +7,7 @@ use \Phalcon\Mvc\User\Component;
 use Vpg\Disturb\Contex\ContextStorageException;
 use Vpg\Disturb\Context\ContextStorageAdapterInterface;
 use Vpg\Disturb\Context\ElasticsearchAdapter;
+use Vpg\Disturb\Workflow;
 
 /**
  * Class ContextStorage
@@ -194,7 +195,7 @@ class ContextStorageService extends Component
         if (isset($contextHash[self::WORKFLOW_STATUS])) {
             return $contextHash[self::WORKFLOW_STATUS];
         } else {
-            return \Disturb\Services\WorkflowManager::STATUS_NO_STARTED;
+            return Workflow\ManagerService::STATUS_NO_STARTED;
         }
     }
 
