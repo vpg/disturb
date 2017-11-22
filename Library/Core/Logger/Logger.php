@@ -5,7 +5,6 @@ namespace Vpg\Disturb\Core\Logger;
 /**
  * Class Logger
  *
- * @category Logger
  * @package  Disturb\Core\Logger
  * @author   Maxime BRENGUIER <mbrenguier@voyageprive.com>
  * @license  https://github.com/vpg/disturb/blob/master/LICENSE MIT Licence

@@ -7,7 +7,6 @@ use \Phalcon\Cli;
  * Console
  * Provides generic func related to PHP CLI
  *
- * @category Cli
  * @package  Disturb\Cli
  * @author   Jérome BOURGEAIS <jbourgeais@voyageprive.com>
  * @license  https://github.com/vpg/disturb/blob/master/LICENSE MIT Licence

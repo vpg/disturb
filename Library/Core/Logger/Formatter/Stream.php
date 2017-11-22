@@ -7,7 +7,6 @@ use \Phalcon\Logger\FormatterInterface;
 /**
  * Class Stream
  *
- * @category Formatter
  * @package  Disturb\Core\Logger
  * @author   Maxime BRENGUIER <mbrenguier@voyageprive.com>
  * @license  https://github.com/vpg/disturb/blob/master/LICENSE MIT Licence

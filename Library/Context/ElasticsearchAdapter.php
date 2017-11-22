@@ -8,7 +8,6 @@ use \Elasticsearch;
 /**
  * Class ElasticsearchAdapter
  *
- * @category ContextStorageAdapters
  * @package  Disturb\Context
  * @author   Alexandre DEFRETIN <adefretin@voyageprive.com>
  * @license  https://github.com/vpg/disturb/blob/master/LICENSE MIT Licence

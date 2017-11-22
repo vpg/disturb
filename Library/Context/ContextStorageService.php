@@ -9,7 +9,6 @@ use Vpg\Disturb\Workflow;
 /**
  * Class ContextStorage
  *
- * @category Services
  * @package  Disturb\Context
  * @author   Alexandre DEFRETIN <adefretin@voyageprive.com>
  * @license  https://github.com/vpg/disturb/blob/master/LICENSE MIT Licence

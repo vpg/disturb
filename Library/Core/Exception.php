@@ -7,7 +7,6 @@ use \Throwable;
 /**
  * Abstract class Exception
  *
- * @category Exceptions
  * @package  Disturb\Exceptions
  * @author   Alexandre DEFRETIN <adefretin@voyageprive.com>
  * @license  https://github.com/vpg/disturb/blob/master/LICENSE MIT Licence

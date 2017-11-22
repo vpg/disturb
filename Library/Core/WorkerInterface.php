@@ -5,7 +5,6 @@ namespace Vpg\Disturb\Core;
 /**
  * Interface Worker
  *
- * @category Worker
  * @package  Disturb\Core
  * @author   Jérome BOURGEAIS <jbourgeais@voyageprive.com>
  * @license  https://github.com/vpg/disturb/blob/master/LICENSE MIT Licence
