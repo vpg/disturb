@@ -2,8 +2,6 @@
 
 namespace Vpg\Disturb\Step;
 
-use \Phalcon\Cli\Task;
-
 use Vpg\Disturb\Core\AbstractWorker;
 use Vpg\Disturb\Message;
 use Vpg\Disturb\Topic;
@@ -44,7 +42,7 @@ class StepWorker extends AbstractWorker
      * \Disturb\Step\StepServiceInterface.php by calling the execute method
      *  - the process result (returned by the service) is sent back to the manager
      *
-     * @param Vpg\Disturb\Message\MessageDto $messageDto the message to process
+     * @param Message\MessageDto $messageDto the message to process
      *
      * @return void
      */
