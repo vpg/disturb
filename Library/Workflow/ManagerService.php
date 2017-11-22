@@ -1,22 +1,19 @@
 <?PHP
-
-namespace Vpg\Disturb\Services;
-
-use Vpg\Disturb\Exceptions;
+namespace Vpg\Disturb\Workflow;
 
 use \Phalcon\Config\Adapter\Json;
 use \Phalcon\Mvc\User\Component;
 
+use Vpg\Disturb\Context\ContextStorageService;
+
 /**
  * Class WorkflowManager
  *
- * @category Services
- * @package  Disturb\Services
+ * @package  Disturb\Workflow
  * @author   Jérome BOURGEAIS <jbourgeais@voyageprive.com>
  * @license  https://github.com/vpg/disturb/blob/master/LICENSE MIT Licence
- * @link     http://example.com/my/bar Documentation of Foo.
  */
-class WorkflowManager extends Component implements WorkflowManagerInterface
+class ManagerService extends Component implements WorkflowManagerInterface
 {
     /**
      * Status no started const
@@ -83,7 +80,7 @@ class WorkflowManager extends Component implements WorkflowManagerInterface
 
         $this->di->setShared(
             'contextStorage',
-            new ContextStorage($this->di->get('config')->contextStorage)
+            new ContextStorageService($this->di->get('config')->contextStorage)
         );
     }
 
@@ -295,7 +292,7 @@ class WorkflowManager extends Component implements WorkflowManagerInterface
      * @param int    $jobId             the job identifier related to the step
      * @param array  $resultHash        the result data
      *
-     * @throws Exceptions\WorkflowException in case of no job found
+     * @throws WorkflowException in case of no job found
      *
      * @return void
      */
@@ -304,7 +301,7 @@ class WorkflowManager extends Component implements WorkflowManagerInterface
         $this->di->get('logger')->debug(json_encode(func_get_args()));
         $stepHash = $this->getContextWorkflowStep($workflowProcessId, $stepCode);
         if (!isset($stepHash['jobList']) || !isset($stepHash['jobList'][$jobId])) {
-            throw new Exceptions\WorkflowException('Cannot find any job');
+            throw new WorkflowException('Cannot find any job');
         }
         $stepHash['jobList'][$jobId]['status'] = $resultHash['status'] ?? self::STATUS_FAILED;
         $stepHash['jobList'][$jobId]['result'] = $resultHash['data'] ?? [];

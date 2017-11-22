@@ -1,18 +1,15 @@
 <?php
 
-namespace Vpg\Disturb\Logger\Formatter;
+namespace Vpg\Disturb\Core\Logger\Formatter;
 
 use \Phalcon\Logger\FormatterInterface;
-use \Phalcon\Logger;
 
 /**
  * Class Stream
  *
- * @category Formatter
- * @package  Disturb\Logger|Formatter
+ * @package  Disturb\Core\Logger
  * @author   Maxime BRENGUIER <mbrenguier@voyageprive.com>
  * @license  https://github.com/vpg/disturb/blob/master/LICENSE MIT Licence
- * @link     http://example.com/my/bar Documentation of Foo.
  */
 class Stream implements FormatterInterface
 {

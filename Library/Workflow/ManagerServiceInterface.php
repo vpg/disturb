@@ -1,15 +1,13 @@
 <?php
 
-namespace Vpg\Disturb\Services;
+namespace Vpg\Disturb\Workflow;
 
 /**
  * ManagerServiceInterface
  *
- * @category Services
- * @package  Disturb\Services
+ * @package  Disturb\Workflow
  * @author   Jérome BOURGEAIS <jbourgeais@voyageprive.com>
  * @license  https://github.com/vpg/disturb/blob/master/LICENSE MIT Licence
- * @link     http://example.com/my/bar Documentation of Foo.
  */
 interface ManagerServiceInterface
 {
@@ -21,7 +19,7 @@ interface ManagerServiceInterface
      *
      * @return array the step to run input data
      *
-     * @throws Vpg\Disturb\WorkflowException
+     * @throws Vpg\Disturb\Workflow\WorkflowException
      */
     public function getStepInput(string $workflowProcessId, string $stepCode) : array;
 }

@@ -1,8 +1,5 @@
 <?php
-
-namespace Vpg\Disturb\ContextStorageAdapters;
-
-use Vpg\Disturb\Exceptions\ContextStorageException;
+namespace Vpg\Disturb\Context;
 
 use \Phalcon\Mvc\User\Component;
 use \Phalcon\Config;
@@ -11,11 +8,9 @@ use \Elasticsearch;
 /**
  * Class ElasticsearchAdapter
  *
- * @category ContextStorageAdapters
- * @package  Disturb\ContextStorageAdapters
+ * @package  Disturb\Context
  * @author   Alexandre DEFRETIN <adefretin@voyageprive.com>
  * @license  https://github.com/vpg/disturb/blob/master/LICENSE MIT Licence
- * @link     http://example.com/my/bar Documentation of Foo.
  */
 class ElasticsearchAdapter extends Component implements ContextStorageAdapterInterface
 {

@@ -1,24 +1,19 @@
 <?php
-
-namespace Vpg\Disturb\Services;
-
-use Vpg\Disturb\Exceptions\ContextStorageException;
-use Vpg\Disturb\ContextStorageAdapters\ContextStorageAdapterInterface;
-use Vpg\Disturb\ContextStorageAdapters\ElasticsearchAdapter;
+namespace Vpg\Disturb\Context;
 
 use \Phalcon\Config;
 use \Phalcon\Mvc\User\Component;
 
+use Vpg\Disturb\Workflow;
+
 /**
  * Class ContextStorage
  *
- * @category Services
- * @package  Disturb\Services
+ * @package  Disturb\Context
  * @author   Alexandre DEFRETIN <adefretin@voyageprive.com>
  * @license  https://github.com/vpg/disturb/blob/master/LICENSE MIT Licence
- * @link     http://example.com/my/bar Documentation of Foo.
  */
-class ContextStorage extends Component
+class ContextStorageService extends Component
 {
     /**
      * Elastic search adapter
@@ -83,7 +78,7 @@ class ContextStorage extends Component
         // check if adapter class exists
         switch ($config->adapter) {
             case self::ADAPTER_ELASTICSEARCH:
-                $adapterClass = 'Vpg\\Disturb\\ContextStorageAdapters\\ElasticsearchAdapter';
+                $adapterClass = 'Vpg\\Disturb\\Context\\ElasticsearchAdapter';
             break;
             default:
             throw new ContextStorageException(
@@ -195,7 +190,7 @@ class ContextStorage extends Component
         if (isset($contextHash[self::WORKFLOW_STATUS])) {
             return $contextHash[self::WORKFLOW_STATUS];
         } else {
-            return \Disturb\Services\WorkflowManager::STATUS_NO_STARTED;
+            return Workflow\ManagerService::STATUS_NO_STARTED;
         }
     }
 

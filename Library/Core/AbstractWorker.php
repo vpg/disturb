@@ -1,25 +1,22 @@
 <?php
 
-namespace Vpg\Disturb\Tasks;
+namespace Vpg\Disturb\Core;
 
 use \Phalcon\Cli\Task;
 use \Phalcon\Loader;
 use \Phalcon\Config\Adapter\Json;
 
-use \Vpg\Disturb\Dtos;
-use \Vpg\Disturb\Cli;
-use \Vpg\Disturb\Exceptions;
+use Vpg\Disturb\Message\MessageDto;
+use Vpg\Disturb\Workflow\WorkflowException;
 
 /**
  * Abstract task
  *
- * @category Tasks
- * @package  Disturb\Tasks
+ * @package  Disturb\Core
  * @author   Jérome BOURGEAIS <jbourgeais@voyageprive.com>
  * @license  https://github.com/vpg/disturb/blob/master/LICENSE MIT Licence
- * @link     http://example.com/my/bar Documentation of Foo.
  */
-abstract class AbstractTask extends Task implements TaskInterface
+abstract class AbstractWorker extends Task implements WorkerInterface
 {
     protected $taskOptionBaseList = [
         'workflow:', // required step code config file
@@ -139,14 +136,14 @@ abstract class AbstractTask extends Task implements TaskInterface
             }
             $this->getDI()->get('logger')->info("RECEIVE msg on {$this->topicName} : $msg->payload");
             try {
-                $msgDto = new Dtos\Message($msg->payload);
+                $msgDto = new MessageDto($msg->payload);
             } catch (\Exception $dtoException) {
                 $this->getDI()->get('logger')->error(
                     "Invalid message : \033[31m" . $dtoException->getMessage() . "\033[0m"
                 );
                 continue;
             }
-            if ($msgDto->getType() == Dtos\Message::TYPE_WF_MONITOR) {
+            if ($msgDto->getType() == MessageDto::TYPE_WF_MONITOR) {
                 $this->processMonitoringMessage($msgDto);
                 continue;
             }
@@ -161,13 +158,13 @@ abstract class AbstractTask extends Task implements TaskInterface
      *
      * @return void
      */
-    private function processMonitoringMessage(Dtos\Message $messageDto)
+    private function processMonitoringMessage(MessageDto $messageDto)
     {
         $this->getDI()->get('logger')->debug($messageDto);
         switch ($messageDto->getAction()) {
-            case Dtos\Message::ACTION_WF_MONITOR_PING:
+            case MessageDto::ACTION_WF_MONITOR_PING:
                 $this->getDI()->get('logger')->debug("PING receive from {$messageDto->getFrom()}");
-                $this->sendMessage($messageDto->getFrom(), Dtos\Message::ACTION_WF_MONITOR_PONG);
+                $this->sendMessage($messageDto->getFrom(), MessageDto::ACTION_WF_MONITOR_PONG);
             break;
         }
     }
@@ -175,12 +172,12 @@ abstract class AbstractTask extends Task implements TaskInterface
     /**
      * Sends the given message to the specified topic
      *
-     * @param string       $topicName Topic name on which send the message
-     * @param Dtos\Message $message   The message to send
+     * @param string     $topicName Topic name on which send the message
+     * @param MessageDto $message   The message to send
      *
      * @return void
      */
-    protected function sendMessage(string $topicName, Dtos\Message $message)
+    protected function sendMessage(string $topicName, MessageDto $message)
     {
         $this->getDI()->get('logger')->debug("($topicName, $message)");
         if (!isset($this->kafkaTopicProducerHash[$topicName])) {
@@ -241,7 +238,7 @@ abstract class AbstractTask extends Task implements TaskInterface
     /**
      * Sets a lock for the current process according to its params
      *
-     * @throws Exceptions\WorkflowException if lock exists or perm issue
+     * @throws WorkflowException if lock exists or perm issue
      * @return void
      */
     private function lock()
@@ -250,10 +247,10 @@ abstract class AbstractTask extends Task implements TaskInterface
         $pid = getMyPid();
         $lockFileName = $this->getLockFilePath();
         if (file_exists($lockFileName) && !isset($this->paramHash['force'])) {
-            throw new Exceptions\WorkflowException('Failed to lock process, already running or zombie');
+            throw new WorkflowException('Failed to lock process, already running or zombie');
         }
         if (!file_put_contents($lockFileName, $pid, LOCK_EX)) {
-            throw new Exceptions\WorkflowException('Failed to lock process : failed to write file ' . $lockFileName);
+            throw new WorkflowException('Failed to lock process : failed to write file ' . $lockFileName);
         }
     }
 

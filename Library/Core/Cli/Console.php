@@ -1,18 +1,15 @@
 <?php
-namespace Vpg\Disturb\Cli;
+namespace Vpg\Disturb\Core\Cli;
 
-use Phalcon\Cli;
-
+use \Phalcon\Cli;
 
 /**
  * Console
  * Provides generic func related to PHP CLI
  *
- * @category Cli
  * @package  Disturb\Cli
  * @author   Jérome BOURGEAIS <jbourgeais@voyageprive.com>
  * @license  https://github.com/vpg/disturb/blob/master/LICENSE MIT Licence
- * @link     http://example.com/my/bar Documentation of Foo.
  */
 class Console extends Cli\Console {
 

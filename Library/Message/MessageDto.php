@@ -1,19 +1,16 @@
 <?php
 
-namespace Vpg\Disturb\Dtos;
+namespace Vpg\Disturb\Message;
 
-use Vpg\Disturb\Exceptions;
 
 /**
  * Class Message
  *
- * @category Dtos
- * @package  Disturb\Dtos
+ * @package  Disturb\Message
  * @author   Jérome BOURGEAIS <jbourgeais@voyageprive.com>
  * @license  https://github.com/vpg/disturb/blob/master/LICENSE MIT Licence
- * @link     http://example.com/my/bar Documentation of Foo.
  */
-class Message
+class MessageDto
 {
     const TYPE_STEP_CTRL = 'STEP-CTRL';
     const TYPE_STEP_ACK = 'STEP-ACK';
@@ -42,7 +39,7 @@ class Message
      *
      * @param mixed $rawMixed could either be a string (json) or an array
      *
-     * @throws Exceptions\InvalidMessageException
+     * @throws InvalidMessageException
      */
     public function __construct($rawMixed)
     {
@@ -51,11 +48,11 @@ class Message
         } elseif (is_string($rawMixed)) {
             if (!($rawHash = json_decode($rawMixed, true))) {
                 // xxx defined typed Exception
-                throw new Exceptions\InvalidMessageException('Not able to parse message');
+                throw new InvalidMessageException('Not able to parse message');
             }
             $this->rawHash = $rawHash;
         } else {
-            throw new Exceptions\InvalidMessageException('Not supported raw message type');
+            throw new InvalidMessageException('Not supported raw message type');
         }
         $this->validate();
     }
@@ -63,7 +60,7 @@ class Message
     /**
      * Validates the current message is valid
      *
-     * @throws Exceptions\InvalidMessageException
+     * @throws InvalidMessageException
      * @throws Exception
      *
      * @return void
@@ -72,7 +69,7 @@ class Message
     {
         $isValid = false;
         if (!isset($this->rawHash['type'])) {
-            throw new Exceptions\InvalidMessageException('Missing message Type');
+            throw new InvalidMessageException('Missing message Type');
         }
 
         $propHashRequired = [];
@@ -87,14 +84,14 @@ class Message
                 $propHashRequired = self::STEP_ACK_REQUIRED_PROP_HASH;
             break;
             default:
-                throw new Exceptions\InvalidMessageException(
+                throw new InvalidMessageException(
                     'Validation of message type ' . $this->rawHash['type'] . ' is not implemented yet, please do'
                 );
         }
         $matchPropList = array_intersect_key($this->rawHash, array_flip($propHashRequired));
         $isValid = (count($propHashRequired) == count($matchPropList));
         if (!$isValid) {
-            throw new Exceptions\InvalidMessageException(
+            throw new InvalidMessageException(
                 'Missing properties for message ' . $this->rawHash['type'] . ' : ' .
                 implode(',', $propHashRequired)
             );

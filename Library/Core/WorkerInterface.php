@@ -1,20 +1,18 @@
 <?php
 
-namespace Vpg\Disturb\Tasks;
+namespace Vpg\Disturb\Core;
 
 /**
- * Interface Task
+ * Interface Worker
  *
- * @category Tasks
- * @package  Disturb\Tasks
+ * @package  Disturb\Core
  * @author   Jérome BOURGEAIS <jbourgeais@voyageprive.com>
  * @license  https://github.com/vpg/disturb/blob/master/LICENSE MIT Licence
- * @link     http://example.com/my/bar Documentation of Foo.
  */
-interface TaskInterface
+interface WorkerInterface
 {
     /**
-     * Start task action
+     * Start worker action
      *
      * @param array $paramHash the params
      *

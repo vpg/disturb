@@ -1,15 +1,13 @@
 <?php
 
-namespace Vpg\Disturb\Services;
+namespace Vpg\Disturb\Workflow;
 
 /**
  * Interface WorkflowManagerInterface
  *
- * @category Services
- * @package  Disturb\Services
+ * @package  Disturb\Workflow
  * @author   Jérome BOURGEAIS <jbourgeais@voyageprive.com>
  * @license  https://github.com/vpg/disturb/blob/master/LICENSE MIT Licence
- * @link     http://example.com/my/bar Documentation of Foo.
  */
 interface WorkflowManagerInterface
 {
@@ -27,7 +25,7 @@ interface WorkflowManagerInterface
      * @param string $workflowProcessId The workflow process identifier
      *
      * @return void
-     * @throws Vpg\Disturb\Exceptions|WorkflowException
+     * @throws Vpg\Disturb\Workflow\WorkflowException
      */
     public function init(string $workflowProcessId);
 
@@ -37,7 +35,7 @@ interface WorkflowManagerInterface
      * @param string $workflowProcessId The workflow process identifier
      *
      * @return string the workflow status code
-     * @throws Vpg\Disturb\Exceptions\WorkflowException
+     * @throws Vpg\Disturb\Workflow\WorkflowException
      */
     public function getStatus(string $workflowProcessId) : string;
 
@@ -47,7 +45,7 @@ interface WorkflowManagerInterface
      * @param string $workflowProcessId The workflow process identifier
      *
      * @return array the next workflow step hash
-     * @throws Vpg\Disturb\Exceptions\WorkflowException
+     * @throws Vpg\Disturb\Workflow\WorkflowException
      */
     public function getNextStepList(string $workflowProcessId) : array;
 
@@ -60,7 +58,7 @@ interface WorkflowManagerInterface
      * @param array  $resultHash        The result info returned by the step to finalize
      *
      * @return void
-     * @throws \Disturb\WorkflowException
+     * @throws Vpg\Disturb\Workflow\WorkflowException
      */
     public function processStepJobResult(string $workflowProcessId, string $stepCode, int $jobId, array $resultHash);
 

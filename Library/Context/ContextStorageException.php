@@ -1,17 +1,17 @@
 <?php
 
-namespace Vpg\Disturb\Exceptions;
+namespace Vpg\Disturb\Context;
+
+use Vpg\Disturb\Core;
 
 /**
  * Class ContextStorageException
  *
- * @category Exceptions
- * @package  Disturb\ContextStorage
+ * @package  Disturb\Context
  * @author   Alexandre DEFRETIN <adefretin@voyageprive.com>
  * @license  https://github.com/vpg/disturb/blob/master/LICENSE MIT Licence
- * @link     http://example.com/my/bar Documentation of Foo.
  */
-class ContextStorageException extends Exception
+class ContextStorageException extends Core\Exception
 {
     /**
      * Code adapter const

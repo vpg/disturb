@@ -1,11 +1,12 @@
 <?php
 
 use \Phalcon\Config\Adapter\Json;
-use \Vpg\Disturb\Cli\Console as ConsoleApp;
+
+use \Vpg\Disturb\Core\Cli\Console as ConsoleApp;
 
 define('DISTURB_DEBUG', getenv('DISTURB_DEBUG'));
 
-require_once(__DIR__ . '/../Library/Config/DI.php');
+require_once(__DIR__ . '/../Library/Core/DI.php');
 
 // Create a console application
 $console = new ConsoleApp();

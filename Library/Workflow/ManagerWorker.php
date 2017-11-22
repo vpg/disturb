@@ -1,24 +1,19 @@
 <?php
 
-namespace Vpg\Disturb\Tasks;
+namespace Vpg\Disturb\Workflow;
 
-use Phalcon\Cli\Task;
-use \Vpg\Disturb\Exceptions\WorkflowException;
-use \Vpg\Disturb\Services;
-use \Vpg\Disturb\Dtos;
-use \Vpg\Disturb\Tasks\AbstractTask as AbstractTask;
+use Vpg\Disturb\Topic;
+use Vpg\Disturb\Message;
+use Vpg\Disturb\Core;
 
 /**
  * Manager task
  *
- * @category Tasks
- * @package  Disturb\Tasks
+ * @package  Disturb\Workflow
  * @author   Jérome BOURGEAIS <jbourgeais@voyageprive.com>
  * @license  https://github.com/vpg/disturb/blob/master/LICENSE MIT Licence
- * @link     http://example.com/my/bar Documentation of Foo.
- * @see      Vpg\Disturb\Tasks\AbstractTask
  */
-class ManagerTask extends AbstractTask
+class ManagerWorker extends Core\AbstractWorker
 {
     protected $taskOptionList = [
         '?name:'    // optional workflow name
@@ -49,27 +44,27 @@ class ManagerTask extends AbstractTask
         $serviceFullName = $this->workflowConfig['servicesClassNameSpace'] . "\\" .
             ucFirst($this->workflowConfig['name']) . 'Manager';
         // xxx Allow client to overwrite ?
-        $this->workflowManagerService = new Services\WorkflowManager($this->paramHash['workflow']);
+        $this->workflowManagerService = new ManagerService($this->paramHash['workflow']);
         $this->getDI()->get('logger')->debug('Loading ' . $serviceFullName);
         $this->service = new $serviceFullName();
 
-        $this->topicName = Services\TopicService::getWorkflowManagerTopicName($this->workflowConfig['name']);
+        $this->topicName = Topic\TopicService::getWorkflowManagerTopicName($this->workflowConfig['name']);
     }
 
     /**
      * Process Dtos message
      *
-     * @param array $messageDto message object
+     * @param Message\MessageDto $messageDto message object
      *
      * @throws WorkflowException
      *
      * @return void
      */
-    protected function processMessage(Dtos\Message $messageDto)
+    protected function processMessage(Message\MessageDto $messageDto)
     {
         $this->getDI()->get('logger')->info('messageDto : ' . $messageDto);
         switch ($messageDto->getType()) {
-            case Dtos\Message::TYPE_WF_CTRL:
+            case Message\MessageDto::TYPE_WF_CTRL:
                 switch ($messageDto->getAction()) {
                     case 'start':
                         $this->workflowManagerService->init($messageDto->getId());
@@ -77,7 +72,7 @@ class ManagerTask extends AbstractTask
                     break;
                 }
             break;
-            case Dtos\Message::TYPE_STEP_ACK:
+            case Message\MessageDto::TYPE_STEP_ACK:
                 $this->getDI()->get('logger')->debug(
                     "Step {$messageDto->getStepCode()} says {$messageDto->getResult()}"
                 );
@@ -91,21 +86,21 @@ class ManagerTask extends AbstractTask
 
                 $status = $this->workflowManagerService->getStatus($messageDto->getId());
                 $this->getDI()->get('logger')->debug("Id {$messageDto->getId()} is '$status'");
-                if ($status == Services\WorkflowManager::STATUS_FAILED) {
+                if ($status == ManagerService::STATUS_FAILED) {
                     throw new WorkflowException("Id failed {$messageDto->getId()}");
                 }
 
                 switch ($this->workflowManagerService->getCurrentStepStatus($messageDto->getId())) {
-                    case Services\WorkflowManager::STATUS_RUNNING:
+                    case ManagerService::STATUS_RUNNING:
                         // xxx check timeout
                     break;
-                    case Services\WorkflowManager::STATUS_SUCCESS:
+                    case ManagerService::STATUS_SUCCESS:
                         $this->runNextStep($messageDto->getId());
                     break;
-                    case Services\WorkflowManager::STATUS_FAILED:
+                    case ManagerService::STATUS_FAILED:
                         $this->workflowManagerService->setStatus(
                             $messageDto->getId(),
-                            Services\WorkflowManager::STATUS_FAILED
+                            ManagerService::STATUS_FAILED
                         );
                     break;
                     default:
@@ -143,16 +138,16 @@ class ManagerTask extends AbstractTask
                 $this->workflowManagerService->registerStepJob($workflowProcessId, $stepCode, $jobId);
                 $messageHash = [
                     'id' => $workflowProcessId,
-                    'type' => Dtos\Message::TYPE_STEP_CTRL,
+                    'type' => Message\MessageDto::TYPE_STEP_CTRL,
                     'jobId' => $jobId,
                     'stepCode' => $stepCode,
                     'action' => 'start',
                     'payload' => $stepJobHash
                 ];
-                $stepMessageDto = new Dtos\Message(json_encode($messageHash));
+                $stepMessageDto = new Message\MessageDto(json_encode($messageHash));
 
                 $this->sendMessage(
-                    Services\TopicService::getWorkflowStepTopicName($stepCode, $this->workflowConfig['name']),
+                    Topic\TopicService::getWorkflowStepTopicName($stepCode, $this->workflowConfig['name']),
                     $stepMessageDto
                 );
             }
