@@ -17,7 +17,7 @@ use Vpg\Disturb\Context\ElasticsearchAdapter;
  * @license  https://github.com/vpg/disturb/blob/master/LICENSE MIT Licence
  * @link     http://example.com/my/bar Documentation of Foo.
  */
-class ContextStorage extends Component
+class ContextStorageService extends Component
 {
     /**
      * Elastic search adapter

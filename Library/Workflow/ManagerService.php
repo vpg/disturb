@@ -4,6 +4,8 @@ namespace Vpg\Disturb\Workflow;
 use \Phalcon\Config\Adapter\Json;
 use \Phalcon\Mvc\User\Component;
 
+use Vpg\Disturb\Context\ContextStorageService;
+
 /**
  * Class WorkflowManager
  *
@@ -11,7 +13,7 @@ use \Phalcon\Mvc\User\Component;
  * @author   Jérome BOURGEAIS <jbourgeais@voyageprive.com>
  * @license  https://github.com/vpg/disturb/blob/master/LICENSE MIT Licence
  */
-class WorkflowManager extends Component implements WorkflowManagerInterface
+class ManagerService extends Component implements WorkflowManagerInterface
 {
     /**
      * Status no started const
@@ -78,7 +80,7 @@ class WorkflowManager extends Component implements WorkflowManagerInterface
 
         $this->di->setShared(
             'contextStorage',
-            new ContextStorage($this->di->get('config')->contextStorage)
+            new ContextStorageService($this->di->get('config')->contextStorage)
         );
     }
 

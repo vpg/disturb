@@ -44,7 +44,7 @@ class ManagerWorker extends Core\AbstractWorker
         $serviceFullName = $this->workflowConfig['servicesClassNameSpace'] . "\\" .
             ucFirst($this->workflowConfig['name']) . 'Manager';
         // xxx Allow client to overwrite ?
-        $this->workflowManagerService = new WorkflowManager($this->paramHash['workflow']);
+        $this->workflowManagerService = new ManagerService($this->paramHash['workflow']);
         $this->getDI()->get('logger')->debug('Loading ' . $serviceFullName);
         $this->service = new $serviceFullName();
 
@@ -86,21 +86,21 @@ class ManagerWorker extends Core\AbstractWorker
 
                 $status = $this->workflowManagerService->getStatus($messageDto->getId());
                 $this->getDI()->get('logger')->debug("Id {$messageDto->getId()} is '$status'");
-                if ($status == WorkflowManager::STATUS_FAILED) {
+                if ($status == ManagerService::STATUS_FAILED) {
                     throw new WorkflowException("Id failed {$messageDto->getId()}");
                 }
 
                 switch ($this->workflowManagerService->getCurrentStepStatus($messageDto->getId())) {
-                    case WorkflowManager::STATUS_RUNNING:
+                    case ManagerService::STATUS_RUNNING:
                         // xxx check timeout
                     break;
-                    case WorkflowManager::STATUS_SUCCESS:
+                    case ManagerService::STATUS_SUCCESS:
                         $this->runNextStep($messageDto->getId());
                     break;
-                    case WorkflowManager::STATUS_FAILED:
+                    case ManagerService::STATUS_FAILED:
                         $this->workflowManagerService->setStatus(
                             $messageDto->getId(),
-                            WorkflowManager::STATUS_FAILED
+                            ManagerService::STATUS_FAILED
                         );
                     break;
                     default:
