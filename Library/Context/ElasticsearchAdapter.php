@@ -5,9 +5,6 @@ use \Phalcon\Mvc\User\Component;
 use \Phalcon\Config;
 use \Elasticsearch;
 
-use Vpg\Disturb\Context\ContextStorageException;
-
-
 /**
  * Class ElasticsearchAdapter
  *
