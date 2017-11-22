@@ -6,11 +6,9 @@ namespace Vpg\Disturb\Message;
 /**
  * Class Message
  *
- * @category Dtos
- * @package  Disturb\Dtos
+ * @package  Disturb\Message
  * @author   Jérome BOURGEAIS <jbourgeais@voyageprive.com>
  * @license  https://github.com/vpg/disturb/blob/master/LICENSE MIT Licence
- * @link     http://example.com/my/bar Documentation of Foo.
  */
 class MessageDto
 {
