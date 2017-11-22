@@ -4,19 +4,15 @@ namespace Vpg\Disturb\Context;
 use \Phalcon\Config;
 use \Phalcon\Mvc\User\Component;
 
-use Vpg\Disturb\Contex\ContextStorageException;
-use Vpg\Disturb\Context\ContextStorageAdapterInterface;
-use Vpg\Disturb\Context\ElasticsearchAdapter;
 use Vpg\Disturb\Workflow;
 
 /**
  * Class ContextStorage
  *
  * @category Services
- * @package  Disturb\Services
+ * @package  Disturb\Context
  * @author   Alexandre DEFRETIN <adefretin@voyageprive.com>
  * @license  https://github.com/vpg/disturb/blob/master/LICENSE MIT Licence
- * @link     http://example.com/my/bar Documentation of Foo.
  */
 class ContextStorageService extends Component
 {
