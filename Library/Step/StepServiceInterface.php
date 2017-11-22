@@ -5,7 +5,7 @@ namespace Vpg\Disturb\Step;
  * StepServiceInterface
  *
  * @package  Disturb\Step
- * @author   @author   Jérome BOURGEAIS <jbourgeais@voyageprive.com>
+ * @author   Jérome BOURGEAIS <jbourgeais@voyageprive.com>
  * @license  https://github.com/vpg/disturb/blob/master/LICENSE MIT Licence
  */
 
