@@ -7,8 +7,7 @@ use Vpg\Disturb\Core;
 /**
  * Class InvalidMessageException
  *
- * @category Exceptions
- * @package  Disturb\Exceptions
+ * @package  Disturb\Messages
  * @author   MAxime BRENGUIER <mbrenguier@voyageprive.com>
  * @license  https://github.com/vpg/disturb/blob/master/LICENSE MIT Licence
  */
