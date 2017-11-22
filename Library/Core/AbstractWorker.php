@@ -13,7 +13,7 @@ use Vpg\Disturb\Workflow\WorkflowException;
  * Abstract task
  *
  * @category Tasks
- * @package  Disturb\Tasks
+ * @package  Disturb\Core
  * @author   Jérome BOURGEAIS <jbourgeais@voyageprive.com>
  * @license  https://github.com/vpg/disturb/blob/master/LICENSE MIT Licence
  */
