@@ -1,5 +1,5 @@
 <?php
-namespace Vpg\Disturb\Context;
+namespace Vpg\Disturb\Core\Storage;
 
 use \Phalcon\Mvc\User\Component;
 use \Phalcon\Config;
@@ -8,11 +8,11 @@ use \Elasticsearch;
 /**
  * Class ElasticsearchAdapter
  *
- * @package  Disturb\Context
+ * @package  Disturb\Core\Storage
  * @author   Alexandre DEFRETIN <adefretin@voyageprive.com>
  * @license  https://github.com/vpg/disturb/blob/master/LICENSE MIT Licence
  */
-class ElasticsearchAdapter extends Component implements ContextStorageAdapterInterface
+class ElasticsearchAdapter extends Component implements StorageAdapterInterface
 {
     /**
      * Vendor class name const
@@ -124,15 +124,15 @@ class ElasticsearchAdapter extends Component implements ContextStorageAdapterInt
      *
      * @param string $className className
      *
-     * @throws ContextStorageException
+     * @throws StorageException
      * @return void
      */
     private function checkVendorLibraryAvailable($className)
     {
         if (!class_exists($className)) {
-            throw new ContextStorageException(
+            throw new StorageException(
                 $className . ' lib not found. Please make "composer update"',
-                ContextStorageException::CODE_VENDOR
+                StorageException::CODE_VENDOR
             );
         }
     }
@@ -142,16 +142,16 @@ class ElasticsearchAdapter extends Component implements ContextStorageAdapterInt
      *
      * @param array $parametersList parametersList
      *
-     * @throws ContextStorageException
+     * @throws StorageException
      * @return void
      */
     private function checkParameters(array $parametersList)
     {
         foreach ($parametersList as $parameter) {
             if (empty($parameter)) {
-                throw new ContextStorageException(
+                throw new StorageException(
                     'invalid parameter',
-                    ContextStorageException::CODE_INVALID_PARAMETER,
+                    StorageException::CODE_INVALID_PARAMETER,
                     null,
                     2
                 );
@@ -164,7 +164,7 @@ class ElasticsearchAdapter extends Component implements ContextStorageAdapterInt
      *
      * @param Json $config config
      *
-     * @throws ContextStorageException
+     * @throws StorageException
      * @return void
      */
     private function initConfig(Config $config)
@@ -178,9 +178,9 @@ class ElasticsearchAdapter extends Component implements ContextStorageAdapterInt
         // check required config fields
         foreach (self::REQUIRED_CONFIG_FIELD_LIST as $configField) {
             if (empty($config[$configField])) {
-                throw new ContextStorageException(
+                throw new StorageException(
                     'config ' . $configField . ' not found',
-                    ContextStorageException::CODE_CONFIG
+                    StorageException::CODE_CONFIG
                 );
             }
             $this->config[$configField] = $config[$configField];
@@ -192,7 +192,7 @@ class ElasticsearchAdapter extends Component implements ContextStorageAdapterInt
      *
      * @return void
      *
-     * @throws ContextStorageException
+     * @throws StorageException
      */
     private function initCommonRequestParams()
     {
@@ -206,7 +206,7 @@ class ElasticsearchAdapter extends Component implements ContextStorageAdapterInt
      *
      * @return void
      *
-     * @throws ContextStorageException
+     * @throws StorageException
      */
     private function initClient()
     {
@@ -217,7 +217,7 @@ class ElasticsearchAdapter extends Component implements ContextStorageAdapterInt
 
         // Check host connexion
         if (! $this->client->ping()) {
-            throw new ContextStorageException('host : ' . $this->config[self::CONFIG_HOST] . ' not available');
+            throw new StorageException('host : ' . $this->config[self::CONFIG_HOST] . ' not available');
         }
 
         $this->initCommonRequestParams();
@@ -227,30 +227,30 @@ class ElasticsearchAdapter extends Component implements ContextStorageAdapterInt
     }
 
     /**
-     * Get document identified by id ($workflowProcessId)
+     * Get document identified by id ($id)
      *
-     * @param string $workflowProcessId workflowProcessId
+     * @param string $id id
      *
      * @return array
      *
-     * @throws ContextStorageException
+     * @throws StorageException
      */
-    public function get(string $workflowProcessId) : array
+    public function get(string $id) : array
     {
         $this->di->get('logger')->debug(json_encode(func_get_args()));
-        $this->checkParameters([$workflowProcessId]);
+        $this->checkParameters([$id]);
 
         try {
             $requestParamHash = array_merge(
-                ['id' => $workflowProcessId],
+                ['id' => $id],
                 $this->commonRequestParamHash
             );
             $resultHash = $this->client->get($requestParamHash);
             return $resultHash[self::DEFAULT_DOC_SOURCE];
         } catch (\Exception $exception) {
-            throw new ContextStorageException(
+            throw new StorageException(
                 'document not found',
-                ContextStorageException::CODE_GET,
+                StorageException::CODE_GET,
                 $exception
             );
         }
@@ -271,55 +271,55 @@ class ElasticsearchAdapter extends Component implements ContextStorageAdapterInt
     }
 
     /**
-     * Check if a document identified by id ($workflowProcessId) exists
+     * Check if a document identified by id ($id) exists
      *
-     * @param string $workflowProcessId workflowProcessId
+     * @param string $id id
      *
      * @return bool
      *
-     * @throws ContextStorageException
+     * @throws StorageException
      */
-    public function exist(string $workflowProcessId) : bool
+    public function exist(string $id) : bool
     {
         $this->di->get('logger')->debug(json_encode(func_get_args()));
-        $this->checkParameters([$workflowProcessId]);
+        $this->checkParameters([$id]);
 
         try {
             $requestParamHash = array_merge(
-                ['id' => $workflowProcessId],
+                ['id' => $id],
                 $this->commonRequestParamHash
             );
             return $this->client->exists($requestParamHash);
         } catch (\Exception $exception) {
-            throw new ContextStorageException(
+            throw new StorageException(
                 'can not check if docuement exist',
-                ContextStorageException::CODE_EXIST,
+                StorageException::CODE_EXIST,
                 $exception
             );
         }
     }
 
     /**
-     * Save document  with id ($workflowProcessId)
+     * Save document  with id ($id)
      *
-     * @param string $workflowProcessId workflowProcessId
-     * @param array  $documentHash      document hash
+     * @param string $id           id
+     * @param array  $documentHash document hash
      *
      * @return array
      *
-     * @throws ContextStorageException
+     * @throws StorageException
      */
-    public function save(string $workflowProcessId, array $documentHash) : array
+    public function save(string $id, array $documentHash) : array
     {
         $this->di->get('logger')->debug(json_encode(func_get_args()));
         // Specify how many times should the operation be retried when a conflict occurs (simultaneous doc update)
         // TODO : check for param "retry_on_conflict"
 
-        $this->checkParameters([$workflowProcessId, $documentHash]);
+        $this->checkParameters([$id, $documentHash]);
 
         try {
             $requestParamHash = array_merge(
-                ['id' => $workflowProcessId],
+                ['id' => $id],
                 $this->commonRequestParamHash
             );
 
@@ -329,69 +329,69 @@ class ElasticsearchAdapter extends Component implements ContextStorageAdapterInt
                 return $this->client->index(array_merge($requestParamHash, ['body' => $documentHash]));
             }
         } catch (\Exception $exception) {
-            throw new ContextStorageException(
+            throw new StorageException(
                 'Fail to save document',
-                ContextStorageException::CODE_SAVE,
+                StorageException::CODE_SAVE,
                 $exception
             );
         }
     }
 
     /**
-     * Delete document identified by $workflowProcessId
+     * Delete document identified by $id
      *
-     * @param string $workflowProcessId workflowProcessId
+     * @param string $id id
      *
      * @return array
      *
-     * @throws ContextStorageException
+     * @throws StorageException
      */
-    public function delete(string $workflowProcessId) : array
+    public function delete(string $id) : array
     {
         $this->di->get('logger')->debug(json_encode(func_get_args()));
-        $this->checkParameters([$workflowProcessId]);
+        $this->checkParameters([$id]);
 
         try {
             $requestParamHash = array_merge(
-                ['id' => $workflowProcessId],
+                ['id' => $id],
                 $this->commonRequestParamHash
             );
             return $this->client->delete($requestParamHash);
         } catch (\Exception $exception) {
-            throw new ContextStorageException(
+            throw new StorageException(
                 'Fail to delete document',
-                ContextStorageException::CODE_DELETE,
+                StorageException::CODE_DELETE,
                 $exception
             );
         }
     }
 
     /**
-     * Updates the document with id ($workflowProcessId)
+     * Updates the document with id ($id)
      *
-     * @param string $workflowProcessId workflowProcessId
-     * @param array  $updateHash        document hash
+     * @param string $id         id
+     * @param array  $updateHash document hash
      *
      * @return array
      *
-     * @throws ContextStorageException
+     * @throws StorageException
      */
-    public function update(string $workflowProcessId, array $updateHash) : array
+    public function update(string $id, array $updateHash) : array
     {
         $this->di->get('logger')->debug(json_encode(func_get_args()));
-        $this->checkParameters([$workflowProcessId, $updateHash]);
+        $this->checkParameters([$id, $updateHash]);
 
         try {
             $requestParamHash = array_merge(
-                ['id' => $workflowProcessId],
+                ['id' => $id],
                 $this->commonRequestParamHash
             );
             return $this->client->update(array_merge($requestParamHash, ['body' => $updateHash]));
         } catch (\Exception $exception) {
             echo $exception->getMessage();
-            throw new ContextStorageException(
+            throw new StorageException(
                 'Fail to update document',
-                ContextStorageException::CODE_SAVE,
+                StorageException::CODE_SAVE,
                 $exception
             );
         }
