@@ -4,8 +4,8 @@ ini_set('display_errors', 1);
 
 error_reporting(E_ALL);
 
+use \Phalcon\Loader;
 
-use Phalcon\Loader;
 
 /**
  * Register the autoloader and tell it to register the tasks directory
@@ -22,11 +22,6 @@ $loader->registerNamespaces(
 
 $loader->register();
 
+require_once(__DIR__ . '/../Library/Core/DI.php');
 
-
-
-
-
-
-
-
+$di->setShared('loader', $loader);

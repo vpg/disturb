@@ -4,6 +4,7 @@ namespace Vpg\Disturb\Context;
 use \Phalcon\Config;
 use \Phalcon\Mvc\User\Component;
 
+use Vpg\Disturb\Core\Storage;
 use Vpg\Disturb\Workflow;
 
 /**
@@ -53,7 +54,7 @@ class ContextStorageService extends Component
     /**
      * Adapter
      *
-     * @var ContextStorageAdapterInterface $adapter
+     * @var StorageAdapterInterface $adapter
      */
     private $adapter;
 
@@ -62,43 +63,43 @@ class ContextStorageService extends Component
      *
      * @param Json $config config
      *
-     * @throws ContextStorageException
+     * @throws StorageException
      */
     public function __construct(Config $config)
     {
         $this->di->get('logger')->debug(json_encode(func_get_args()));
         // check adapter type
         if (empty($config->adapter)) {
-            throw new ContextStorageException(
+            throw new StorageException(
                 'Adapter name not found',
-                ContextStorageException::CODE_ADAPTER
+                StorageException::CODE_ADAPTER
             );
         }
 
         // check if adapter class exists
         switch ($config->adapter) {
             case self::ADAPTER_ELASTICSEARCH:
-                $adapterClass = 'Vpg\\Disturb\\Context\\ElasticsearchAdapter';
+                $adapterClass = 'Vpg\\Disturb\\Core\\Storage\\ElasticsearchAdapter';
             break;
             default:
-            throw new ContextStorageException(
+            throw new StorageException(
                 'Adapter class not found',
-                ContextStorageException::CODE_ADAPTER
+                StorageException::CODE_ADAPTER
             );
         }
 
         if (! class_exists($adapterClass)) {
-            throw new ContextStorageException(
+            throw new StorageException(
                 'Adapter class not found : ' . $adapterClass,
-                ContextStorageException::CODE_ADAPTER
+                StorageException::CODE_ADAPTER
             );
         }
 
         // check if adapter config exists
         if (empty($config->config)) {
-            throw new ContextStorageException(
+            throw new StorageException(
                 'Adapter config not found',
-                ContextStorageException::CODE_ADAPTER
+                StorageException::CODE_ADAPTER
             );
         }
 

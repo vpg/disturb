@@ -2,11 +2,11 @@
 
 namespace Tests;
 
-use PHPUnit\Framework\TestCase as TestCase;
+use \PHPUnit\Framework\TestCase as TestCase;
 
-use Phalcon\DI;
-use Phalcon\DiInterface;
-use Phalcon\Di\InjectionAwareInterface;
+use \Phalcon\DI;
+use \Phalcon\DiInterface;
+use \phalcon\Di\InjectionAwareInterface;
 
 /**
  * Common Unit Test Case Class
@@ -25,17 +25,14 @@ abstract class DisturbUnitTestCase extends TestCase implements InjectionAwareInt
     public function setUp()
     {
         // Reset the DI container
-        Di::reset();
+        $di = DI::getDefault();
 
         // Instantiate a new DI container
-        $this->di = new Di();
+        $this->setDI($di);
     }
 
     protected function tearDown()
     {
-        $di = $this->getDI();
-        $di::reset();
-
         parent::tearDown();
     }
 

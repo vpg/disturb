@@ -1,9 +1,9 @@
 <?php
 
-namespace Tests\Library\Context;
+namespace Tests\Library\Core\Storage;
 
-use Vpg\Disturb\ContextStorageAdapters\ElasticsearchAdapter;
-use Vpg\Disturb\Exceptions\ContextStorageException;
+use Vpg\Disturb\Core\Storage\ElasticsearchAdapter;
+use Vpg\Disturb\Core\Storage\StorageException;
 
 use Phalcon\Config\Adapter\Json;
 
@@ -85,13 +85,15 @@ class ElasticsearchAdapterTest extends \Tests\DisturbUnitTestCase
 
         try {
             $this->invokeMethod($this->elasticsearchAdapter, 'initConfig', [$uncompletedConfig]);
-        } catch (ContextStorageException $exception) {
+        } catch (StorageException $exception) {
             if ($exception) {
-                $this->assertEquals('Vpg\Disturb\ContextStorageAdapters\ElasticsearchAdapter::initConfig : config ' .
+                $this->assertEquals(
+                    'Vpg\Disturb\Core\Storage\ElasticsearchAdapter::initConfig : config ' .
                     ElasticsearchAdapter::CONFIG_HOST . ' not found',
-                    $exception->getMessage());
+                    $exception->getMessage()
+                );
             } else {
-                $this->fail('Exception expected : Vpg\Disturb\ContextStorageAdapters\ElasticsearchAdapter::initConfig : 
+                $this->fail('Exception expected : Vpg\Disturb\Core\Storage\ElasticsearchAdapter::initConfig : 
                 config ' . ElasticsearchAdapter::CONFIG_HOST . ' not found');
             }
         }
@@ -123,13 +125,13 @@ class ElasticsearchAdapterTest extends \Tests\DisturbUnitTestCase
         $badVendorLibraryName = 'badVendorLibraryName';
         try {
             $this->invokeMethod($this->elasticsearchAdapter, 'checkVendorLibraryAvailable', [$badVendorLibraryName]);
-        } catch (ContextStorageException $exception) {
+        } catch (StorageException $exception) {
             if ($exception) {
-                $this->assertEquals('Vpg\Disturb\ContextStorageAdapters\ElasticsearchAdapter::checkVendorLibraryAvailable : ' .
+                $this->assertEquals('Vpg\Disturb\Core\Storage\ElasticsearchAdapter::checkVendorLibraryAvailable : ' .
                     $badVendorLibraryName . ' lib not found. Please make "composer update"',
                     $exception->getMessage());
             } else {
-                $this->fail('Vpg\Disturb\ContextStorageAdapters\ElasticsearchAdapter::checkVendorLibraryAvailable : ' .
+                $this->fail('Vpg\Disturb\Core\Storage\ElasticsearchAdapter::checkVendorLibraryAvailable : ' .
                     $badVendorLibraryName . ' lib not found.
                  Please make "composer update"');
             }
@@ -188,13 +190,13 @@ class ElasticsearchAdapterTest extends \Tests\DisturbUnitTestCase
                 'initClient',
                 []
             );
-        } catch (ContextStorageException $exception) {
+        } catch (StorageException $exception) {
             if ($exception) {
-                $this->assertEquals('Vpg\Disturb\ContextStorageAdapters\ElasticsearchAdapter::initClient : host : ' .
+                $this->assertEquals('Vpg\Disturb\Core\Storage\ElasticsearchAdapter::initClient : host : ' .
                     $config[ElasticsearchAdapter::CONFIG_HOST] .
                     ' not available', $exception->getMessage());
             } else {
-                $this->fail('Vpg\Disturb\ContextStorageAdapters\ElasticsearchAdapter::initClient : host : ' .
+                $this->fail('Vpg\Disturb\Core\Storage\ElasticsearchAdapter::initClient : host : ' .
                     $config[ElasticsearchAdapter::CONFIG_HOST] . ' not available');
             }
         }
@@ -229,9 +231,9 @@ class ElasticsearchAdapterTest extends \Tests\DisturbUnitTestCase
             );
         } catch (\Exception $exception) {
             if ($exception) {
-                $this->assertEquals($exception->getCode(), ContextStorageException::CODE_INVALID_PARAMETER);
+                $this->assertEquals($exception->getCode(), StorageException::CODE_INVALID_PARAMETER);
             } else {
-                $this->fail('Exception code expected : ' . ContextStorageException::CODE_INVALID_PARAMETER);
+                $this->fail('Exception code expected : ' . StorageException::CODE_INVALID_PARAMETER);
             }
         }
 
@@ -265,9 +267,9 @@ class ElasticsearchAdapterTest extends \Tests\DisturbUnitTestCase
             );
         } catch (\Exception $exception) {
             if ($exception) {
-                $this->assertEquals($exception->getCode(), ContextStorageException::CODE_INVALID_PARAMETER);
+                $this->assertEquals($exception->getCode(), StorageException::CODE_INVALID_PARAMETER);
             } else {
-                $this->fail('Exception code expected : ' . ContextStorageException::CODE_INVALID_PARAMETER);
+                $this->fail('Exception code expected : ' . StorageException::CODE_INVALID_PARAMETER);
             }
         }
 
@@ -280,9 +282,9 @@ class ElasticsearchAdapterTest extends \Tests\DisturbUnitTestCase
             );
         } catch (\Exception $exception) {
             if ($exception) {
-                $this->assertEquals($exception->getCode(), ContextStorageException::CODE_GET);
+                $this->assertEquals($exception->getCode(), StorageException::CODE_GET);
             } else {
-                $this->fail('Exception code expected : ' . ContextStorageException::CODE_GET);
+                $this->fail('Exception code expected : ' . StorageException::CODE_GET);
             }
         }
 
@@ -294,11 +296,7 @@ class ElasticsearchAdapterTest extends \Tests\DisturbUnitTestCase
                 [self::TEST_DOCUMENT_ID]
             );
 
-            $this->assertArrayHasKey('_id', $docHash);
-            $this->assertEquals(self::TEST_DOCUMENT_ID, $docHash['_id']);
-
-            $this->assertArrayHasKey('_source', $docHash);
-            $this->assertArraysEquals(self::TEST_DOCUMENT, $docHash['_source']);
+            $this->assertArraysEquals(self::TEST_DOCUMENT, $docHash);
         } catch (\Exception $exception) {
             $this->fail($exception->getMessage());
         }
@@ -320,9 +318,9 @@ class ElasticsearchAdapterTest extends \Tests\DisturbUnitTestCase
             );
         } catch (\Exception $exception) {
             if ($exception) {
-                $this->assertEquals($exception->getCode(), ContextStorageException::CODE_INVALID_PARAMETER);
+                $this->assertEquals($exception->getCode(), StorageException::CODE_INVALID_PARAMETER);
             } else {
-                $this->fail('Exception code expected : ' . ContextStorageException::CODE_INVALID_PARAMETER);
+                $this->fail('Exception code expected : ' . StorageException::CODE_INVALID_PARAMETER);
             }
         }
 
@@ -336,9 +334,9 @@ class ElasticsearchAdapterTest extends \Tests\DisturbUnitTestCase
             $this->assertFalse($doesDocumentExist);
         } catch (\Exception $exception) {
             if ($exception) {
-                $this->assertEquals($exception->getCode(), ContextStorageException::CODE_EXIST);
+                $this->assertEquals($exception->getCode(), StorageException::CODE_EXIST);
             } else {
-                $this->fail('Exception code expected : ' . ContextStorageException::CODE_EXIST);
+                $this->fail('Exception code expected : ' . StorageException::CODE_EXIST);
             }
         }
 
@@ -352,9 +350,9 @@ class ElasticsearchAdapterTest extends \Tests\DisturbUnitTestCase
             $this->assertTrue($doesDocumentExist);
         } catch (\Exception $exception) {
             if ($exception) {
-                $this->assertEquals($exception->getCode(), ContextStorageException::CODE_EXIST);
+                $this->assertEquals($exception->getCode(), StorageException::CODE_EXIST);
             } else {
-                $this->fail('Exception code expected : ' . ContextStorageException::CODE_EXIST);
+                $this->fail('Exception code expected : ' . StorageException::CODE_EXIST);
             }
         }
     }
@@ -375,9 +373,9 @@ class ElasticsearchAdapterTest extends \Tests\DisturbUnitTestCase
             );
         } catch (\Exception $exception) {
             if ($exception) {
-                $this->assertEquals($exception->getCode(), ContextStorageException::CODE_INVALID_PARAMETER);
+                $this->assertEquals($exception->getCode(), StorageException::CODE_INVALID_PARAMETER);
             } else {
-                $this->fail('Exception code expected : ' . ContextStorageException::CODE_INVALID_PARAMETER);
+                $this->fail('Exception code expected : ' . StorageException::CODE_INVALID_PARAMETER);
             }
         }
 
@@ -407,9 +405,9 @@ class ElasticsearchAdapterTest extends \Tests\DisturbUnitTestCase
             $this->assertFalse($doesDocumentExist);
         } catch (\Exception $exception) {
             if ($exception) {
-                $this->assertEquals($exception->getCode(), ContextStorageException::CODE_DELETE);
+                $this->assertEquals($exception->getCode(), StorageException::CODE_DELETE);
             } else {
-                $this->fail('Exception code expected : ' . ContextStorageException::CODE_DELETE);
+                $this->fail('Exception code expected : ' . StorageException::CODE_DELETE);
             }
         }
     }
