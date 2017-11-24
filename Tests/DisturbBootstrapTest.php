@@ -22,6 +22,6 @@ $loader->registerNamespaces(
 
 $loader->register();
 
-require_once(__DIR__ . '/../Library/Core/DI.php');
+require_once(__DIR__ . '/../Library/Core/DI/Di.php');
 
 $di->setShared('loader', $loader);
