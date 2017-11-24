@@ -17,13 +17,6 @@ use Vpg\Disturb\Workflow;
 class ContextStorageService extends Component
 {
     /**
-     * Elastic search adapter
-     *
-     * @const string ADAPTER_ELASTICSEARCH
-     */
-    const ADAPTER_ELASTICSEARCH = 'elasticsearch';
-
-    /**
      * Workflow
      *
      * @const string WORKFLOW
@@ -68,43 +61,8 @@ class ContextStorageService extends Component
     public function __construct(Config $config)
     {
         $this->di->get('logger')->debug(json_encode(func_get_args()));
-        // check adapter type
-        if (empty($config->adapter)) {
-            throw new StorageException(
-                'Adapter name not found',
-                StorageException::CODE_ADAPTER
-            );
-        }
 
-        // check if adapter class exists
-        switch ($config->adapter) {
-            case self::ADAPTER_ELASTICSEARCH:
-                $adapterClass = 'Vpg\\Disturb\\Core\\Storage\\ElasticsearchAdapter';
-            break;
-            default:
-            throw new StorageException(
-                'Adapter class not found',
-                StorageException::CODE_ADAPTER
-            );
-        }
-
-        if (! class_exists($adapterClass)) {
-            throw new StorageException(
-                'Adapter class not found : ' . $adapterClass,
-                StorageException::CODE_ADAPTER
-            );
-        }
-
-        // check if adapter config exists
-        if (empty($config->config)) {
-            throw new StorageException(
-                'Adapter config not found',
-                StorageException::CODE_ADAPTER
-            );
-        }
-
-        $this->adapter = new $adapterClass();
-        $this->adapter->initialize($config->config);
+        $this->adapter = Storage\StorageAdapterFactory($config, ['index' => 'disturb_context', 'type' => 'workflow']);
     }
 
     /**

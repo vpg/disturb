@@ -20,7 +20,7 @@ interface StorageAdapterInterface
      *
      * @return mixed
      */
-    public function initialize(Config $config);
+    public function initialize(Config $config, array $dbHash);
 
     /**
      * Get storage data identified by $id

@@ -84,7 +84,7 @@ class ElasticsearchAdapterTest extends \Tests\DisturbUnitTestCase
         );
 
         try {
-            $this->invokeMethod($this->elasticsearchAdapter, 'initConfig', [$uncompletedConfig]);
+            $this->invokeMethod($this->elasticsearchAdapter, 'initConfig', [$uncompletedConfig, ['index' => 'disturb_monitoring', 'type' => 'worker']]);
         } catch (StorageException $exception) {
             if ($exception) {
                 $this->assertEquals(
@@ -105,12 +105,12 @@ class ElasticsearchAdapterTest extends \Tests\DisturbUnitTestCase
         $this->assertEquals($this->elasticsearchTestHost, $adapterConfig[ElasticsearchAdapter::CONFIG_HOST]);
 
         $this->assertEquals(
-            ElasticsearchAdapter::DEFAULT_DOC_INDEX,
+            'disturb_monitoring',
             $adapterConfig[ElasticsearchAdapter::DOC_INDEX]
         );
 
         $this->assertEquals(
-            ElasticsearchAdapter::DEFAULT_DOC_TYPE,
+            'worker',
             $adapterConfig[ElasticsearchAdapter::DOC_TYPE]
         );
     }
@@ -163,12 +163,12 @@ class ElasticsearchAdapterTest extends \Tests\DisturbUnitTestCase
         $commonRequestParamHash = $this->getProperty($this->elasticsearchAdapter, 'commonRequestParamHash');
 
         $this->assertEquals(
-            ElasticsearchAdapter::DEFAULT_DOC_INDEX,
+            'disturb_monitoring',
             $commonRequestParamHash[ElasticsearchAdapter::DOC_INDEX]
         );
 
         $this->assertEquals(
-            ElasticsearchAdapter::DEFAULT_DOC_TYPE,
+            'worker',
             $commonRequestParamHash[ElasticsearchAdapter::DOC_TYPE]
         );
     }
@@ -422,7 +422,7 @@ class ElasticsearchAdapterTest extends \Tests\DisturbUnitTestCase
         $config = new Json(
             realpath(__DIR__ . '/Config/elasticsearchConfig.json')
         );
-        $this->invokeMethod($this->elasticsearchAdapter, 'initConfig', [$config]);
+        $this->invokeMethod($this->elasticsearchAdapter, 'initConfig', [$config, ['index' => 'disturb_monitoring', 'type' => 'worker']]);
     }
 
     /**
@@ -435,7 +435,7 @@ class ElasticsearchAdapterTest extends \Tests\DisturbUnitTestCase
         $config = new Json(
             realpath(__DIR__ . '/Config/elasticsearchBadConfig.json')
         );
-        $this->invokeMethod($this->elasticsearchAdapter, 'initConfig', [$config]);
+        $this->invokeMethod($this->elasticsearchAdapter, 'initConfig', [$config, ['index' => 'disturb_monitoring', 'type' => 'worker']]);
     }
 
     /**
@@ -448,6 +448,6 @@ class ElasticsearchAdapterTest extends \Tests\DisturbUnitTestCase
         $config = new Json(
             realpath(__DIR__ . '/Config/elasticsearchConfig.json')
         );
-        $this->invokeMethod($this->elasticsearchAdapter, 'initialize', [$config]);
+        $this->invokeMethod($this->elasticsearchAdapter, 'initialize', [$config, ['index' => 'disturb_monitoring', 'type' => 'worker']]);
     }
 }

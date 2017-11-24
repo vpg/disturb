@@ -22,20 +22,6 @@ class ElasticsearchAdapter extends Component implements StorageAdapterInterface
     const VENDOR_CLASSNAME = '\\Elasticsearch\\Client';
 
     /**
-     * Default doc index const
-     *
-     * @const string DEFAULT_INDEX
-     */
-    const DEFAULT_DOC_INDEX = 'disturb_context';
-
-    /**
-     * Default type const
-     *
-     * @const string DEFAULT_TYPE
-     */
-    const DEFAULT_DOC_TYPE = 'workflow';
-
-    /**
      * Doc source const
      *
      * @const string DEFAULT_DOC_SOURCE
@@ -111,11 +97,11 @@ class ElasticsearchAdapter extends Component implements StorageAdapterInterface
      *
      * @return void
      */
-    public function initialize(Config $config)
+    public function initialize(Config $config, array $dbHash)
     {
         $this->di->get('logger')->debug(json_encode(func_get_args()));
         $this->checkVendorLibraryAvailable(self::VENDOR_CLASSNAME);
-        $this->initConfig($config);
+        $this->initConfig($config, $dbHash);
         $this->initClient();
     }
 
@@ -162,18 +148,19 @@ class ElasticsearchAdapter extends Component implements StorageAdapterInterface
     /**
      * Init configuration
      *
-     * @param Json $config config
+     * @param Json $config  host config
+     * @param array $dbHash index and type config
      *
      * @throws StorageException
      * @return void
      */
-    private function initConfig(Config $config)
+    private function initConfig(Config $config, array $dbHash)
     {
         $this->checkParameters([$config]);
 
         // get default values for document index / type
-        $config[self::DOC_INDEX] = self::DEFAULT_DOC_INDEX;
-        $config[self::DOC_TYPE] = self::DEFAULT_DOC_TYPE;
+        $config[self::DOC_INDEX] = $dbHash['index'];
+        $config[self::DOC_TYPE] = $dbHash['type'];
 
         // check required config fields
         foreach (self::REQUIRED_CONFIG_FIELD_LIST as $configField) {

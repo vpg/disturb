@@ -1,0 +1,19 @@
+{
+    "name" : "loadingContract",
+    "version" : "0.0.1",
+    "brokerServerList" : ["10.13.11.27", "10.13.11.28", "10.13.11.29"],
+    "servicesClassPath" : "app/Workflows/LoadingContract",
+    "servicesClassNameSpace" : "Vpg\\Turbo\\Workflows\\LoadingContract",
+    "projectBootstrap": "app/Workflows/bootstrap.php",
+    "storage" : {
+        "adapter": "elasticsearch",
+        "config": {
+            "host": "https://elasticsearch5.recette5.vpglabs.site:443"
+        }
+    },
+    "steps" : [
+        {
+            "name" : "checkInfraGroupLodging"
+        }
+    ]
+}
