@@ -22,6 +22,7 @@ $loader->registerNamespaces(
 
 $loader->register();
 
-require_once(__DIR__ . '/../Library/Core/DI/Di.php');
+$di = new Vpg\Disturb\Core\DI\Di();
+require_once (__DIR__ . '/../Library/Core/DI/init.php');
 
 $di->setShared('loader', $loader);

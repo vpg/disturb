@@ -1,11 +1,11 @@
 <?php
 
-namespace Disturb\Library\Core\DI;
+namespace Vpg\Disturb\Core\DI;
 
 /**
  * Class DI
  *
- * @package Disturb\Library\Core\DI
+ * @package Vpg\Disturb\Core\DI
  * @author  Thomas Pellegatta <tpellegatta@voyageprive.com>
  *
  */

@@ -1,4 +1,7 @@
 <?php
+
+use \Phalcon\DI;
+
 // Load the configuration file (if any)
 $configFile = __DIR__ . '/Config/config.php';
 
@@ -42,3 +45,5 @@ $di->set(
     },
     true
 );
+
+DI::setDefault($di);
