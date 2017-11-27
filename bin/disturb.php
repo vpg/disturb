@@ -1,7 +1,7 @@
 <?php
 
 use \Phalcon\Config\Adapter\Json;
-
+use \Vpg\Disturb\Core\DI;
 use \Vpg\Disturb\Core\Cli\Console as ConsoleApp;
 
 define('DISTURB_DEBUG', getenv('DISTURB_DEBUG'));
@@ -20,10 +20,10 @@ $loader->registerNamespaces(
 $loader->registerFiles([__DIR__ . '/../../vendor/autoload.php']);
 $loader->register();
 
-require_once(__DIR__ . '/../Library/Core/DI.php');
+$di = new DI\Di();
+require_once(__DIR__ . '/../Library/Core/DI/init.php');
 
 $di->setShared('loader', $loader);
-
 
 // Create a console application
 $console = new ConsoleApp();

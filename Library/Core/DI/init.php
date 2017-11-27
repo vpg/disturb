@@ -1,8 +1,6 @@
 <?php
 
-// Using the CLI factory default services container
-$di = new \Phalcon\Di\FactoryDefault\Cli();
-
+use \Phalcon\DI;
 
 // Load the configuration file (if any)
 $configFile = __DIR__ . '/Config/config.php';
@@ -48,4 +46,4 @@ $di->set(
     true
 );
 
-\Phalcon\Di::setDefault($di);
+DI::setDefault($di);
