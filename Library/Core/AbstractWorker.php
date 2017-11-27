@@ -49,7 +49,7 @@ abstract class AbstractWorker extends Task implements WorkerInterface
      */
     protected function initWorker()
     {
-        $this->getDI()->get('logger')->debug(json_encode(func_get_args()));
+        $this->getDI()->get('logr')->debug(json_encode(func_get_args()));
         // xxx check if file exists, throw exc on err
         $this->workflowConfig = new Json($this->paramHash['workflow']);
         $this->registerClientNS(
@@ -69,7 +69,7 @@ abstract class AbstractWorker extends Task implements WorkerInterface
      */
     private function parseOpt(array $paramList)
     {
-        $this->getDI()->get('logger')->debug(json_encode(func_get_args()));
+        $this->getDI()->get('logr')->debug(json_encode(func_get_args()));
         $paramHash = Cli\Console::parseLongOpt(join($paramList, ' '));
         foreach (array_merge($this->taskOptionBaseList, $this->taskOptionList) as $option) {
             $optionMatch = preg_match('/^(?<optionnal>\?)?(?<opt>\w+):?(?<val>\w+)?/', $option, $matchHash);
@@ -79,7 +79,7 @@ abstract class AbstractWorker extends Task implements WorkerInterface
                 isset($matchHash['val']) &&
                 empty($paramHash[$matchHash['opt']])
             ) {
-                $this->getDI()->get('logger')->debug(
+                $this->getDI()->get('logr')->debug(
                     'Setting default value "' . $matchHash['val'] . '" for "' . $matchHash['opt'] . '"'
                 );
                 $paramHash[$matchHash['opt']] = $matchHash['val'];
@@ -106,13 +106,13 @@ abstract class AbstractWorker extends Task implements WorkerInterface
      */
     public final function startAction(array $paramList)
     {
-        $this->getDI()->get('logger')->debug(json_encode(func_get_args()));
+        $this->getDI()->get('logr')->debug(json_encode(func_get_args()));
         $this->paramHash = $this->parseOpt($paramList);
         $this->lock();
         $this->initWorker();
 
         // xxx Factorize stdout/err support
-        $this->getDI()->get('logger')->info(
+        $this->getDI()->get('logr')->info(
             "Worker listening on \033[32m" .
             implode(',', $this->workflowConfig['brokerServerList']->toArray()) .
             ":\033[32m" . $this->topicName . "\033[0m"
@@ -130,15 +130,15 @@ abstract class AbstractWorker extends Task implements WorkerInterface
                     case '-191': // no more msg
                     break;
                     default:
-                        $this->getDI()->get('logger')->error($msg->errstr());
+                        $this->getDI()->get('logr')->error($msg->errstr());
                 }
                 continue;
             }
-            $this->getDI()->get('logger')->info("RECEIVE msg on {$this->topicName} : $msg->payload");
+            $this->getDI()->get('logr')->info("RECEIVE msg on {$this->topicName} : $msg->payload");
             try {
                 $msgDto = new MessageDto($msg->payload);
             } catch (\Exception $dtoException) {
-                $this->getDI()->get('logger')->error(
+                $this->getDI()->get('logr')->error(
                     "Invalid message : \033[31m" . $dtoException->getMessage() . "\033[0m"
                 );
                 continue;
@@ -160,10 +160,10 @@ abstract class AbstractWorker extends Task implements WorkerInterface
      */
     private function processMonitoringMessage(MessageDto $messageDto)
     {
-        $this->getDI()->get('logger')->debug($messageDto);
+        $this->getDI()->get('logr')->debug($messageDto);
         switch ($messageDto->getAction()) {
             case MessageDto::ACTION_WF_MONITOR_PING:
-                $this->getDI()->get('logger')->debug("PING receive from {$messageDto->getFrom()}");
+                $this->getDI()->get('logr')->debug("PING receive from {$messageDto->getFrom()}");
                 $this->sendMessage($messageDto->getFrom(), MessageDto::ACTION_WF_MONITOR_PONG);
             break;
         }
@@ -179,7 +179,7 @@ abstract class AbstractWorker extends Task implements WorkerInterface
      */
     protected function sendMessage(string $topicName, MessageDto $message)
     {
-        $this->getDI()->get('logger')->debug("($topicName, $message)");
+        $this->getDI()->get('logr')->debug("($topicName, $message)");
         if (!isset($this->kafkaTopicProducerHash[$topicName])) {
             $this->kafkaTopicProducerHash[$topicName] = $this->kafkaProducer->newTopic($topicName);
         }
@@ -196,7 +196,7 @@ abstract class AbstractWorker extends Task implements WorkerInterface
      */
     private function registerClientNS(string $clientServicesNamespace, string $clientServicesPath)
     {
-        $this->getDI()->get('logger')->debug(json_encode(func_get_args()));
+        $this->getDI()->get('logr')->debug(json_encode(func_get_args()));
         $loader = $this->getDI()->getShared('loader');
         $loader->registerNamespaces([$clientServicesNamespace => $clientServicesPath], true);
         $loader->register();
@@ -209,7 +209,7 @@ abstract class AbstractWorker extends Task implements WorkerInterface
      */
     private function initMq()
     {
-        $this->getDI()->get('logger')->debug(json_encode(func_get_args()));
+        $this->getDI()->get('logr')->debug(json_encode(func_get_args()));
         $brokers = implode(',', $this->workflowConfig['brokerServerList']->toArray());
 
         // xxx put kafka\TopicConf in DI and config in a config file
@@ -225,7 +225,7 @@ abstract class AbstractWorker extends Task implements WorkerInterface
         $this->kafkaConf->set('metadata.broker.list', $brokers);
         $group = $this->paramHash['step'] ?? 'manager';
         $this->kafkaConf->set('group.id', $group);
-        $this->getDI()->get('logger')->debug('Setting consumer group to ' . $group);
+        $this->getDI()->get('logr')->debug('Setting consumer group to ' . $group);
         $this->kafkaConf->setDefaultTopicConf($this->kafkaTopicConf);
 
         // xxx put Consumer in a DI service
@@ -243,7 +243,7 @@ abstract class AbstractWorker extends Task implements WorkerInterface
      */
     private function lock()
     {
-        $this->getDI()->get('logger')->debug(json_encode(func_get_args()));
+        $this->getDI()->get('logr')->debug(json_encode(func_get_args()));
         $pid = getMyPid();
         $lockFileName = $this->getLockFilePath();
         if (file_exists($lockFileName) && !isset($this->paramHash['force'])) {
@@ -261,7 +261,7 @@ abstract class AbstractWorker extends Task implements WorkerInterface
      */
     private function getLockFilePath()
     {
-        $this->getDI()->get('logger')->debug(json_encode(func_get_args()));
+        $this->getDI()->get('logr')->debug(json_encode(func_get_args()));
         $lockDirPath = '/var/run/';
         $taskFullName = get_called_class();
         // xxx We will probably have to deal w/ the BU

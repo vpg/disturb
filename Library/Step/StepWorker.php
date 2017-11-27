@@ -29,8 +29,8 @@ class StepWorker extends AbstractWorker
      */
     protected function usage()
     {
-        $this->getDI()->get('logger')->debug('Usage : ');
-        $this->getDI()->get('logger')->debug(
+        $this->getDI()->get('logr')->debug('Usage : ');
+        $this->getDI()->get('logr')->debug(
             'disturb.php "Tasks\\Step" start --step="stepName" '.
             '--workflow="/path/to/workflow/config/file.json" [--name="workflowName"]'
         );
@@ -48,7 +48,7 @@ class StepWorker extends AbstractWorker
      */
     protected function processMessage(Message\MessageDto $messageDto)
     {
-        $this->getDI()->get('logger')->info('messageDto : ' . $messageDto);
+        $this->getDI()->get('logr')->info('messageDto : ' . $messageDto);
         $resultHash = $this->service->execute($messageDto->getPayload());
         $msgDto = new Message\MessageDto(
             [
@@ -75,7 +75,7 @@ class StepWorker extends AbstractWorker
      */
     protected function initWorker()
     {
-        $this->getDI()->get('logger')->debug(json_encode(func_get_args()));
+        $this->getDI()->get('logr')->debug(json_encode(func_get_args()));
         parent::initWorker($this->paramHash);
         $serviceFullName = $this->workflowConfig['servicesClassNameSpace'] . '\\' .
             ucFirst($this->paramHash['step']) . 'Step';

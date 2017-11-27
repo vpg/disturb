@@ -50,7 +50,7 @@ $paramHash = ConsoleApp::parseLongOpt(join($arguments['params'], ' '));
 $workflowConfig = new Json($paramHash['workflow']);
 $projectBootstrapFilePath = $workflowConfig['projectBootstrap'] ?? '';
 if (is_readable($projectBootstrapFilePath)) {
-    $di->get('logger')->info('Loading Bootstrap : ' . $projectBootstrapFilePath);
+    $di->get('logr')->info('Loading Bootstrap : ' . $projectBootstrapFilePath);
     require_once($projectBootstrapFilePath);
 }
 

@@ -26,8 +26,8 @@ class ManagerWorker extends Core\AbstractWorker
      */
     protected function usage()
     {
-        $this->getDI()->get('logger')->debug('Usage : ');
-        $this->getDI()->get('logger')->debug(
+        $this->getDI()->get('logr')->debug('Usage : ');
+        $this->getDI()->get('logr')->debug(
             'disturb.php "Tasks\\Manager" start --workflow="/path/to/workflow/config/file.json" [--name="workflowName"]'
         );
     }
@@ -39,13 +39,13 @@ class ManagerWorker extends Core\AbstractWorker
      */
     protected function initWorker()
     {
-        $this->getDI()->get('logger')->debug(json_encode(func_get_args()));
+        $this->getDI()->get('logr')->debug(json_encode(func_get_args()));
         parent::initWorker();
         $serviceFullName = $this->workflowConfig['servicesClassNameSpace'] . "\\" .
             ucFirst($this->workflowConfig['name']) . 'Manager';
         // xxx Allow client to overwrite ?
         $this->workflowManagerService = new ManagerService($this->paramHash['workflow']);
-        $this->getDI()->get('logger')->debug('Loading ' . $serviceFullName);
+        $this->getDI()->get('logr')->debug('Loading ' . $serviceFullName);
         $this->service = new $serviceFullName();
 
         $this->topicName = Topic\TopicService::getWorkflowManagerTopicName($this->workflowConfig['name']);
@@ -62,7 +62,7 @@ class ManagerWorker extends Core\AbstractWorker
      */
     protected function processMessage(Message\MessageDto $messageDto)
     {
-        $this->getDI()->get('logger')->info('messageDto : ' . $messageDto);
+        $this->getDI()->get('logr')->info('messageDto : ' . $messageDto);
         switch ($messageDto->getType()) {
             case Message\MessageDto::TYPE_WF_CTRL:
                 switch ($messageDto->getAction()) {
@@ -73,7 +73,7 @@ class ManagerWorker extends Core\AbstractWorker
                 }
             break;
             case Message\MessageDto::TYPE_STEP_ACK:
-                $this->getDI()->get('logger')->debug(
+                $this->getDI()->get('logr')->debug(
                     "Step {$messageDto->getStepCode()} says {$messageDto->getResult()}"
                 );
                 $stepResultHash = json_decode($messageDto->getResult(), true);
@@ -85,7 +85,7 @@ class ManagerWorker extends Core\AbstractWorker
                 );
 
                 $status = $this->workflowManagerService->getStatus($messageDto->getId());
-                $this->getDI()->get('logger')->debug("Id {$messageDto->getId()} is '$status'");
+                $this->getDI()->get('logr')->debug("Id {$messageDto->getId()} is '$status'");
                 if ($status == ManagerService::STATUS_FAILED) {
                     throw new WorkflowException("Id failed {$messageDto->getId()}");
                 }
@@ -108,7 +108,7 @@ class ManagerWorker extends Core\AbstractWorker
                 }
             break;
             default:
-                $this->getDI()->get('logger')->error("ERR : Unknown message type : {$messageDto->getType()}");
+                $this->getDI()->get('logr')->error("ERR : Unknown message type : {$messageDto->getType()}");
         }
     }
 
@@ -124,7 +124,7 @@ class ManagerWorker extends Core\AbstractWorker
 
         $stepHashList = $this->workflowManagerService->getNextStepList($workflowProcessId);
         if (empty($stepHashList)) {
-            $this->getDI()->get('logger')->info("No more step to run, WF ends");
+            $this->getDI()->get('logr')->info("No more step to run, WF ends");
             var_dump($this->workflowManagerService->getContext($workflowProcessId));
         }
         $this->workflowManagerService->initNextStep($workflowProcessId);

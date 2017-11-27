@@ -67,7 +67,7 @@ class ContextStorageService extends Component
      */
     public function __construct(Config $config)
     {
-        $this->di->get('logger')->debug(json_encode(func_get_args()));
+        $this->di->get('logr')->debug(json_encode(func_get_args()));
         // check adapter type
         if (empty($config->adapter)) {
             throw new StorageException(
@@ -116,7 +116,7 @@ class ContextStorageService extends Component
      */
     public function get(string $workflowProcessId)
     {
-        $this->di->get('logger')->debug(json_encode(func_get_args()));
+        $this->di->get('logr')->debug(json_encode(func_get_args()));
         return $this->adapter->get($workflowProcessId);
     }
 
@@ -129,7 +129,7 @@ class ContextStorageService extends Component
      */
     public function exist(string $workflowProcessId)
     {
-        $this->di->get('logger')->debug(json_encode(func_get_args()));
+        $this->di->get('logr')->debug(json_encode(func_get_args()));
         return $this->adapter->exist($workflowProcessId);
     }
 
@@ -143,7 +143,7 @@ class ContextStorageService extends Component
      */
     public function save(string $workflowProcessId, array $valueHash)
     {
-        $this->di->get('logger')->debug(json_encode(func_get_args()));
+        $this->di->get('logr')->debug(json_encode(func_get_args()));
         return $this->adapter->save($workflowProcessId, $valueHash);
     }
 
@@ -156,7 +156,7 @@ class ContextStorageService extends Component
      */
     public function delete(string $workflowProcessId)
     {
-        $this->di->get('logger')->debug(json_encode(func_get_args()));
+        $this->di->get('logr')->debug(json_encode(func_get_args()));
         return $this->adapter->delete($workflowProcessId);
     }
 
@@ -170,7 +170,7 @@ class ContextStorageService extends Component
      */
     public function setWorkflowStatus(string $workflowProcessId, string $status)
     {
-        $this->di->get('logger')->debug(json_encode(func_get_args()));
+        $this->di->get('logr')->debug(json_encode(func_get_args()));
         $contextHash = $this->get($workflowProcessId);
         $contextHash[self::WORKFLOW_STATUS] = $status;
         $this->save($workflowProcessId, $contextHash);
@@ -186,7 +186,7 @@ class ContextStorageService extends Component
      */
     public function getWorkflowStatus(string $workflowProcessId) : string
     {
-        $this->di->get('logger')->debug(json_encode(func_get_args()));
+        $this->di->get('logr')->debug(json_encode(func_get_args()));
         $contextHash = $this->get($workflowProcessId);
         if (isset($contextHash[self::WORKFLOW_STATUS])) {
             return $contextHash[self::WORKFLOW_STATUS];
@@ -204,7 +204,7 @@ class ContextStorageService extends Component
      */
     public function initWorkflowNextStep(string $workflowProcessId)
     {
-        $this->di->get('logger')->debug(json_encode(func_get_args()));
+        $this->di->get('logr')->debug(json_encode(func_get_args()));
         $contextHash = $this->get($workflowProcessId);
         $contextHash[self::WORKFLOW_CURRENT_STEP_POS]++;
         $this->save($workflowProcessId, $contextHash);
@@ -219,7 +219,7 @@ class ContextStorageService extends Component
      */
     public function getWorkflowNextStepPosition(string $workflowProcessId) : int
     {
-        $this->di->get('logger')->debug(json_encode(func_get_args()));
+        $this->di->get('logr')->debug(json_encode(func_get_args()));
         $contextHash = $this->get($workflowProcessId);
         return $contextHash[self::WORKFLOW_CURRENT_STEP_POS] + 1;
     }
@@ -233,7 +233,7 @@ class ContextStorageService extends Component
      */
     public function getWorkflowCurrentStepPosition(string $workflowProcessId) : int
     {
-        $this->di->get('logger')->debug(json_encode(func_get_args()));
+        $this->di->get('logr')->debug(json_encode(func_get_args()));
         $contextHash = $this->get($workflowProcessId);
         return $contextHash[self::WORKFLOW_CURRENT_STEP_POS];
     }
@@ -248,7 +248,7 @@ class ContextStorageService extends Component
      */
     public function getWorkflowCurrentStepList(string $workflowProcessId, int $currentWorkflowPosition) : array
     {
-        $this->di->get('logger')->debug(json_encode(func_get_args()));
+        $this->di->get('logr')->debug(json_encode(func_get_args()));
         $contextHash = $this->get($workflowProcessId);
         return $contextHash[self::WORKFLOW][self::WORKFLOW_STEPS][$currentWorkflowPosition];
     }
@@ -262,7 +262,7 @@ class ContextStorageService extends Component
      */
     public function getWorkflowStepList(string $workflowProcessId) : array
     {
-        $this->di->get('logger')->debug(json_encode(func_get_args()));
+        $this->di->get('logr')->debug(json_encode(func_get_args()));
         $contextHash = $this->get($workflowProcessId);
         return $contextHash[self::WORKFLOW][self::WORKFLOW_STEPS];
     }
@@ -277,7 +277,7 @@ class ContextStorageService extends Component
      */
     public function setWorkflowStepList(string $workflowProcessId, array $workflowStepList)
     {
-        $this->di->get('logger')->debug(json_encode(func_get_args()));
+        $this->di->get('logr')->debug(json_encode(func_get_args()));
         $contextHash = $this->get($workflowProcessId);
         $contextHash[self::WORKFLOW][self::WORKFLOW_STEPS] = $workflowStepList;
         $this->save($workflowProcessId, $contextHash);
@@ -294,7 +294,7 @@ class ContextStorageService extends Component
      */
     public function updateWorkflowStep(string $workflowProcessId, string $stepCode, array $stepHash)
     {
-        $this->di->get('logger')->debug(json_encode(func_get_args()));
+        $this->di->get('logr')->debug(json_encode(func_get_args()));
         $script = <<<EOT
         def nbStep = ctx._source.workflow.steps.size();
         for (stepIndex = 0; stepIndex < nbStep; stepIndex++) {

@@ -71,7 +71,7 @@ class ManagerService extends Component implements WorkflowManagerInterface
      */
     public function __construct(string $workflowConfigFilePath)
     {
-        $this->di->get('logger')->debug("Loading WF from '$workflowConfigFilePath'");
+        $this->di->get('logr')->debug("Loading WF from '$workflowConfigFilePath'");
 
         $this->di->setShared(
             'config',
@@ -80,7 +80,7 @@ class ManagerService extends Component implements WorkflowManagerInterface
 
         $this->di->setShared(
             'contextStorage',
-            new ContextStorageService($this->di->get('config')->contextStorage)
+            new ContextStorageService($this->di->get('config')->storage)
         );
     }
 
@@ -93,7 +93,7 @@ class ManagerService extends Component implements WorkflowManagerInterface
      */
     public function init(string $workflowProcessId)
     {
-        $this->di->get('logger')->debug(json_encode(func_get_args()));
+        $this->di->get('logr')->debug(json_encode(func_get_args()));
         $this->di->get('contextStorage')->save(
             $workflowProcessId,
             [
@@ -115,7 +115,7 @@ class ManagerService extends Component implements WorkflowManagerInterface
      */
     public function getContext(string $workflowProcessId)
     {
-        $this->di->get('logger')->debug(json_encode(func_get_args()));
+        $this->di->get('logr')->debug(json_encode(func_get_args()));
         return $this->di->get('contextStorage')->get($workflowProcessId);
     }
 
@@ -129,7 +129,7 @@ class ManagerService extends Component implements WorkflowManagerInterface
      */
     public function setStatus(string $workflowProcessId, string $status)
     {
-        $this->di->get('logger')->debug(json_encode(func_get_args()));
+        $this->di->get('logr')->debug(json_encode(func_get_args()));
         $this->di->get('contextStorage')->setWorkflowStatus($workflowProcessId, $status);
     }
 
@@ -142,7 +142,7 @@ class ManagerService extends Component implements WorkflowManagerInterface
      */
     public function getStatus(string $workflowProcessId) : string
     {
-        $this->di->get('logger')->debug(json_encode(func_get_args()));
+        $this->di->get('logr')->debug(json_encode(func_get_args()));
         return $this->di->get('contextStorage')->getWorkflowStatus($workflowProcessId);
     }
 
@@ -155,7 +155,7 @@ class ManagerService extends Component implements WorkflowManagerInterface
      */
     public function initNextStep(string $workflowProcessId)
     {
-        $this->di->get('logger')->debug(json_encode(func_get_args()));
+        $this->di->get('logr')->debug(json_encode(func_get_args()));
         $this->di->get('contextStorage')->initWorkflowNextStep($workflowProcessId);
     }
 
@@ -168,7 +168,7 @@ class ManagerService extends Component implements WorkflowManagerInterface
      */
     public function getNextStepList(string $workflowProcessId) : array
     {
-        $this->di->get('logger')->debug(json_encode(func_get_args()));
+        $this->di->get('logr')->debug(json_encode(func_get_args()));
         $nextStepPos = $this->di->get('contextStorage')->getWorkflowNextStepPosition($workflowProcessId);
 
         // Manage case when there is no more step to run
@@ -193,7 +193,7 @@ class ManagerService extends Component implements WorkflowManagerInterface
      */
     private function getStepStatusByJobStatus(array $step) : string
     {
-        $this->di->get('logger')->debug(json_encode(func_get_args()));
+        $this->di->get('logr')->debug(json_encode(func_get_args()));
 
         $jobStatusList = [];
         $jobList = $step['jobList'];
@@ -242,7 +242,7 @@ class ManagerService extends Component implements WorkflowManagerInterface
      */
     private function getWorkflowCurrentPosition(string $workflowProcessId) : int
     {
-        $this->di->get('logger')->debug(json_encode(func_get_args()));
+        $this->di->get('logr')->debug(json_encode(func_get_args()));
         return $this->di->get('contextStorage')->getWorkflowCurrentStepPosition($workflowProcessId);
     }
 
@@ -255,7 +255,7 @@ class ManagerService extends Component implements WorkflowManagerInterface
      */
     public function getCurrentStepStatus(string $workflowProcessId) : string
     {
-        $this->di->get('logger')->debug(json_encode(func_get_args()));
+        $this->di->get('logr')->debug(json_encode(func_get_args()));
         $currentStepPos = $this->getWorkflowCurrentPosition($workflowProcessId);
         $stepNode = $this->di->get('contextStorage')->getWorkflowCurrentStepList($workflowProcessId, $currentStepPos);
         $stepStatusList = [];
@@ -298,7 +298,7 @@ class ManagerService extends Component implements WorkflowManagerInterface
      */
     public function processStepJobResult(string $workflowProcessId, string $stepCode, int $jobId, array $resultHash)
     {
-        $this->di->get('logger')->debug(json_encode(func_get_args()));
+        $this->di->get('logr')->debug(json_encode(func_get_args()));
         $stepHash = $this->getContextWorkflowStep($workflowProcessId, $stepCode);
         if (!isset($stepHash['jobList']) || !isset($stepHash['jobList'][$jobId])) {
             throw new WorkflowException('Cannot find any job');
@@ -350,7 +350,7 @@ class ManagerService extends Component implements WorkflowManagerInterface
      */
     public function registerStepJob($workflowProcessId, $stepCode, $jobId)
     {
-        $this->di->get('logger')->debug(json_encode(func_get_args()));
+        $this->di->get('logr')->debug(json_encode(func_get_args()));
         // q&d search in context the job for which saving the result
         $stepHash = $this->getContextWorkflowStep($workflowProcessId, $stepCode);
         if (!isset($stepHash['jobList'])) {
@@ -375,7 +375,7 @@ class ManagerService extends Component implements WorkflowManagerInterface
      */
     private function getContextWorkflowStep($workflowProcessId, $stepCode)
     {
-        $this->di->get('logger')->debug(json_encode(func_get_args()));
+        $this->di->get('logr')->debug(json_encode(func_get_args()));
         $workflowStepList = $this->di->get('contextStorage')->getWorkflowStepList($workflowProcessId);
         foreach ($workflowStepList as &$stepNode) {
             if ($this->isStepParallelized($stepNode)) {
@@ -402,7 +402,7 @@ class ManagerService extends Component implements WorkflowManagerInterface
      */
     private function isRunning(string $workflowProcessId) : bool
     {
-        $this->di->get('logger')->debug(json_encode(func_get_args()));
+        $this->di->get('logr')->debug(json_encode(func_get_args()));
         return ($this->di->get('contextStorage')->getWorkflowStatus($workflowProcessId) == self::STATUS_STARTED);
     }
 
@@ -423,7 +423,7 @@ class ManagerService extends Component implements WorkflowManagerInterface
         //      { "name" : "step_foo"},
         //      { "name" : "step_bar"}
         // ]
-        $this->di->get('logger')->debug(json_encode(func_get_args()));
+        $this->di->get('logr')->debug(json_encode(func_get_args()));
         return !(array_keys($stepNode) !== array_keys(array_keys($stepNode)));
     }
 }
