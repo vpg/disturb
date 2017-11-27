@@ -67,7 +67,7 @@ class TopicService
 
         return str_replace(
             ['@prefix@', '@step_name@','@workflow_name@'],
-            [defined('DISTURB_TOPIC_PREFIX') ? DISTURB_TOPIC_PREFIX : '', stepName, $workflowName],
+            [defined('DISTURB_TOPIC_PREFIX') ? DISTURB_TOPIC_PREFIX : '', $stepName, $workflowName],
             self::TOPIC_WORKFLOW_MANAGER_STEP_NAME
         );
     }
