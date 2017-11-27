@@ -1,7 +1,7 @@
 <?php
 
 use \Phalcon\Config\Adapter\Json;
-use \Disturb\Library\Core\DI;
+use \Vpg\Disturb\Core\DI;
 use \Vpg\Disturb\Core\Cli\Console as ConsoleApp;
 
 define('DISTURB_DEBUG', getenv('DISTURB_DEBUG'));
