@@ -22,7 +22,7 @@ $di->set('dispatcher', function () {
 
 // Register logger
 $di->set(
-    'logger',
+    'logr',
     function () use ($di) {
         $logger = new \Vpg\Disturb\Core\Logger\Logger();
 

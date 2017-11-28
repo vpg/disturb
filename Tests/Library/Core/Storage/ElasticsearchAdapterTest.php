@@ -313,7 +313,7 @@ class ElasticsearchAdapterTest extends \Tests\DisturbUnitTestCase
         try {
             $this->invokeMethod(
                 $this->elasticsearchAdapter,
-                'exist',
+                'exists',
                 [self::TEST_DOCUMENT_EMPTY_ID]
             );
         } catch (\Exception $exception) {
@@ -328,7 +328,7 @@ class ElasticsearchAdapterTest extends \Tests\DisturbUnitTestCase
         try {
             $doesDocumentExist = $this->invokeMethod(
                 $this->elasticsearchAdapter,
-                'exist',
+                'exists',
                 [self::TEST_DOCUMENT_FAKE_ID]
             );
             $this->assertFalse($doesDocumentExist);
@@ -344,7 +344,7 @@ class ElasticsearchAdapterTest extends \Tests\DisturbUnitTestCase
         try {
             $doesDocumentExist = $this->invokeMethod(
                 $this->elasticsearchAdapter,
-                'exist',
+                'exists',
                 [self::TEST_DOCUMENT_ID]
             );
             $this->assertTrue($doesDocumentExist);
@@ -384,7 +384,7 @@ class ElasticsearchAdapterTest extends \Tests\DisturbUnitTestCase
             // check if test document exist
             $doesDocumentExist = $this->invokeMethod(
                 $this->elasticsearchAdapter,
-                'exist',
+                'exists',
                 [self::TEST_DOCUMENT_ID]
             );
             $this->assertTrue($doesDocumentExist);
@@ -399,7 +399,7 @@ class ElasticsearchAdapterTest extends \Tests\DisturbUnitTestCase
             // check if test document is correctly deleted
             $doesDocumentExist = $this->invokeMethod(
                 $this->elasticsearchAdapter,
-                'exist',
+                'exists',
                 [self::TEST_DOCUMENT_ID]
             );
             $this->assertFalse($doesDocumentExist);

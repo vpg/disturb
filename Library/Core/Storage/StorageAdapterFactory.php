@@ -35,7 +35,7 @@ class StorageAdapterFactory
      */
     public static function get(Workflow\WorkflowConfigDto $config, array $dbHash)
     {
-        DI::getDefault()->get('logger')->debug(json_encode(func_get_args()));
+        DI::getDefault()->get('logr')->debug(json_encode(func_get_args()));
         // check adapter type
         if (empty($config->getStorageAdapter())) {
             throw new StorageException(

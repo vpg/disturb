@@ -99,7 +99,7 @@ class ElasticsearchAdapter extends Component implements StorageAdapterInterface
      */
     public function initialize(Config $config, array $dbHash)
     {
-        $this->di->get('logger')->debug(json_encode(func_get_args()));
+        $this->di->get('logr')->debug(json_encode(func_get_args()));
         $this->checkVendorLibraryAvailable(self::VENDOR_CLASSNAME);
         $this->initConfig($config, $dbHash);
         $this->initClient();
@@ -197,7 +197,7 @@ class ElasticsearchAdapter extends Component implements StorageAdapterInterface
      */
     private function initClient()
     {
-        $this->di->get('logger')->debug(json_encode($this->config[self::CONFIG_HOST]));
+        $this->di->get('logr')->debug(json_encode($this->config[self::CONFIG_HOST]));
         $this->client = \Elasticsearch\ClientBuilder::create()
             ->setHosts([$this->config[self::CONFIG_HOST]])
             ->build();
@@ -224,7 +224,7 @@ class ElasticsearchAdapter extends Component implements StorageAdapterInterface
      */
     public function get(string $id) : array
     {
-        $this->di->get('logger')->debug(json_encode(func_get_args()));
+        $this->di->get('logr')->debug(json_encode(func_get_args()));
         $this->checkParameters([$id]);
 
         try {
@@ -252,7 +252,7 @@ class ElasticsearchAdapter extends Component implements StorageAdapterInterface
      */
     public function search(array $queryParameterHash) : array
     {
-        $this->di->get('logger')->debug(json_encode(func_get_args()));
+        $this->di->get('logr')->debug(json_encode(func_get_args()));
         // TODO
         return [];
     }
@@ -266,9 +266,9 @@ class ElasticsearchAdapter extends Component implements StorageAdapterInterface
      *
      * @throws StorageException
      */
-    public function exist(string $id) : bool
+    public function exists(string $id) : bool
     {
-        $this->di->get('logger')->debug(json_encode(func_get_args()));
+        $this->di->get('logr')->debug(json_encode(func_get_args()));
         $this->checkParameters([$id]);
 
         try {
@@ -298,7 +298,7 @@ class ElasticsearchAdapter extends Component implements StorageAdapterInterface
      */
     public function save(string $id, array $documentHash) : array
     {
-        $this->di->get('logger')->debug(json_encode(func_get_args()));
+        $this->di->get('logr')->debug(json_encode(func_get_args()));
         // Specify how many times should the operation be retried when a conflict occurs (simultaneous doc update)
         // TODO : check for param "retry_on_conflict"
 
@@ -335,7 +335,7 @@ class ElasticsearchAdapter extends Component implements StorageAdapterInterface
      */
     public function delete(string $id) : array
     {
-        $this->di->get('logger')->debug(json_encode(func_get_args()));
+        $this->di->get('logr')->debug(json_encode(func_get_args()));
         $this->checkParameters([$id]);
 
         try {
@@ -365,7 +365,7 @@ class ElasticsearchAdapter extends Component implements StorageAdapterInterface
      */
     public function update(string $id, array $updateHash) : array
     {
-        $this->di->get('logger')->debug(json_encode(func_get_args()));
+        $this->di->get('logr')->debug(json_encode(func_get_args()));
         $this->checkParameters([$id, $updateHash]);
 
         try {

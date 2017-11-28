@@ -31,13 +31,13 @@ abstract class AbstractDto extends Component
      */
     public function __construct($rawMixed)
     {
-        $this->di->get('logger')->debug(json_encode(func_get_args()));
+        $this->di->get('logr')->debug(json_encode(func_get_args()));
         $type = gettype($rawMixed);
         if ($type == 'object') {
             $type = get_class($rawMixed);
         }
         // Load conf according to the type
-        $this->di->get('logger')->debug("Type : $type");
+        $this->di->get('logr')->debug("Type : $type");
         switch ($type) {
             case self::TYPE_HASH:
                 $this->rawHash = $rawMixed;

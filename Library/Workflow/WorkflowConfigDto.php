@@ -31,7 +31,7 @@ class WorkflowConfigDto extends Dto\AbstractDto
      */
     public function __construct($mixed)
     {
-        $this->di->get('logger')->debug(json_encode(func_get_args()));
+        $this->di->get('logr')->debug(json_encode(func_get_args()));
         parent::__construct($mixed);
         $this->validate();
     }

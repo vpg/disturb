@@ -16,14 +16,14 @@ class TopicService
      *
      * @const String TOPIC_WORKFLOW_MANAGER_NAME
      */
-    const TOPIC_WORKFLOW_MANAGER_NAME = 'disturb-@workflow_name@-manager';
+    const TOPIC_WORKFLOW_MANAGER_NAME = '@prefix@disturb-@workflow_name@-manager';
 
     /**
      * Topic workflow manager step name
      *
      * @const String TOPIC_WORKFLOW_MANAGER_STEP_NAME
      */
-    const TOPIC_WORKFLOW_MANAGER_STEP_NAME = 'disturb-@workflow_name@-@step_name@-step';
+    const TOPIC_WORKFLOW_MANAGER_STEP_NAME = '@prefix@disturb-@workflow_name@-@step_name@-step';
 
     /**
      * Generate formated topic name for workflow manager
@@ -42,8 +42,8 @@ class TopicService
         }
 
         return str_replace(
-            ['@workflow_name@'],
-            [$workflowName],
+            ['@prefix@', '@workflow_name@'],
+            [defined('DISTURB_TOPIC_PREFIX') ? DISTURB_TOPIC_PREFIX : '', $workflowName],
             self::TOPIC_WORKFLOW_MANAGER_NAME
         );
     }
@@ -66,8 +66,8 @@ class TopicService
         }
 
         return str_replace(
-            ['@step_name@','@workflow_name@'],
-            [$stepName, $workflowName],
+            ['@prefix@', '@step_name@','@workflow_name@'],
+            [defined('DISTURB_TOPIC_PREFIX') ? DISTURB_TOPIC_PREFIX : '', $stepName, $workflowName],
             self::TOPIC_WORKFLOW_MANAGER_STEP_NAME
         );
     }

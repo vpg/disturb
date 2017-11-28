@@ -47,7 +47,7 @@ interface StorageAdapterInterface
      *
      * @return bool
      */
-    public function exist(string $id) : bool;
+    public function exists(string $id) : bool;
 
     /**
      * Save storage data identified by $id

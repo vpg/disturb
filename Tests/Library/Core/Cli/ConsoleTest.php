@@ -2,7 +2,7 @@
 
 namespace Tests\Library\Cli;
 
-use Vpg\Disturb\Cli;
+use Vpg\Disturb\Core\Cli;
 
 
 /**
