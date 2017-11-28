@@ -96,7 +96,7 @@ class ManagerService extends Component implements WorkflowManagerInterface
     {
         $this->di->get('logr')->debug(json_encode(func_get_args()));
         if ($this->di->get('contextStorage')->exists($workflowProcessId)) {
-            throw new WorkflowException("Failed to init workflow '$workflowProcessId' : exisiting context");
+            throw new WorkflowException("Failed to init workflow '$workflowProcessId' : existing context");
         }
         $this->di->get('contextStorage')->save(
             $workflowProcessId,
