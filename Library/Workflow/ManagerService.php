@@ -88,16 +88,21 @@ class ManagerService extends Component implements WorkflowManagerInterface
      * Init
      *
      * @param string $workflowProcessId the workflow process identifier
+     * @param array  $payloadHash       the workflow initial payload
      *
      * @return void
      */
-    public function init(string $workflowProcessId)
+    public function init(string $workflowProcessId, array $payloadHash)
     {
         $this->di->get('logr')->debug(json_encode(func_get_args()));
+        if ($this->di->get('contextStorage')->exists($workflowProcessId)) {
+            throw new WorkflowException("Failed to init workflow '$workflowProcessId' : existing context");
+        }
         $this->di->get('contextStorage')->save(
             $workflowProcessId,
             [
                 'workflow' => ['steps' => $this->di->get('config')['steps']->toArray()],
+                'initialPayload' => $payloadHash,
                 'status' => self::STATUS_STARTED,
                 'currentStepPos' => -1,
                 'initializedAt' => date('Y-m-d H:i:s'),

@@ -127,10 +127,10 @@ class ContextStorageService extends Component
      *
      * @return bool
      */
-    public function exist(string $workflowProcessId)
+    public function exists(string $workflowProcessId)
     {
         $this->di->get('logr')->debug(json_encode(func_get_args()));
-        return $this->adapter->exist($workflowProcessId);
+        return $this->adapter->exists($workflowProcessId);
     }
 
     /**
