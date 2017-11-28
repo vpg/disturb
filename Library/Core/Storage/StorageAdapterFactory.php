@@ -22,18 +22,32 @@ class StorageAdapterFactory
      */
     const ADAPTER_ELASTICSEARCH = 'elasticsearch';
 
+    /**
+     * Context usage const
+     *
+     * @const string USAGE_CONTEXT
+     */
+    const USAGE_CONTEXT = 'context';
+
+    /**
+     * Monitoring usage const
+     *
+     * @const string USAGE_MONITORING
+     */
+    const USAGE_MONITORING = 'monitoring';
+
 
     /**
      * ContextStorage constructor
      *
      * @param Workflow\WorkflowConfigDto $config config
-     * @param array                      $dbHash db config e.g. index and type for elasticsearch
+     * @param string                     $usage  define the usage, could either be context or monitoring
      *
      * @throws StorageException
      *
      * @return StorageAdapterInterface implementation
      */
-    public static function get(Workflow\WorkflowConfigDto $config, array $dbHash)
+    public static function get(Workflow\WorkflowConfigDto $config, string $usage)
     {
         DI::getDefault()->get('logr')->debug(json_encode(func_get_args()));
         // check adapter type
@@ -72,7 +86,7 @@ class StorageAdapterFactory
         }
 
         $adapter = new $adapterClass();
-        $adapter->initialize(new \Phalcon\Config($config->getStorageConfig()), $dbHash);
+        $adapter->initialize(new \Phalcon\Config($config->getStorageConfig()), $usage);
         return $adapter;
     }
 }

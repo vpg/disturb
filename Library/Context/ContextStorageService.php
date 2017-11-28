@@ -64,7 +64,7 @@ class ContextStorageService extends Component
         $config = new Workflow\WorkflowConfigDto($configFilePath);
         $this->adapter = Storage\StorageAdapterFactory::get(
             $config,
-            ['index' => 'disturb_context', 'type' => 'workflow']
+            Storage\StorageAdapterFactory::USAGE_CONTEXT
         );
     }
 

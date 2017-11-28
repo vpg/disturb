@@ -22,7 +22,7 @@ class StorageAdapterFactoryTest extends \Tests\DisturbUnitTestCase
     public function testElastic()
     {
         $config = new Workflow\WorkflowConfigDto(__DIR__ . '/config/validWorkflowConfig.json');
-        $adapter = Storage\StorageAdapterFactory::get($config, ['index' => 'disturb_monitoring', 'type' => 'worker']);
+        $adapter = Storage\StorageAdapterFactory::get($config, Storage\StorageAdapterFactory::USAGE_MONITORING);
         $this->assertInstanceOf('Vpg\\Disturb\\Core\\Storage\\ElasticsearchAdapter', $adapter);
     }
 }
