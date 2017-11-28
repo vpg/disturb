@@ -67,7 +67,14 @@ class ManagerWorker extends Core\AbstractWorker
             case Message\MessageDto::TYPE_WF_CTRL:
                 switch ($messageDto->getAction()) {
                     case 'start':
-                        $this->workflowManagerService->init($messageDto->getId());
+                        try {
+                            $this->workflowManagerService->init($messageDto->getId(), $messageDto->getPayload());
+                        } catch (WorkflowException $wfException) {
+                            $this->getDI()->get('logr')->error(
+                                "Failed to start workflow : {$wfException->getMessage()}"
+                            );
+                            return;
+                        }
                         $this->runNextStep($messageDto->getId());
                     break;
                 }

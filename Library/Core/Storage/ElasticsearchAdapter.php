@@ -279,7 +279,7 @@ class ElasticsearchAdapter extends Component implements StorageAdapterInterface
      *
      * @throws StorageException
      */
-    public function exist(string $id) : bool
+    public function exists(string $id) : bool
     {
         $this->di->get('logr')->debug(json_encode(func_get_args()));
         $this->checkParameters([$id]);
