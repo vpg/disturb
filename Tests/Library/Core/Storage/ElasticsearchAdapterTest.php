@@ -110,7 +110,7 @@ class ElasticsearchAdapterTest extends \Tests\DisturbUnitTestCase
         $this->assertEquals($this->elasticsearchTestHost, $adapterConfig[ElasticsearchAdapter::CONFIG_HOST]);
 
         $this->assertEquals(
-            'disturb_monitoring',
+            ElasticsearchAdapter::USAGE_MONITORING_CONFIG[ElasticsearchAdapter::DOC_INDEX],
             $adapterConfig[ElasticsearchAdapter::DOC_INDEX]
         );
 
@@ -171,7 +171,7 @@ class ElasticsearchAdapterTest extends \Tests\DisturbUnitTestCase
         $commonRequestParamHash = $this->getProperty($this->elasticsearchAdapter, 'commonRequestParamHash');
 
         $this->assertEquals(
-            'disturb_monitoring',
+            ElasticsearchAdapter::USAGE_MONITORING_CONFIG[ElasticsearchAdapter::DOC_INDEX],
             $commonRequestParamHash[ElasticsearchAdapter::DOC_INDEX]
         );
 

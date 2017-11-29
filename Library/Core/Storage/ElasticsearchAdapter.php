@@ -188,8 +188,8 @@ class ElasticsearchAdapter extends Component implements StorageAdapterInterface
         $this->checkParameters([$config]);
 
         // get default values for document index / type
-        $config[self::DOC_INDEX] = $dbHash['index'];
-        $config[self::DOC_TYPE] = $dbHash['type'];
+        $config[self::DOC_INDEX] = $dbHash[self::DOC_INDEX];
+        $config[self::DOC_TYPE] = $dbHash[self::DOC_TYPE];
 
         // check required config fields
         foreach (self::REQUIRED_CONFIG_FIELD_LIST as $configField) {

@@ -40,18 +40,18 @@ class StorageAdapterFactory
     /**
      * ContextStorage constructor
      *
-     * @param Workflow\WorkflowConfigDto $config config
-     * @param string                     $usage  define the usage, could either be context or monitoring
+     * @param Workflow\WorkflowConfigDto $workflowConfigDto config
+     * @param string                     $usage             define the usage, could either be context or monitoring
      *
      * @throws StorageException
      *
      * @return StorageAdapterInterface implementation
      */
-    public static function get(Workflow\WorkflowConfigDto $config, string $usage)
+    public static function get(Workflow\WorkflowConfigDto $workflowConfigDto, string $usage)
     {
         DI::getDefault()->get('logr')->debug(json_encode(func_get_args()));
         // check adapter type
-        if (empty($config->getStorageAdapter())) {
+        if (empty($workflowConfigDto->getStorageAdapter())) {
             throw new StorageException(
                 'Adapter name not found',
                 StorageException::CODE_ADAPTER
@@ -59,7 +59,7 @@ class StorageAdapterFactory
         }
 
         // check if adapter class exists
-        switch ($config->getStorageAdapter()) {
+        switch ($workflowConfigDto->getStorageAdapter()) {
             case self::ADAPTER_ELASTICSEARCH:
                 $adapterClass = 'Vpg\\Disturb\\Core\\Storage\\ElasticsearchAdapter';
             break;
@@ -78,7 +78,7 @@ class StorageAdapterFactory
         }
 
         // check if adapter config exists
-        if (empty($config->getStorageConfig())) {
+        if (empty($workflowConfigDto->getStorageConfig())) {
             throw new StorageException(
                 'Adapter config not found',
                 StorageException::CODE_ADAPTER
@@ -86,7 +86,7 @@ class StorageAdapterFactory
         }
 
         $adapter = new $adapterClass();
-        $adapter->initialize(new \Phalcon\Config($config->getStorageConfig()), $usage);
+        $adapter->initialize(new \Phalcon\Config($workflowConfigDto->getStorageConfig()), $usage);
         return $adapter;
     }
 }
