@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Library\Cli;
+namespace Tests\Library\Core\Cli;
 
 use Vpg\Disturb\Core\Cli;
 
