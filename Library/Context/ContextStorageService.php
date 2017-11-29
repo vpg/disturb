@@ -17,13 +17,6 @@ use Vpg\Disturb\Workflow;
 class ContextStorageService extends Component
 {
     /**
-     * Elastic search adapter
-     *
-     * @const string ADAPTER_ELASTICSEARCH
-     */
-    const ADAPTER_ELASTICSEARCH = 'elasticsearch';
-
-    /**
      * Workflow
      *
      * @const string WORKFLOW
@@ -61,50 +54,18 @@ class ContextStorageService extends Component
     /**
      * ContextStorage constructor
      *
-     * @param Json $config config
+     * @param string $configFilePath config file path
      *
      * @throws StorageException
      */
-    public function __construct(Config $config)
+    public function __construct(string $configFilePath)
     {
         $this->di->get('logr')->debug(json_encode(func_get_args()));
-        // check adapter type
-        if (empty($config->adapter)) {
-            throw new StorageException(
-                'Adapter name not found',
-                StorageException::CODE_ADAPTER
-            );
-        }
-
-        // check if adapter class exists
-        switch ($config->adapter) {
-            case self::ADAPTER_ELASTICSEARCH:
-                $adapterClass = 'Vpg\\Disturb\\Core\\Storage\\ElasticsearchAdapter';
-            break;
-            default:
-            throw new StorageException(
-                'Adapter class not found',
-                StorageException::CODE_ADAPTER
-            );
-        }
-
-        if (! class_exists($adapterClass)) {
-            throw new StorageException(
-                'Adapter class not found : ' . $adapterClass,
-                StorageException::CODE_ADAPTER
-            );
-        }
-
-        // check if adapter config exists
-        if (empty($config->config)) {
-            throw new StorageException(
-                'Adapter config not found',
-                StorageException::CODE_ADAPTER
-            );
-        }
-
-        $this->adapter = new $adapterClass();
-        $this->adapter->initialize($config->config);
+        $config = new Workflow\WorkflowConfigDto($configFilePath);
+        $this->adapter = Storage\StorageAdapterFactory::get(
+            $config,
+            Storage\StorageAdapterFactory::USAGE_CONTEXT
+        );
     }
 
     /**

@@ -2,6 +2,7 @@
 
 namespace Tests\Library\Core\Storage;
 
+use Vpg\Disturb\Core\Storage\StorageAdapterFactory;
 use Vpg\Disturb\Core\Storage\ElasticsearchAdapter;
 use Vpg\Disturb\Core\Storage\StorageException;
 
@@ -71,7 +72,7 @@ class ElasticsearchAdapterTest extends \Tests\DisturbUnitTestCase
     {
         // config not found
         try {
-            $this->invokeMethod($this->elasticsearchAdapter, 'initConfig', []);
+            $this->invokeMethod($this->elasticsearchAdapter, 'initConfig', '');
         } catch (\Throwable $exception) {
             if (!$exception) {
                 $this->fail('Exception expected : Elasticsearch config not found');
@@ -84,7 +85,11 @@ class ElasticsearchAdapterTest extends \Tests\DisturbUnitTestCase
         );
 
         try {
-            $this->invokeMethod($this->elasticsearchAdapter, 'initConfig', [$uncompletedConfig]);
+            $this->invokeMethod(
+                $this->elasticsearchAdapter,
+                'initConfig',
+                [$uncompletedConfig, ElasticsearchAdapter::USAGE_MONITORING_CONFIG]
+            );
         } catch (StorageException $exception) {
             if ($exception) {
                 $this->assertEquals(
@@ -105,12 +110,12 @@ class ElasticsearchAdapterTest extends \Tests\DisturbUnitTestCase
         $this->assertEquals($this->elasticsearchTestHost, $adapterConfig[ElasticsearchAdapter::CONFIG_HOST]);
 
         $this->assertEquals(
-            ElasticsearchAdapter::DEFAULT_DOC_INDEX,
+            ElasticsearchAdapter::USAGE_MONITORING_CONFIG[ElasticsearchAdapter::DOC_INDEX],
             $adapterConfig[ElasticsearchAdapter::DOC_INDEX]
         );
 
         $this->assertEquals(
-            ElasticsearchAdapter::DEFAULT_DOC_TYPE,
+            'worker',
             $adapterConfig[ElasticsearchAdapter::DOC_TYPE]
         );
     }
@@ -127,13 +132,16 @@ class ElasticsearchAdapterTest extends \Tests\DisturbUnitTestCase
             $this->invokeMethod($this->elasticsearchAdapter, 'checkVendorLibraryAvailable', [$badVendorLibraryName]);
         } catch (StorageException $exception) {
             if ($exception) {
-                $this->assertEquals('Vpg\Disturb\Core\Storage\ElasticsearchAdapter::checkVendorLibraryAvailable : ' .
+                $this->assertEquals(
+                    'Vpg\Disturb\Core\Storage\ElasticsearchAdapter::checkVendorLibraryAvailable : ' .
                     $badVendorLibraryName . ' lib not found. Please make "composer update"',
-                    $exception->getMessage());
+                    $exception->getMessage()
+                );
             } else {
-                $this->fail('Vpg\Disturb\Core\Storage\ElasticsearchAdapter::checkVendorLibraryAvailable : ' .
-                    $badVendorLibraryName . ' lib not found.
-                 Please make "composer update"');
+                $this->fail(
+                    'Vpg\Disturb\Core\Storage\ElasticsearchAdapter::checkVendorLibraryAvailable : ' .
+                    $badVendorLibraryName . ' lib not found.  Please make "composer update"'
+                );
             }
         }
 
@@ -163,12 +171,12 @@ class ElasticsearchAdapterTest extends \Tests\DisturbUnitTestCase
         $commonRequestParamHash = $this->getProperty($this->elasticsearchAdapter, 'commonRequestParamHash');
 
         $this->assertEquals(
-            ElasticsearchAdapter::DEFAULT_DOC_INDEX,
+            ElasticsearchAdapter::USAGE_MONITORING_CONFIG[ElasticsearchAdapter::DOC_INDEX],
             $commonRequestParamHash[ElasticsearchAdapter::DOC_INDEX]
         );
 
         $this->assertEquals(
-            ElasticsearchAdapter::DEFAULT_DOC_TYPE,
+            'worker',
             $commonRequestParamHash[ElasticsearchAdapter::DOC_TYPE]
         );
     }
@@ -192,12 +200,16 @@ class ElasticsearchAdapterTest extends \Tests\DisturbUnitTestCase
             );
         } catch (StorageException $exception) {
             if ($exception) {
-                $this->assertEquals('Vpg\Disturb\Core\Storage\ElasticsearchAdapter::initClient : host : ' .
-                    $config[ElasticsearchAdapter::CONFIG_HOST] .
-                    ' not available', $exception->getMessage());
+                $this->assertEquals(
+                    'Vpg\Disturb\Core\Storage\ElasticsearchAdapter::initClient : host : ' .
+                    $config[ElasticsearchAdapter::CONFIG_HOST] . ' not available',
+                    $exception->getMessage()
+                );
             } else {
-                $this->fail('Vpg\Disturb\Core\Storage\ElasticsearchAdapter::initClient : host : ' .
-                    $config[ElasticsearchAdapter::CONFIG_HOST] . ' not available');
+                $this->fail(
+                    'Vpg\Disturb\Core\Storage\ElasticsearchAdapter::initClient : host : ' .
+                    $config[ElasticsearchAdapter::CONFIG_HOST] . ' not available'
+                );
             }
         }
 
@@ -211,12 +223,14 @@ class ElasticsearchAdapterTest extends \Tests\DisturbUnitTestCase
                 []
             );
         } catch (\Exception $exception) {
-            $this->fail('ElasticsearchAdatper initClient : ' . $exception->getMessage());
+            $this->fail('ElasticsearchAdapter initClient : ' . $exception->getMessage());
         }
     }
 
     /**
      * Test save
+     *
+     * @return void
      */
     public function testSave()
     {
@@ -304,6 +318,8 @@ class ElasticsearchAdapterTest extends \Tests\DisturbUnitTestCase
 
     /**
      * Test exist function
+     *
+     * @return void
      */
     public function testExist()
     {
@@ -359,6 +375,8 @@ class ElasticsearchAdapterTest extends \Tests\DisturbUnitTestCase
 
     /**
      * Test delete function
+     *
+     * @return void
      */
     public function testDelete()
     {
@@ -422,7 +440,11 @@ class ElasticsearchAdapterTest extends \Tests\DisturbUnitTestCase
         $config = new Json(
             realpath(__DIR__ . '/Config/elasticsearchConfig.json')
         );
-        $this->invokeMethod($this->elasticsearchAdapter, 'initConfig', [$config]);
+        $this->invokeMethod(
+            $this->elasticsearchAdapter,
+            'initConfig',
+            [$config, ElasticsearchAdapter::USAGE_MONITORING_CONFIG]
+        );
     }
 
     /**
@@ -435,7 +457,11 @@ class ElasticsearchAdapterTest extends \Tests\DisturbUnitTestCase
         $config = new Json(
             realpath(__DIR__ . '/Config/elasticsearchBadConfig.json')
         );
-        $this->invokeMethod($this->elasticsearchAdapter, 'initConfig', [$config]);
+        $this->invokeMethod(
+            $this->elasticsearchAdapter,
+            'initConfig',
+            [$config, ElasticsearchAdapter::USAGE_MONITORING_CONFIG]
+        );
     }
 
     /**
@@ -448,6 +474,10 @@ class ElasticsearchAdapterTest extends \Tests\DisturbUnitTestCase
         $config = new Json(
             realpath(__DIR__ . '/Config/elasticsearchConfig.json')
         );
-        $this->invokeMethod($this->elasticsearchAdapter, 'initialize', [$config]);
+        $this->invokeMethod(
+            $this->elasticsearchAdapter,
+            'initialize',
+            [$config, StorageAdapterFactory::USAGE_MONITORING]
+        );
     }
 }

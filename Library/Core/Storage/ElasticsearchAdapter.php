@@ -22,20 +22,6 @@ class ElasticsearchAdapter extends Component implements StorageAdapterInterface
     const VENDOR_CLASSNAME = '\\Elasticsearch\\Client';
 
     /**
-     * Default doc index const
-     *
-     * @const string DEFAULT_INDEX
-     */
-    const DEFAULT_DOC_INDEX = 'disturb_context';
-
-    /**
-     * Default type const
-     *
-     * @const string DEFAULT_TYPE
-     */
-    const DEFAULT_DOC_TYPE = 'workflow';
-
-    /**
      * Doc source const
      *
      * @const string DEFAULT_DOC_SOURCE
@@ -62,6 +48,20 @@ class ElasticsearchAdapter extends Component implements StorageAdapterInterface
      * @const string CONFIG_HOST
      */
     const CONFIG_HOST = 'host';
+
+    /**
+     * Context usage config
+     *
+     * @const string USAGE_CONTEXT_CONFIG
+     */
+    const USAGE_CONTEXT_CONFIG = ['index' => 'disturb_context', 'type' => 'workflow'];
+
+    /**
+     * Monitoring usage config
+     *
+     * @const string USAGE_MONITORING_CONFIG
+     */
+    const USAGE_MONITORING_CONFIG = ['index' => 'disturb_monitoring', 'type' => 'worker'];
 
     /**
      * Required config field list const
@@ -107,15 +107,30 @@ class ElasticsearchAdapter extends Component implements StorageAdapterInterface
     /**
      * Initialize
      *
-     * @param Json $config config
+     * @param Json   $config config
+     * @param string $usage  define the usage, could either be context or monitoring
      *
      * @return void
      */
-    public function initialize(Config $config)
+    public function initialize(Config $config, string $usage)
     {
         $this->di->get('logr')->debug(json_encode(func_get_args()));
         $this->checkVendorLibraryAvailable(self::VENDOR_CLASSNAME);
-        $this->initConfig($config);
+        switch ($usage) {
+            case StorageAdapterFactory::USAGE_CONTEXT:
+                $dbHash = self::USAGE_CONTEXT_CONFIG;
+            break;
+            case StorageAdapterFactory::USAGE_MONITORING:
+                $dbHash = self::USAGE_MONITORING_CONFIG;
+            break;
+            default:
+                throw new StorageException(
+                    "Unkown usage : $usage",
+                    StorageException::CODE_INVALID_PARAMETER
+                );
+
+        }
+        $this->initConfig($config, $dbHash);
         $this->initClient();
     }
 
@@ -162,18 +177,19 @@ class ElasticsearchAdapter extends Component implements StorageAdapterInterface
     /**
      * Init configuration
      *
-     * @param Json $config config
+     * @param Json  $config host config
+     * @param array $dbHash index and type config
      *
      * @throws StorageException
      * @return void
      */
-    private function initConfig(Config $config)
+    private function initConfig(Config $config, array $dbHash)
     {
         $this->checkParameters([$config]);
 
         // get default values for document index / type
-        $config[self::DOC_INDEX] = self::DEFAULT_DOC_INDEX;
-        $config[self::DOC_TYPE] = self::DEFAULT_DOC_TYPE;
+        $config[self::DOC_INDEX] = $dbHash[self::DOC_INDEX];
+        $config[self::DOC_TYPE] = $dbHash[self::DOC_TYPE];
 
         // check required config fields
         foreach (self::REQUIRED_CONFIG_FIELD_LIST as $configField) {

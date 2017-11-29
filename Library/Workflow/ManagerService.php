@@ -80,7 +80,7 @@ class ManagerService extends Component implements WorkflowManagerInterface
 
         $this->di->setShared(
             'contextStorage',
-            new ContextStorageService($this->di->get('config')->storage)
+            new ContextStorageService($workflowConfigFilePath)
         );
     }
 

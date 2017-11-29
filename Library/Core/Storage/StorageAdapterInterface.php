@@ -17,10 +17,11 @@ interface StorageAdapterInterface
      * Initialize
      *
      * @param Config $config config
+     * @param string $usage  define the usage, could either be context or monitoring
      *
      * @return mixed
      */
-    public function initialize(Config $config);
+    public function initialize(Config $config, string $usage);
 
     /**
      * Get storage data identified by $id
