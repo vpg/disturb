@@ -53,17 +53,34 @@ class Service extends Component
     /**
      * Registers a worker into the monitoring sys
      *
-     * @param string $workerCode the worker's code to register 
+     * @param string $workerCode the worker's code to register
      *
      * @return void
      */
-    public function workerStarted(string $workerCode)
+    public function workerBeat(string $workerCode)
+    {
+        $this->di->get('logr')->debug(json_encode(func_get_args()));
+        $workerHash = [
+            'heartBeatAt' => Date('Y-m-d H:i:s')
+        ];
+        $this->storageClient->save($workerCode, $workerHash);
+    }
+
+    /**
+     * Registers a worker into the monitoring sys
+     *
+     * @param string $workerCode the worker's code to register
+     * @param int    $pid        the worker's pid
+     *
+     * @return void
+     */
+    public function workerStarted(string $workerCode, int $pid)
     {
         $this->di->get('logr')->debug(json_encode(func_get_args()));
         $workerHash = [
             'status' => Core\AbstractWorker::STATUS_STARTED,
             'runingOn' => php_uname("n"),
-            'pid' => 1,
+            'pid' => $pid,
             'startedAt' => Date('Y-m-d H:i:s'),
             'heartBeatAt' => Date('Y-m-d H:i:s')
         ];
@@ -73,7 +90,7 @@ class Service extends Component
     /**
      * Registers a worker into the monitoring sys
      *
-     * @param string $workerCode the worker's code to register 
+     * @param string $workerCode the worker's code to register
      *
      * @return void
      */
@@ -89,11 +106,12 @@ class Service extends Component
     /**
      * Registers a worker into the monitoring sys
      *
-     * @param string $workerCode the worker's code to register 
+     * @param string $workerCode the worker's code to register
+     * @param int    $exitCode   the worker's exit code
      *
      * @return void
      */
-    public function WorkerExited(string $workerCode, int $exitCode = 0)
+    public function workerExited(string $workerCode, int $exitCode = 0)
     {
         $this->di->get('logr')->debug(json_encode(func_get_args()));
         $workerHash = [
