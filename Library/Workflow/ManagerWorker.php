@@ -5,6 +5,7 @@ namespace Vpg\Disturb\Workflow;
 use Vpg\Disturb\Topic;
 use Vpg\Disturb\Message;
 use Vpg\Disturb\Core;
+use Vpg\Disturb\Step;
 
 /**
  * Manager task
@@ -83,7 +84,7 @@ class ManagerWorker extends Core\AbstractWorker
                 $this->getDI()->get('logr')->debug(
                     "Step {$messageDto->getStepCode()} says {$messageDto->getResult()}"
                 );
-                $stepResultHash = json_decode($messageDto->getResult(), true);
+                $stepResultHash = $messageDto->getResult();
                 $this->workflowManagerService->processStepJobResult(
                     $messageDto->getId(),
                     $messageDto->getStepCode(),
@@ -125,6 +126,7 @@ class ManagerWorker extends Core\AbstractWorker
      * @param string $workflowProcessId workflow process id
      *
      * @return void
+     * @throws Step\StepException
      */
     protected function runNextStep(string $workflowProcessId)
     {
@@ -136,28 +138,38 @@ class ManagerWorker extends Core\AbstractWorker
         }
         $this->workflowManagerService->initNextStep($workflowProcessId);
 
-        // run through the next step(s)
-        foreach ($stepHashList as $stepHash) {
-            $stepCode = $stepHash['name'];
-            $stepInputList = $this->service->getStepInput($workflowProcessId, $stepCode);
-            // run through the "job" to send to each step
-            foreach ($stepInputList as $jobId => $stepJobHash) {
-                $this->workflowManagerService->registerStepJob($workflowProcessId, $stepCode, $jobId);
-                $messageHash = [
-                    'id' => $workflowProcessId,
-                    'type' => Message\MessageDto::TYPE_STEP_CTRL,
-                    'jobId' => $jobId,
-                    'stepCode' => $stepCode,
-                    'action' => 'start',
-                    'payload' => $stepJobHash
-                ];
-                $stepMessageDto = new Message\MessageDto(json_encode($messageHash));
+        try {
+            // run through the next step(s)
+            foreach ($stepHashList as $stepHash) {
+                $stepCode = $stepHash['name'];
+                $stepInputList = $this->service->getStepInput($workflowProcessId, $stepCode);
 
-                $this->sendMessage(
-                    Topic\TopicService::getWorkflowStepTopicName($stepCode, $this->workflowConfig['name']),
-                    $stepMessageDto
-                );
+                // run through the "job" to send to each step
+                foreach ($stepInputList as $jobId => $stepJobHash) {
+                    $this->workflowManagerService->registerStepJob($workflowProcessId, $stepCode, $jobId);
+                    $messageHash = [
+                        'id' => $workflowProcessId,
+                        'type' => Message\MessageDto::TYPE_STEP_CTRL,
+                        'jobId' => $jobId,
+                        'stepCode' => $stepCode,
+                        'action' => 'start',
+                        'payload' => $stepJobHash
+                    ];
+                    $stepMessageDto = new Message\MessageDto(json_encode($messageHash));
+
+                    $this->sendMessage(
+                        Topic\TopicService::getWorkflowStepTopicName($stepCode, $this->workflowConfig['name']),
+                        $stepMessageDto
+                    );
+                }
             }
+        } catch (Exception $exception) {
+            $this->workflowManagerService->setStatus(
+                $workflowProcessId,
+                ManagerService::STATUS_FAILED,
+                $exception->getMessage()
+            );
         }
+
     }
 }

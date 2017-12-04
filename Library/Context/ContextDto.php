@@ -97,7 +97,18 @@ class ContextDto extends Dto\AbstractDto
     }
 
     /**
-     * Returns the stepposition of the current workflow context
+     * Returns the info of the current workflow context status
+     *
+     * @return string the current info
+     */
+    public function getWorkflowInfo() : string
+    {
+        $this->di->get('logr')->debug(json_encode(func_get_args()));
+        return $this->rawHash['info'] ?? '';
+    }
+
+    /**
+     * Returns the step position of the current workflow context
      *
      * @return int the current step position
      */

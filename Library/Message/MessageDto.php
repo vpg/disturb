@@ -191,11 +191,11 @@ class MessageDto
     /**
      * Get encoded result
      *
-     * @return string
+     * @return array
      */
-    public function getResult(): string
+    public function getResult(): array
     {
-        return $this->rawHash['result'] ?? '';
+        return $this->rawHash['result'] ?? [];
     }
 
 }
