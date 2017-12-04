@@ -214,14 +214,4 @@ EOT;
         ];
         return $this->adapter->update($workflowProcessId, $updateHash);
     }
-
-    /**
-     * Update the given step related to the given workflow/stepcode
-     *
-     * @return Context\Reader
-     */
-    public static function getReader()
-    {
-        return Reader(\Phalcon\Di::getDefault()->get('config')->get('workflowConfigFilePath'));
-    }
 }

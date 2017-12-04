@@ -6,4 +6,4 @@ $configHash = [
 
 
 $config = new \Phalcon\Config();
-$di->set('config', $config);
+$di->set('disturb-config', $config);
