@@ -1,0 +1,10 @@
+{
+  "actions": [
+    {
+      "add": {
+        "index": "disturb_monitoring-1.0.0-beta",
+        "alias": "disturb_monitoring"
+      }
+    }
+  ]
+}
