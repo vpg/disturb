@@ -5,12 +5,10 @@ $di = new \Phalcon\Di\FactoryDefault\Cli();
 
 
 // Load the configuration file (if any)
-$configFile = __DIR__ . '/Config/config.php';
+$configFile = __DIR__ . '/../Config/config.php';
 
 if (is_readable($configFile)) {
-    $config = include $configFile;
-
-    $di->set('config', $config);
+    require_once($configFile);
 }
 
 $di->set('dispatcher', function () {

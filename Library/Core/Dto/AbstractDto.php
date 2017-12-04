@@ -101,4 +101,14 @@ abstract class AbstractDto extends Component
 
         return $missingPropList;
     }
+
+    /**
+     * Returns the raw data hash
+     *
+     * @return array the raw data hash
+     */
+    public function getRawHash() : array
+    {
+        return $this->rawHash;
+    }
 }

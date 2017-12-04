@@ -57,8 +57,9 @@ class ContextDto extends Dto\AbstractDto
      *
      * @return array the initial payload
      */
-    public function getInitialPayload()
+    public function getInitialPayload() : array
     {
+        $this->di->get('logr')->debug(json_encode(func_get_args()));
         return $this->rawHash['initialPayload'] ?? [];
     }
 
@@ -70,8 +71,9 @@ class ContextDto extends Dto\AbstractDto
      *                  'stepName' => ['foo' => 'bar'],
      *               ]
      */
-    public function getStepResultData()
+    public function getStepResultData() : array
     {
+        $this->di->get('logr')->debug(json_encode(func_get_args()));
         $allStepResultHash = [];
         foreach ($this->rawHash['workflow']['steps'] as $stepHash) {
             $stepResultHash = array_column($stepHash['jobList'], 'result');
@@ -81,5 +83,51 @@ class ContextDto extends Dto\AbstractDto
             $allStepResultHash[$stepHash['name']] = array_column($stepHash['jobList'], 'result');
         }
         return $allStepResultHash;
+    }
+
+    /**
+     * Returns the status of the current workflow context
+     *
+     * @return string the current status
+     */
+    public function getWorkflowStatus() : string
+    {
+        $this->di->get('logr')->debug(json_encode(func_get_args()));
+        return $this->rawHash['status'] ?? '';
+    }
+
+    /**
+     * Returns the stepposition of the current workflow context
+     *
+     * @return int the current step position
+     */
+    public function getWorkflowCurrentPosition() : int
+    {
+        $this->di->get('logr')->debug(json_encode(func_get_args()));
+        return $this->rawHash['currentStepPos'] ?? -1;
+    }
+
+    /**
+     * Returns the step list of the current workflow context
+     *
+     * @return array the current step list
+     */
+    public function getWorkflowStepList() : array
+    {
+        $this->di->get('logr')->debug(json_encode(func_get_args()));
+        return $this->rawHash['workflow']['steps'] ?? [];
+    }
+
+    /**
+     * Returns the step list of the current workflow context for the given position
+     *
+     * @param int $positionNo the postion
+     *
+     * @return array the step list
+     */
+    public function getWorkflowStepListByPosition(int $positionNo) : array
+    {
+        $this->di->get('logr')->debug(json_encode(func_get_args()));
+        return $this->rawHash['workflow']['steps'][$positionNo] ?? [];
     }
 }

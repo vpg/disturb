@@ -78,7 +78,8 @@ class ContextStorageService extends Component
     public function get(string $workflowProcessId)
     {
         $this->di->get('logr')->debug(json_encode(func_get_args()));
-        return $this->adapter->get($workflowProcessId);
+        $contextHash = $this->adapter->get($workflowProcessId);
+        return new ContextDto($contextHash);
     }
 
     /**
@@ -132,28 +133,11 @@ class ContextStorageService extends Component
     public function setWorkflowStatus(string $workflowProcessId, string $status)
     {
         $this->di->get('logr')->debug(json_encode(func_get_args()));
-        $contextHash = $this->get($workflowProcessId);
+        $contextDto = $this->get($workflowProcessId);
+        $contextHash = $contextDto->getRawHash();
         $contextHash[self::WORKFLOW_STATUS] = $status;
         $this->save($workflowProcessId, $contextHash);
 
-    }
-
-    /**
-     * Get workflow status
-     *
-     * @param string $workflowProcessId the workflow process id
-     *
-     * @return string
-     */
-    public function getWorkflowStatus(string $workflowProcessId) : string
-    {
-        $this->di->get('logr')->debug(json_encode(func_get_args()));
-        $contextHash = $this->get($workflowProcessId);
-        if (isset($contextHash[self::WORKFLOW_STATUS])) {
-            return $contextHash[self::WORKFLOW_STATUS];
-        } else {
-            return Workflow\ManagerService::STATUS_NO_STARTED;
-        }
     }
 
     /**
@@ -166,67 +150,12 @@ class ContextStorageService extends Component
     public function initWorkflowNextStep(string $workflowProcessId)
     {
         $this->di->get('logr')->debug(json_encode(func_get_args()));
-        $contextHash = $this->get($workflowProcessId);
+        $contextDto = $this->get($workflowProcessId);
+        $contextHash = $contextDto->getRawHash();
         $contextHash[self::WORKFLOW_CURRENT_STEP_POS]++;
         $this->save($workflowProcessId, $contextHash);
     }
 
-    /**
-     * Get workflow next step position
-     *
-     * @param string $workflowProcessId the workflow process id
-     *
-     * @return int
-     */
-    public function getWorkflowNextStepPosition(string $workflowProcessId) : int
-    {
-        $this->di->get('logr')->debug(json_encode(func_get_args()));
-        $contextHash = $this->get($workflowProcessId);
-        return $contextHash[self::WORKFLOW_CURRENT_STEP_POS] + 1;
-    }
-
-    /**
-     * Get workflow current step position
-     *
-     * @param string $workflowProcessId the workflow process id
-     *
-     * @return int
-     */
-    public function getWorkflowCurrentStepPosition(string $workflowProcessId) : int
-    {
-        $this->di->get('logr')->debug(json_encode(func_get_args()));
-        $contextHash = $this->get($workflowProcessId);
-        return $contextHash[self::WORKFLOW_CURRENT_STEP_POS];
-    }
-
-    /**
-     * Get workflow current step list
-     *
-     * @param string $workflowProcessId       the workflow process id
-     * @param int    $currentWorkflowPosition currentWorkflowPosition
-     *
-     * @return array
-     */
-    public function getWorkflowCurrentStepList(string $workflowProcessId, int $currentWorkflowPosition) : array
-    {
-        $this->di->get('logr')->debug(json_encode(func_get_args()));
-        $contextHash = $this->get($workflowProcessId);
-        return $contextHash[self::WORKFLOW][self::WORKFLOW_STEPS][$currentWorkflowPosition];
-    }
-
-    /**
-     * Get workflow step list
-     *
-     * @param string $workflowProcessId the workflow process id
-     *
-     * @return array
-     */
-    public function getWorkflowStepList(string $workflowProcessId) : array
-    {
-        $this->di->get('logr')->debug(json_encode(func_get_args()));
-        $contextHash = $this->get($workflowProcessId);
-        return $contextHash[self::WORKFLOW][self::WORKFLOW_STEPS];
-    }
 
     /**
      * Set workflow step list
@@ -239,6 +168,7 @@ class ContextStorageService extends Component
     public function setWorkflowStepList(string $workflowProcessId, array $workflowStepList)
     {
         $this->di->get('logr')->debug(json_encode(func_get_args()));
+        // xxx use partial update
         $contextHash = $this->get($workflowProcessId);
         $contextHash[self::WORKFLOW][self::WORKFLOW_STEPS] = $workflowStepList;
         $this->save($workflowProcessId, $contextHash);
@@ -285,5 +215,13 @@ EOT;
         return $this->adapter->update($workflowProcessId, $updateHash);
     }
 
-
+    /**
+     * Update the given step related to the given workflow/stepcode
+     *
+     * @return Context\Reader
+     */
+    public static function getReader()
+    {
+        return Reader(\Phalcon\Di::getDefault()->get('config')->get('workflowConfigFilePath'));
+    }
 }
