@@ -132,7 +132,7 @@ class ManagerWorker extends Core\AbstractWorker
         $stepHashList = $this->workflowManagerService->getNextStepList($workflowProcessId);
         if (empty($stepHashList)) {
             $this->getDI()->get('logr')->info("No more step to run, WF ends");
-            var_dump($this->workflowManagerService->getContext($workflowProcessId));
+            return;
         }
         $this->workflowManagerService->initNextStep($workflowProcessId);
 

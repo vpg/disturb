@@ -53,6 +53,7 @@ if (is_readable($projectBootstrapFilePath)) {
     $di->get('logr')->info('Loading Bootstrap : ' . $projectBootstrapFilePath);
     require_once($projectBootstrapFilePath);
 }
+$di->get('disturb-config')->workflowConfigFilePath = $paramHash['workflow'];
 
 try {
     // Handle incoming arguments

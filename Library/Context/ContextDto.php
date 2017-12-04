@@ -1,0 +1,133 @@
+<?php
+
+namespace Vpg\Disturb\Context;
+
+use \Phalcon\Config;
+
+use Vpg\Disturb\Core\Dto;
+
+
+/**
+ * Class ContextDto
+ *
+ * @package  Disturb\Dtos
+ * @author   Jérome BOURGEAIS <jbourgeais@voyageprive.com>
+ * @license  https://github.com/vpg/disturb/blob/master/LICENSE MIT Licence
+ */
+class ContextDto extends Dto\AbstractDto
+{
+
+    private $requiredProps = [
+        'initialPayload',
+        'status',
+        ['workflow', 'steps']
+    ];
+
+    /**
+     * Instanciates a new workflow config according to the given file path
+     *
+     * @param string $mixed the file path of the json config
+     *
+     * @throws InvalidConfigException
+     */
+    public function __construct($mixed)
+    {
+        $this->di->get('logr')->debug(json_encode(func_get_args()));
+        parent::__construct($mixed);
+        $this->validate();
+    }
+
+    /**
+     * Validates the current config
+     *
+     * @throws InvalidWorkflowConfigException
+     *
+     * @return void
+     */
+    public function validate()
+    {
+        $missingPropList = $this->getMissingPropertyList($this->requiredProps);
+        if (!empty($missingPropList)) {
+            throw new ContextStorageException('Missing properties :' . json_encode($missingPropList));
+        }
+    }
+
+    /**
+     * Returns the initial payload of the current workflow context
+     *
+     * @return array the initial payload
+     */
+    public function getInitialPayload() : array
+    {
+        $this->di->get('logr')->debug(json_encode(func_get_args()));
+        return $this->rawHash['initialPayload'] ?? [];
+    }
+
+    /**
+     * Returns the results of all steps
+     *
+     * @return array the result of all processed steps
+     *               [
+     *                  'stepName' => ['foo' => 'bar'],
+     *               ]
+     */
+    public function getStepResultData() : array
+    {
+        $this->di->get('logr')->debug(json_encode(func_get_args()));
+        $allStepResultHash = [];
+        foreach ($this->rawHash['workflow']['steps'] as $stepHash) {
+            $stepResultHash = array_column($stepHash['jobList'], 'result');
+            if (empty(array_filter($stepResultHash))) {
+                continue;
+            }
+            $allStepResultHash[$stepHash['name']] = array_column($stepHash['jobList'], 'result');
+        }
+        return $allStepResultHash;
+    }
+
+    /**
+     * Returns the status of the current workflow context
+     *
+     * @return string the current status
+     */
+    public function getWorkflowStatus() : string
+    {
+        $this->di->get('logr')->debug(json_encode(func_get_args()));
+        return $this->rawHash['status'] ?? '';
+    }
+
+    /**
+     * Returns the stepposition of the current workflow context
+     *
+     * @return int the current step position
+     */
+    public function getWorkflowCurrentPosition() : int
+    {
+        $this->di->get('logr')->debug(json_encode(func_get_args()));
+        return $this->rawHash['currentStepPos'] ?? -1;
+    }
+
+    /**
+     * Returns the step list of the current workflow context
+     *
+     * @return array the current step list
+     */
+    public function getWorkflowStepList() : array
+    {
+        $this->di->get('logr')->debug(json_encode(func_get_args()));
+        return $this->rawHash['workflow']['steps'] ?? [];
+    }
+
+    /**
+     * Returns the step list of the current workflow context for the given position
+     *
+     * @param int $positionNo the postion
+     *
+     * @return array the step list
+     */
+    public function getWorkflowStepListByPosition(int $positionNo) : array
+    {
+        $this->di->get('logr')->debug(json_encode(func_get_args()));
+        return $this->rawHash['workflow']['steps'][$positionNo] ?? [];
+    }
+}
