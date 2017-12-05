@@ -61,7 +61,7 @@ class Service extends Component
     {
         $this->di->get('logr')->debug(json_encode(func_get_args()));
         $workerHash = [
-            'heartBeatAt' => Date('Y-m-d H:i:s')
+            'heartBeatAt' => date('Y-m-d H:i:s')
         ];
         $this->storageClient->save($workerCode, $workerHash);
     }
@@ -81,8 +81,8 @@ class Service extends Component
             'status' => Core\AbstractWorker::STATUS_STARTED,
             'runingOn' => php_uname("n"),
             'pid' => $pid,
-            'startedAt' => Date('Y-m-d H:i:s'),
-            'heartBeatAt' => Date('Y-m-d H:i:s')
+            'startedAt' => date('Y-m-d H:i:s'),
+            'heartBeatAt' => date('Y-m-d H:i:s')
         ];
         $this->storageClient->save($workerCode, $workerHash);
     }
@@ -98,7 +98,7 @@ class Service extends Component
     {
         $this->di->get('logr')->debug(json_encode(func_get_args()));
         $workerHash = [
-            'heartBeatAt' => Date('Y-m-d H:i:s')
+            'heartBeatAt' => date('Y-m-d H:i:s')
         ];
         $this->storageClient->save($workerCode, $workerHash);
     }
@@ -115,7 +115,7 @@ class Service extends Component
     {
         $this->di->get('logr')->debug(json_encode(func_get_args()));
         $workerHash = [
-            'exitedAt' => Date('Y-m-d H:i:s'),
+            'exitedAt' => date('Y-m-d H:i:s'),
             'runingOn' => php_uname("n"),
             'status' => Core\AbstractWorker::STATUS_EXITED,
             'exitCode' => $exitCode
