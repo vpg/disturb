@@ -5,7 +5,6 @@ namespace Vpg\Disturb\Workflow;
 use Vpg\Disturb\Topic;
 use Vpg\Disturb\Message;
 use Vpg\Disturb\Core;
-use Vpg\Disturb\Step;
 
 /**
  * Manager task
@@ -126,7 +125,7 @@ class ManagerWorker extends Core\AbstractWorker
      * @param string $workflowProcessId workflow process id
      *
      * @return void
-     * @throws Step\StepException
+     * @throws \Exception
      */
     protected function runNextStep(string $workflowProcessId)
     {
@@ -163,7 +162,7 @@ class ManagerWorker extends Core\AbstractWorker
                     );
                 }
             }
-        } catch (Exception $exception) {
+        } catch (\Exception $exception) {
             $this->workflowManagerService->setStatus(
                 $workflowProcessId,
                 ManagerService::STATUS_FAILED,
