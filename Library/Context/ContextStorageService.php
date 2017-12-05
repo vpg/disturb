@@ -38,6 +38,13 @@ class ContextStorageService extends Component
     const WORKFLOW_STATUS = 'status';
 
     /**
+     * Workflow info
+     *
+     * @const string WORKFLOW_INFO
+     */
+    const WORKFLOW_INFO = 'info';
+
+    /**
      * Workflow current step pos
      *
      * @const string WORKFLOW_CURRENT_STEP_POS
@@ -127,15 +134,17 @@ class ContextStorageService extends Component
      *
      * @param string $workflowProcessId the workflow process id
      * @param string $status            status
+     * @param string $info              status info related
      *
      * @return void
      */
-    public function setWorkflowStatus(string $workflowProcessId, string $status)
+    public function setWorkflowStatus(string $workflowProcessId, string $status, string $info = '')
     {
         $this->di->get('logr')->debug(json_encode(func_get_args()));
         $contextDto = $this->get($workflowProcessId);
         $contextHash = $contextDto->getRawHash();
         $contextHash[self::WORKFLOW_STATUS] = $status;
+        $contextHash[self::WORKFLOW_INFO] = $info;
         $this->save($workflowProcessId, $contextHash);
 
     }

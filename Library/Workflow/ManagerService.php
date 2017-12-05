@@ -129,13 +129,14 @@ class ManagerService extends Component implements WorkflowManagerInterface
      *
      * @param string $workflowProcessId the wf process identifier
      * @param string $status            wf status
+     * @param string $message           error message
      *
      * @return void
      */
-    public function setStatus(string $workflowProcessId, string $status)
+    public function setStatus(string $workflowProcessId, string $status, string $message)
     {
         $this->di->get('logr')->debug(json_encode(func_get_args()));
-        $this->di->get('contextStorage')->setWorkflowStatus($workflowProcessId, $status);
+        $this->di->get('contextStorage')->setWorkflowStatus($workflowProcessId, $status, $message);
     }
 
     /**

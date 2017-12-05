@@ -5,6 +5,8 @@ namespace Vpg\Disturb\Step;
 use Vpg\Disturb\Core\AbstractWorker;
 use Vpg\Disturb\Message;
 use Vpg\Disturb\Topic;
+use Vpg\Disturb\Core;
+use Vpg\Disturb\Workflow\ManagerService;
 
 /**
  * Generic Step task
@@ -49,14 +51,22 @@ class StepWorker extends AbstractWorker
     protected function processMessage(Message\MessageDto $messageDto)
     {
         $this->getDI()->get('logr')->info('messageDto : ' . $messageDto);
-        $resultHash = $this->service->execute($messageDto->getPayload());
+        try {
+            $resultHash = $this->service->execute($messageDto->getPayload());
+        } catch (Exception $exception) {
+            $resultHash = [
+                'status' => ManagerService::STATUS_FAILED,
+                'info' => $exception->getMessage()
+            ];
+        }
+
         $msgDto = new Message\MessageDto(
             [
                 'id' => $messageDto->getId(),
                 'type' => Message\MessageDto::TYPE_STEP_ACK,
                 'stepCode' => $messageDto->getStepCode(),
                 'jobId' => $messageDto->getJobId(),
-                'result' => json_encode($resultHash)
+                'result' => $resultHash
             ]
         );
 
