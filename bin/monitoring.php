@@ -72,14 +72,14 @@ switch ($arguments['worker']) {
 $monitoringService = new Monitoring\Service($workflowConfig);
 switch ($arguments['action']) {
     case 'start':
-        $monitoringService->workerStarted($workerCode, $paramHash['pid']);
+        $monitoringService->logWorkerStarted($workerCode, $paramHash['pid']);
     break;
     case 'exit':
-        $monitoringService->workerExited($workerCode, $paramHash['exitCode']);
+        $monitoringService->logWorkerExited($workerCode, $paramHash['exitCode']);
     break;
     case 'heartbeat':
         while (true) {
-            $monitoringService->workerBeat($workerCode);
+            $monitoringService->logWorkerBeat($workerCode);
             // xxx put it in conf
             sleep(5);
         }

@@ -57,7 +57,7 @@ class Service extends Component
      *
      * @return void
      */
-    public function workerBeat(string $workerCode)
+    public function logWorkerBeat(string $workerCode)
     {
         $this->di->get('logr')->debug(json_encode(func_get_args()));
         $workerHash = [
@@ -74,7 +74,7 @@ class Service extends Component
      *
      * @return void
      */
-    public function workerStarted(string $workerCode, int $pid)
+    public function logWorkerStarted(string $workerCode, int $pid)
     {
         $this->di->get('logr')->debug(json_encode(func_get_args()));
         $workerHash = [
@@ -91,27 +91,11 @@ class Service extends Component
      * Registers a worker into the monitoring sys
      *
      * @param string $workerCode the worker's code to register
-     *
-     * @return void
-     */
-    public function workerHeartBeats(string $workerCode)
-    {
-        $this->di->get('logr')->debug(json_encode(func_get_args()));
-        $workerHash = [
-            'heartBeatAt' => date('Y-m-d H:i:s')
-        ];
-        $this->storageClient->save($workerCode, $workerHash);
-    }
-
-    /**
-     * Registers a worker into the monitoring sys
-     *
-     * @param string $workerCode the worker's code to register
      * @param int    $exitCode   the worker's exit code
      *
      * @return void
      */
-    public function workerExited(string $workerCode, int $exitCode = 0)
+    public function logWorkerExited(string $workerCode, int $exitCode = 0)
     {
         $this->di->get('logr')->debug(json_encode(func_get_args()));
         $workerHash = [
