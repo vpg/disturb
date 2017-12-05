@@ -133,7 +133,7 @@ class ManagerService extends Component implements WorkflowManagerInterface
      *
      * @return void
      */
-    public function setStatus(string $workflowProcessId, string $status, string $message)
+    public function setStatus(string $workflowProcessId, string $status, string $message = '')
     {
         $this->di->get('logr')->debug(json_encode(func_get_args()));
         $this->di->get('contextStorage')->setWorkflowStatus($workflowProcessId, $status, $message);
@@ -322,7 +322,7 @@ class ManagerService extends Component implements WorkflowManagerInterface
     {
         // check step conf to see if the step is "blocking"
         // set the WF status accordingly
-        $this->setStatus($workflowProcessId, self::STATUS_FAILED);
+        $this->setStatus($workflowProcessId, self::STATUS_FAILED, $resultHash['info'] ?? '');
     }
 
     /**

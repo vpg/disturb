@@ -1,9 +1,6 @@
 <?php
 
-$configHash = [
-    
-];
+$configHash = [];
 
-
-$config = new \Phalcon\Config();
+$config = new \Phalcon\Config($configHash);
 $di->set('disturb-config', $config);

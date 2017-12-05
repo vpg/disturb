@@ -77,7 +77,7 @@ class ContextDto extends Dto\AbstractDto
         $allStepResultHash = [];
         foreach ($this->rawHash['workflow']['steps'] as $stepHash) {
             $stepResultHash = array_column($stepHash['jobList'], 'result');
-            if (empty(array_filter($stepResultHash))) {
+            if (!$stepResultHash || empty(array_filter($stepResultHash))) {
                 continue;
             }
             $allStepResultHash[$stepHash['name']] = array_column($stepHash['jobList'], 'result');
