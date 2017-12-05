@@ -18,6 +18,21 @@ use Vpg\Disturb\Workflow\WorkflowException;
  */
 abstract class AbstractWorker extends Task implements WorkerInterface
 {
+    /**
+     * Started worker status
+     *
+     * @const string STATUS_STARTED
+     */
+    const STATUS_STARTED = 'started';
+
+    /**
+     * Exited worker status
+     *
+     * @const string STATUS_EXITED
+     */
+    const STATUS_EXITED = 'exited';
+
+
     protected $taskOptionBaseList = [
         'workflow:', // required step code config file
         '?force',    // Optional force run even if lockfile exists
@@ -37,7 +52,6 @@ abstract class AbstractWorker extends Task implements WorkerInterface
     protected $service = null;
 
     protected $workflowConfig;
-
 
     /**
      * Inits the current worker according to the given workflow config
@@ -111,6 +125,7 @@ abstract class AbstractWorker extends Task implements WorkerInterface
         $this->lock();
         $this->initWorker();
 
+
         // xxx Factorize stdout/err support
         $this->getDI()->get('logr')->info(
             "Worker listening on \033[32m" .
@@ -147,7 +162,11 @@ abstract class AbstractWorker extends Task implements WorkerInterface
                 $this->processMonitoringMessage($msgDto);
                 continue;
             }
-            $this->processMessage($msgDto);
+            try {
+                $this->processMessage($msgDto);
+            } catch (\Exception $e) {
+                $this->getDI()->get('logger')->error($e->getMessage());
+            }
         }
     }
 
@@ -214,7 +233,6 @@ abstract class AbstractWorker extends Task implements WorkerInterface
 
         // xxx put kafka\TopicConf in DI and config in a config file
         $this->kafkaTopicConf = new \RdKafka\TopicConf();
-        $this->kafkaTopicConf->set('offset.store.method', 'file');
         $this->kafkaTopicConf->set('auto.commit.interval.ms', 100);
         $this->kafkaTopicConf->set('offset.store.sync.interval.ms', 100);
         $this->kafkaTopicConf->set('offset.store.method', 'broker');
@@ -263,13 +281,27 @@ abstract class AbstractWorker extends Task implements WorkerInterface
     {
         $this->getDI()->get('logr')->debug(json_encode(func_get_args()));
         $lockDirPath = '/var/run/';
+        $workerName = self::getWorkerCode($this->paramHash);
+        $lockFileName = $workerName;
+        return $lockDirPath . $lockFileName . '.pid';
+    }
+
+    /**
+     * Returns the code of the current worker according to the worker given argv
+     *
+     * @param array $paramHash The argv list
+     *
+     * @return string worker code e.g. : disturb-step-computesomething-1
+     */
+    public static function getWorkerCode(array $paramHash)
+    {
         $taskFullName = get_called_class();
         // xxx We will probably have to deal w/ the BU
         if (strpos($taskFullName, 'Manager')) {
-            $lockFileName = 'disturb-manager';
+            $workerName = 'disturb-manager';
         } else {
-            $lockFileName = 'disturb-step-' . $this->paramHash['step'] . '-' . $this->paramHash['workerId'];
+            $workerName = 'disturb-step-' . $paramHash['step'] . '-' . $paramHash['workerId'];
         }
-        return $lockDirPath . $lockFileName . '.pid';
+        return $workerName;
     }
 }

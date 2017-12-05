@@ -14,9 +14,9 @@ HOST=$1
 INIT_FOLDER_PATH=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 
 # Elasticsearch indexes to create
-INDEX_LIST=('disturb_context-1.0.0-beta')
+declare -a INDEX_LIST=("disturb_context-1.0.0-beta" "disturb_monitoring-1.0.0-beta")
 
-for index in $INDEX_LIST; do
+for index in "${INDEX_LIST[@]}"; do
 
     INDEX_EXISTS_HTTP_CODE="$(curl -k -sL -w "%{http_code}\\n" $HOST/$index -o /dev/null)"
     if [[ $INDEX_EXISTS_HTTP_CODE == 200 ]]; then
