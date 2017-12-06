@@ -7,7 +7,7 @@ if [[ "$BASE_DIR" =~ vendor\/bin$ ]]; then
 fi
 
 php $DISTURB_DIR/monitoring.php $(uname -n) manager 'start' --pid=$$ ${@}
-(php $DISTURB_DIR/monitoring.php $(uname -n) manager heartbeat ${@}) &
+#(php $DISTURB_DIR/monitoring.php $(uname -n) manager heartbeat ${@}) &
 pid="$!"
 php $DISTURB_DIR/disturb.php "Vpg\\Disturb\\Workflow\\Manager" ${@}
 managerExitCode=$?
