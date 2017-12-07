@@ -81,7 +81,7 @@ class ManagerWorker extends Core\AbstractWorker
             break;
             case Message\MessageDto::TYPE_STEP_ACK:
                 $this->getDI()->get('logr')->debug(
-                    "Step {$messageDto->getStepCode()} says {$messageDto->getResult()}"
+                    "Step " . $messageDto->getStepCode() . " says " . json_encode($messageDto->getResult())
                 );
                 $stepResultHash = $messageDto->getResult();
                 $this->workflowManagerService->processStepJobResult(

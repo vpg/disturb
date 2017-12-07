@@ -76,6 +76,9 @@ class ContextDto extends Dto\AbstractDto
         $this->di->get('logr')->debug(json_encode(func_get_args()));
         $allStepResultHash = [];
         foreach ($this->rawHash['workflow']['steps'] as $stepHash) {
+            if(!isset($stepHash['jobList'])){
+                continue;
+            }
             $stepResultHash = array_column($stepHash['jobList'], 'result');
             if (!$stepResultHash || empty(array_filter($stepResultHash))) {
                 continue;
