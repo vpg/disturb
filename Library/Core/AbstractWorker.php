@@ -53,6 +53,8 @@ abstract class AbstractWorker extends Task implements WorkerInterface
 
     protected $workflowConfig;
 
+    protected $workerHostname = '';
+
     /**
      * Inits the current worker according to the given workflow config
      *  - Loads the config
@@ -70,6 +72,7 @@ abstract class AbstractWorker extends Task implements WorkerInterface
             $this->workflowConfig['servicesClassNameSpace'],
             $this->workflowConfig['servicesClassPath']
         );
+        $this->workerHostname = php_uname("n");
         $this->initMq();
     }
 
@@ -143,9 +146,10 @@ abstract class AbstractWorker extends Task implements WorkerInterface
                 }
                 switch ($msg->err) {
                     case '-191': // no more msg
+                    case '-185': // timeout
                     break;
                     default:
-                        $this->getDI()->get('logr')->error($msg->errstr());
+                        $this->getDI()->get('logr')->error($msg->err . ' : ' . $msg->errstr());
                 }
                 continue;
             }
@@ -243,7 +247,7 @@ abstract class AbstractWorker extends Task implements WorkerInterface
         $this->kafkaConf->set('metadata.broker.list', $brokers);
         $group = $this->paramHash['step'] ?? 'manager';
         $this->kafkaConf->set('group.id', $group);
-        $this->getDI()->get('logr')->debug('Setting consumer group to ' . $group);
+        $this->getDI()->get('logr')->info('Setting consumer group to ' . $group);
         $this->kafkaConf->setDefaultTopicConf($this->kafkaTopicConf);
 
         // xxx put Consumer in a DI service

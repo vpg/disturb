@@ -189,7 +189,7 @@ class MessageDto
     }
 
     /**
-     * Get encoded result
+     * Get result
      *
      * @return array
      */
@@ -198,4 +198,13 @@ class MessageDto
         return $this->rawHash['result'] ?? [];
     }
 
+    /**
+     * Get step job result status
+     *
+     * @return string
+     */
+    public function getStepResultStatus(): string
+    {
+        return isset($this->rawHash['result']) ? $this->rawHash['result']['status'] ?? '' : '';
+    }
 }
