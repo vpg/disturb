@@ -405,7 +405,7 @@ class ElasticsearchAdapter extends Component implements StorageAdapterInterface
                 $this->commonRequestParamHash
             );
             if ($retryNb) {
-                $requestParamHash['retry_on_conflict'] = $retry;
+                $requestParamHash['retry_on_conflict'] = $retryNb;
             }
             return $this->client->update(array_merge($requestParamHash, ['body' => $updateHash]));
         } catch (\Exception $exception) {

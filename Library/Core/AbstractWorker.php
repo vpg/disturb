@@ -48,11 +48,24 @@ abstract class AbstractWorker extends Task implements WorkerInterface
     protected $kafkaTopicConsumer = null;
     protected $kafkaTopicProducerHash = [];
 
+    /**
+     * @var string $workerHostname Worker hostname
+     */
     protected $topicName = '';
+
+    /**
+     * @var Object $service The client Class
+     */
     protected $service = null;
 
+    /**
+     * @var Phalcon\Config $workflowConfig Current workflow config
+     */
     protected $workflowConfig;
 
+    /**
+     * @var string $workerHostname Worker hostname
+     */
     protected $workerHostname = '';
 
     /**
@@ -72,7 +85,7 @@ abstract class AbstractWorker extends Task implements WorkerInterface
             $this->workflowConfig['servicesClassNameSpace'],
             $this->workflowConfig['servicesClassPath']
         );
-        $this->workerHostname = php_uname("n");
+        $this->workerHostname = php_uname('n');
         $this->initMq();
     }
 
