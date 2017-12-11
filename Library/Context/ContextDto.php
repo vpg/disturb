@@ -20,7 +20,7 @@ class ContextDto extends Dto\AbstractDto
     private $requiredProps = [
         'initialPayload',
         'status',
-        ['workflow', 'steps']
+        'steps'
     ];
 
     /**
@@ -75,7 +75,7 @@ class ContextDto extends Dto\AbstractDto
     {
         $this->di->get('logr')->debug(json_encode(func_get_args()));
         $allStepResultHash = [];
-        foreach ($this->rawHash['workflow']['steps'] as $stepHash) {
+        foreach ($this->rawHash['steps'] as $stepHash) {
             if(!isset($stepHash['jobList'])){
                 continue;
             }
@@ -129,7 +129,7 @@ class ContextDto extends Dto\AbstractDto
     public function getWorkflowStepList() : array
     {
         $this->di->get('logr')->debug(json_encode(func_get_args()));
-        return $this->rawHash['workflow']['steps'] ?? [];
+        return $this->rawHash['steps'] ?? [];
     }
 
     /**
@@ -142,6 +142,6 @@ class ContextDto extends Dto\AbstractDto
     public function getWorkflowStepListByPosition(int $positionNo) : array
     {
         $this->di->get('logr')->debug(json_encode(func_get_args()));
-        return $this->rawHash['workflow']['steps'][$positionNo] ?? [];
+        return $this->rawHash['steps'][$positionNo] ?? [];
     }
 }

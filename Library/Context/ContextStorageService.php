@@ -184,7 +184,7 @@ class ContextStorageService extends Component
         $this->di->get('logr')->debug(json_encode(func_get_args()));
         // xxx use partial update
         $contextHash = $this->get($workflowProcessId);
-        $contextHash[self::WORKFLOW][self::WORKFLOW_STEPS] = $workflowStepList;
+        $contextHash[self::WORKFLOW_STEPS] = $workflowStepList;
         $this->save($workflowProcessId, $contextHash);
     }
 
@@ -201,18 +201,18 @@ class ContextStorageService extends Component
     {
         $this->di->get('logr')->debug(json_encode(func_get_args()));
         $script = <<<EOT
-        def nbStep = ctx._source.workflow.steps.size();
+        def nbStep = ctx._source.steps.size();
         for (stepIndex = 0; stepIndex < nbStep; stepIndex++) {
-            if (ctx._source.workflow.steps[stepIndex] instanceof List) {
-                def nbParallelizedStep = ctx._source.workflow.steps[stepIndex].size();
+            if (ctx._source.steps[stepIndex] instanceof List) {
+                def nbParallelizedStep = ctx._source.steps[stepIndex].size();
                 for (parallelizedStepIndex = 0; parallelizedStepIndex < nbParallelizedStep; parallelizedStepIndex++) {
-                    if (ctx._source.workflow.steps[stepIndex][parallelizedStepIndex].name == stepCode) {
-                        ctx._source.workflow.steps[stepIndex][parallelizedStepIndex] = stepHash;
+                    if (ctx._source.steps[stepIndex][parallelizedStepIndex].name == stepCode) {
+                        ctx._source.steps[stepIndex][parallelizedStepIndex] = stepHash;
                         break;
                     }
                 }
-            } else if (ctx._source.workflow.steps[stepIndex].name == stepCode) {
-                ctx._source.workflow.steps[stepIndex] = stepHash;
+            } else if (ctx._source.steps[stepIndex].name == stepCode) {
+                ctx._source.steps[stepIndex] = stepHash;
             }
         }
 EOT;
@@ -243,27 +243,27 @@ EOT;
     {
         $this->di->get('logr')->debug(json_encode(func_get_args()));
         $script = <<<eot
-        def nbStep = ctx._source.workflow.steps.size();
+        def nbStep = ctx._source.steps.size();
         for (stepIndex = 0; stepIndex < nbStep; stepIndex++) {
-            if (ctx._source.workflow.steps[stepIndex] instanceof List) {
-                def nbParallelizedStep = ctx._source.workflow.steps[stepIndex].size();
+            if (ctx._source.steps[stepIndex] instanceof List) {
+                def nbParallelizedStep = ctx._source.steps[stepIndex].size();
                 for (parallelizedStepIndex= 0; parallelizedStepIndex< nbParallelizedStep; parallelizedStepIndex++) {
-                    if (ctx._source.workflow.steps[stepIndex][parallelizedStepIndex].name == stepCode) {
-                        def nbJob = ctx._source.workflow.steps[stepIndex][parallelizedStepIndex]['jobList'].size();
+                    if (ctx._source.steps[stepIndex][parallelizedStepIndex].name == stepCode) {
+                        def nbJob = ctx._source.steps[stepIndex][parallelizedStepIndex]['jobList'].size();
                         for (jobIndex = 0; jobIndex < nbJob; jobIndex++) {
-                            if (ctx._source.workflow.steps[stepIndex][parallelizedStepIndex]['jobList'][jobIndex].id == jobId) {
-                                ctx._source.workflow.steps[stepIndex][parallelizedStepIndex]['jobList'][jobIndex] << jobHash
+                            if (ctx._source.steps[stepIndex][parallelizedStepIndex]['jobList'][jobIndex].id == jobId) {
+                                ctx._source.steps[stepIndex][parallelizedStepIndex]['jobList'][jobIndex] << jobHash
                                 break;
                             }
                          }
                         break;
                     }
                 }
-            } else if (ctx._source.workflow.steps[stepIndex].name == stepCode) {
-                def nbJob = ctx._source.workflow.steps[stepIndex]['jobList'].size();
+            } else if (ctx._source.steps[stepIndex].name == stepCode) {
+                def nbJob = ctx._source.steps[stepIndex]['jobList'].size();
                 for (jobIndex = 0; jobIndex < nbJob; jobIndex++) {
-                    if (ctx._source.workflow.steps[stepIndex]['jobList'][jobIndex].id == jobId) {
-                        ctx._source.workflow.steps[stepIndex]['jobList'][jobIndex] << jobHash
+                    if (ctx._source.steps[stepIndex]['jobList'][jobIndex].id == jobId) {
+                        ctx._source.steps[stepIndex]['jobList'][jobIndex] << jobHash
                         break;
                     }
                 }

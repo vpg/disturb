@@ -101,7 +101,7 @@ class ManagerService extends Component implements WorkflowManagerInterface
         $this->di->get('contextStorage')->save(
             $workflowProcessId,
             [
-                'workflow' => ['steps' => $this->di->get('WorkflowConfig')['steps']->toArray()],
+                'steps' => $this->di->get('WorkflowConfig')['steps']->toArray(),
                 'initialPayload' => $payloadHash,
                 'status' => self::STATUS_STARTED,
                 'currentStepPos' => -1,

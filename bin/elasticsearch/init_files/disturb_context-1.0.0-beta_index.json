@@ -1,6 +1,7 @@
 {
     "mappings": {
         "workflow": {
+            "dynamic": "false",
             "properties": {
                 "finishedAt": {
                     "type":   "date",
