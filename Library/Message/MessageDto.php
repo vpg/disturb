@@ -32,7 +32,7 @@ class MessageDto
     const ACTION_WF_MONITOR_PONG = 'WF-MONITOR-PONG';
 
     const MSG_RETURN_SUCCESS = 'SUCCESS';
-    const MSG_RETURN_ERROR = 'ERROR';
+    const MSG_RETURN_FAILED = 'FAILED';
 
     private $rawHash = [];
 

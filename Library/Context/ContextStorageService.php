@@ -52,6 +52,11 @@ class ContextStorageService extends Component
     const WORKFLOW_CURRENT_STEP_POS = 'currentStepPos';
 
     /**
+     * @const string DATE_FORMAT the date format used to store date
+     */
+    const DATE_FORMAT = 'Y-m-d H:i:s';
+
+    /**
      * Adapter
      *
      * @var StorageAdapterInterface $adapter
@@ -244,7 +249,7 @@ EOT;
                 def nbParallelizedStep = ctx._source.workflow.steps[stepIndex].size();
                 for (parallelizedStepIndex= 0; parallelizedStepIndex< nbParallelizedStep; parallelizedStepIndex++) {
                     if (ctx._source.workflow.steps[stepIndex][parallelizedStepIndex].name == stepCode) {
-                        def nbJob = ctx._source.workflow.steps[parallelizedStepIndex]['jobList'].size();
+                        def nbJob = ctx._source.workflow.steps[stepIndex][parallelizedStepIndex]['jobList'].size();
                         for (jobIndex = 0; jobIndex < nbJob; jobIndex++) {
                             if (ctx._source.workflow.steps[stepIndex][parallelizedStepIndex]['jobList'][jobIndex].id == jobId) {
                                 ctx._source.workflow.steps[stepIndex][parallelizedStepIndex]['jobList'][jobIndex] << jobHash
@@ -276,7 +281,7 @@ eot;
                 ]
             ]
         ];
-        return $this->adapter->update($workflowProcessId, $updateHash);
+        return $this->adapter->update($workflowProcessId, $updateHash, 2);
     }
 
 

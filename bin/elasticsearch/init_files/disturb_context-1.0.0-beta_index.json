@@ -1,4 +1,41 @@
 {
-  "mappings": {
-  }
+    "mappings": {
+        "workflow": {
+            "properties": {
+                "finishedAt": {
+                    "type":   "date",
+                    "format": "yyyy-MM-dd HH:mm:ss"
+                },
+                "startedAt": {
+                    "type":   "date",
+                    "format": "yyyy-MM-dd HH:mm:ss"
+                },
+                "workflow": {
+                    "properties": {
+                        "steps": {
+                            "type": "nested",
+                            "properties": {
+                                "name":    { "type": "string"  },
+                                "jobList": {
+                                    "type": "nested",
+                                    "properties": {
+                                        "worker": { "type": "string" },
+                                        "status": { "type": "string" },
+                                        "finishedAt": {
+                                            "type":   "date",
+                                            "format": "yyyy-MM-dd HH:mm:ss"
+                                        },
+                                        "startedAt": {
+                                            "type":   "date",
+                                            "format": "yyyy-MM-dd HH:mm:ss"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
 }

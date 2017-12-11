@@ -109,10 +109,18 @@ class ManagerWorker extends Core\AbstractWorker
                         // xxx check timeout
                     break;
                     case ManagerService::STATUS_SUCCESS:
-                        $this->runNextStep($messageDto->getId());
+                        if ($this->workflowManagerService->hasNextStep($messageDto->getId())) {
+                            $this->runNextStep($messageDto->getId());
+                        } else {
+                            $this->workflowManagerService->finalize(
+                                $messageDto->getId(),
+                                ManagerService::STATUS_SUCCESS
+                            );
+                        }
+
                     break;
                     case ManagerService::STATUS_FAILED:
-                        $this->workflowManagerService->setStatus(
+                        $this->workflowManagerService->finalize(
                             $messageDto->getId(),
                             ManagerService::STATUS_FAILED
                         );
@@ -172,7 +180,7 @@ class ManagerWorker extends Core\AbstractWorker
             }
         } catch (\Exception $exception) {
             $this->getDI()->get('logr')->error($exception->getMeassage());
-            $this->workflowManagerService->setStatus(
+            $this->workflowManagerService->finalize(
                 $workflowProcessId,
                 ManagerService::STATUS_FAILED,
                 $exception->getMessage()
