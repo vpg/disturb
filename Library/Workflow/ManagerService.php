@@ -101,13 +101,37 @@ class ManagerService extends Component implements WorkflowManagerInterface
         $this->di->get('contextStorage')->save(
             $workflowProcessId,
             [
-                'workflow' => ['steps' => $this->di->get('WorkflowConfig')['steps']->toArray()],
+                'steps' => $this->di->get('WorkflowConfig')['steps']->toArray(),
                 'initialPayload' => $payloadHash,
                 'status' => self::STATUS_STARTED,
                 'currentStepPos' => -1,
-                'initializedAt' => date('Y-m-d H:i:s'),
-                'updatedAt' => date('Y-m-d H:i:s')
+                'startedAt' => date(ContextStorageService::DATE_FORMAT)
                 ]
+        );
+    }
+
+    /**
+     * Finalize the given workflow
+     *
+     * @param string $workflowProcessId the workflow process identifier
+     * @param string $workflowStatus    the workflow status
+     * @param string $workflowInfo      the workflow info
+     *
+     * @return void
+     */
+    public function finalize(string $workflowProcessId, string $workflowStatus, string $workflowInfo = '')
+    {
+        $this->di->get('logr')->debug(json_encode(func_get_args()));
+        if (!$this->di->get('contextStorage')->exists($workflowProcessId)) {
+            throw new WorkflowException("Failed to finaliz workflow '$workflowProcessId' : non existing context");
+        }
+        $this->di->get('contextStorage')->save(
+            $workflowProcessId,
+            [
+                'status'     => $workflowStatus,
+                'finishedAt' => date(ContextStorageService::DATE_FORMAT),
+                'info'       => $workflowInfo
+            ]
         );
     }
 
@@ -136,6 +160,7 @@ class ManagerService extends Component implements WorkflowManagerInterface
     public function setStatus(string $workflowProcessId, string $status, string $message = '')
     {
         $this->di->get('logr')->debug(json_encode(func_get_args()));
+        $this->di->get('logr')->info("Workflow $workflowProcessId is now $status");
         $this->di->get('contextStorage')->setWorkflowStatus($workflowProcessId, $status, $message);
     }
 
@@ -193,6 +218,22 @@ class ManagerService extends Component implements WorkflowManagerInterface
     }
 
     /**
+     * Returns true if the given workflow has still step to run
+     *
+     * @param string $workflowProcessId the wf process identifier
+     *
+     * @return bool
+     */
+    public function hasNextStep(string $workflowProcessId) : bool
+    {
+        $this->di->get('logr')->debug(json_encode(func_get_args()));
+        $contextDto = $this->di->get('contextStorage')->get($workflowProcessId);
+        $nextStepPos = $contextDto->getWorkflowCurrentPosition() + 1;
+        return !empty($this->di->get('WorkflowConfig')->steps[$nextStepPos]);
+    }
+
+
+    /**
      * Check for a step if all related jobs have been succeed
      *
      * @param array $step context step hash
@@ -222,6 +263,7 @@ class ManagerService extends Component implements WorkflowManagerInterface
      */
     private function aggregateStatus(array $statusList) : string
     {
+        $this->di->get('logr')->debug(json_encode(func_get_args()));
         $nbJobs = sizeof($statusList);
         $statusValueList = array_count_values($statusList);
         $status = self::STATUS_FAILED;
@@ -230,7 +272,11 @@ class ManagerService extends Component implements WorkflowManagerInterface
             $status = $statusList[0];
         } else {
             // If there is one running
-            if (isset($statusValueList[self::STATUS_NO_STARTED])) {
+            if (
+                isset($statusValueList[self::STATUS_NO_STARTED]) ||
+                isset($statusValueList[self::STATUS_RUNNING]) ||
+                isset($statusValueList[self::STATUS_STARTED])
+            ) {
                 $status = self::STATUS_RUNNING;
             }
             // If there is one fail
@@ -299,9 +345,15 @@ class ManagerService extends Component implements WorkflowManagerInterface
         if (!isset($stepHash['jobList']) || !isset($stepHash['jobList'][$jobId])) {
             throw new WorkflowException('Cannot find any job');
         }
-        $stepHash['jobList'][$jobId]['status'] = $resultHash['status'] ?? self::STATUS_FAILED;
-        $stepHash['jobList'][$jobId]['result'] = $resultHash['data'] ?? [];
-        $this->di->get('contextStorage')->updateWorkflowStep($workflowProcessId, $stepCode, $stepHash);
+        $jobHash['status'] = $resultHash['status'] ?? self::STATUS_FAILED;
+        $jobHash['result'] = $resultHash['data'] ?? [];
+        $jobHash['finishedAt'] = date(ContextStorageService::DATE_FORMAT);
+        $this->di->get('contextStorage')->updateWorkflowStepJob(
+            $workflowProcessId,
+            $stepCode,
+            $jobId,
+            $jobHash
+        );
 
         if ($stepHash['jobList'][$jobId]['status'] == self::STATUS_FAILED) {
             $this->processStepJobFailure($workflowProcessId, $stepCode, $jobId, $resultHash);
@@ -322,7 +374,7 @@ class ManagerService extends Component implements WorkflowManagerInterface
     {
         // check step conf to see if the step is "blocking"
         // set the WF status accordingly
-        $this->setStatus($workflowProcessId, self::STATUS_FAILED, $resultHash['info'] ?? '');
+        $this->finalize($workflowProcessId, self::STATUS_FAILED, $resultHash['info'] ?? '');
     }
 
     /**
@@ -356,9 +408,46 @@ class ManagerService extends Component implements WorkflowManagerInterface
         $stepHash['jobList'][] = [
             'id' => $jobId,
             'status' => self::STATUS_NO_STARTED,
+            'registeredAt' => date(ContextStorageService::DATE_FORMAT),
             'result' => []
         ];
         $this->di->get('contextStorage')->updateWorkflowStep($workflowProcessId, $stepCode, $stepHash);
+    }
+
+    /**
+     * Updates in context the step's job status related to the given wf process id
+     * Stores in context as below :
+     *  {
+     *      'jobList' : [
+     *          {
+     *              'jobId' : 0,
+     *              'status' : 'NOT_STARTED',
+     *
+     *              'result' : {}
+     *          },
+     *      ]
+     *  }
+     *
+     * @param string $workflowProcessId the wf process identifier to which belongs the step's job result
+     * @param string $stepCode          the step to which belongs the job
+     * @param int    $jobId             the job identifier related to the step
+     * @param string $workerHostname    the worker hostnampe on which the step has been executed
+     *
+     * @return void
+     */
+    public function registerStepJobStarted($workflowProcessId, $stepCode, $jobId, $workerHostname)
+    {
+        $this->di->get('logr')->debug(json_encode(func_get_args()));
+        $this->di->get('contextStorage')->updateWorkflowStepJob(
+            $workflowProcessId,
+            $stepCode,
+            $jobId,
+            [
+                'status' => self::STATUS_STARTED,
+                'startedAt' => date(ContextStorageService::DATE_FORMAT),
+                'worker' => $workerHostname
+            ]
+        );
     }
 
     /**

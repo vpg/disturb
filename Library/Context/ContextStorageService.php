@@ -52,6 +52,11 @@ class ContextStorageService extends Component
     const WORKFLOW_CURRENT_STEP_POS = 'currentStepPos';
 
     /**
+     * @const string DATE_FORMAT the date format used to store date
+     */
+    const DATE_FORMAT = 'Y-m-d H:i:s';
+
+    /**
      * Adapter
      *
      * @var StorageAdapterInterface $adapter
@@ -179,7 +184,7 @@ class ContextStorageService extends Component
         $this->di->get('logr')->debug(json_encode(func_get_args()));
         // xxx use partial update
         $contextHash = $this->get($workflowProcessId);
-        $contextHash[self::WORKFLOW][self::WORKFLOW_STEPS] = $workflowStepList;
+        $contextHash[self::WORKFLOW_STEPS] = $workflowStepList;
         $this->save($workflowProcessId, $contextHash);
     }
 
@@ -196,18 +201,18 @@ class ContextStorageService extends Component
     {
         $this->di->get('logr')->debug(json_encode(func_get_args()));
         $script = <<<EOT
-        def nbStep = ctx._source.workflow.steps.size();
+        def nbStep = ctx._source.steps.size();
         for (stepIndex = 0; stepIndex < nbStep; stepIndex++) {
-            if (ctx._source.workflow.steps[stepIndex] instanceof List) {
-                def nbParallelizedStep = ctx._source.workflow.steps[stepIndex].size();
+            if (ctx._source.steps[stepIndex] instanceof List) {
+                def nbParallelizedStep = ctx._source.steps[stepIndex].size();
                 for (parallelizedStepIndex = 0; parallelizedStepIndex < nbParallelizedStep; parallelizedStepIndex++) {
-                    if (ctx._source.workflow.steps[stepIndex][parallelizedStepIndex].name == stepCode) {
-                        ctx._source.workflow.steps[stepIndex][parallelizedStepIndex] = stepHash;
+                    if (ctx._source.steps[stepIndex][parallelizedStepIndex].name == stepCode) {
+                        ctx._source.steps[stepIndex][parallelizedStepIndex] = stepHash;
                         break;
                     }
                 }
-            } else if (ctx._source.workflow.steps[stepIndex].name == stepCode) {
-                ctx._source.workflow.steps[stepIndex] =stepHash;
+            } else if (ctx._source.steps[stepIndex].name == stepCode) {
+                ctx._source.steps[stepIndex] = stepHash;
             }
         }
 EOT;
@@ -223,4 +228,61 @@ EOT;
         ];
         return $this->adapter->update($workflowProcessId, $updateHash);
     }
+
+    /**
+     * update the given step job related to the given workflow/stepcode/jobid
+     *
+     * @param string $workflowProcessId the workflow identifier
+     * @param string $stepCode          the step code
+     * @param int    $jobId             the step job id
+     * @param array  $jobHash           the job data to save
+     *
+     * @return array
+     */
+    public function updateWorkflowStepJob(string $workflowProcessId, string $stepCode, int $jobId, array $jobHash)
+    {
+        $this->di->get('logr')->debug(json_encode(func_get_args()));
+        $script = <<<eot
+        def nbStep = ctx._source.steps.size();
+        for (stepIndex = 0; stepIndex < nbStep; stepIndex++) {
+            if (ctx._source.steps[stepIndex] instanceof List) {
+                def nbParallelizedStep = ctx._source.steps[stepIndex].size();
+                for (parallelizedStepIndex= 0; parallelizedStepIndex< nbParallelizedStep; parallelizedStepIndex++) {
+                    if (ctx._source.steps[stepIndex][parallelizedStepIndex].name == stepCode) {
+                        def nbJob = ctx._source.steps[stepIndex][parallelizedStepIndex]['jobList'].size();
+                        for (jobIndex = 0; jobIndex < nbJob; jobIndex++) {
+                            if (ctx._source.steps[stepIndex][parallelizedStepIndex]['jobList'][jobIndex].id == jobId) {
+                                ctx._source.steps[stepIndex][parallelizedStepIndex]['jobList'][jobIndex] << jobHash
+                                break;
+                            }
+                         }
+                        break;
+                    }
+                }
+            } else if (ctx._source.steps[stepIndex].name == stepCode) {
+                def nbJob = ctx._source.steps[stepIndex]['jobList'].size();
+                for (jobIndex = 0; jobIndex < nbJob; jobIndex++) {
+                    if (ctx._source.steps[stepIndex]['jobList'][jobIndex].id == jobId) {
+                        ctx._source.steps[stepIndex]['jobList'][jobIndex] << jobHash
+                        break;
+                    }
+                }
+            }
+        }
+eot;
+        $updateHash = [
+            'script' => [
+                'lang' => 'groovy',
+                'inline' => $script,
+                'params' => [
+                    'stepCode' => $stepCode,
+                    'jobId' => $jobId,
+                    'jobHash' => $jobHash
+                ]
+            ]
+        ];
+        return $this->adapter->update($workflowProcessId, $updateHash, 2);
+    }
+
+
 }

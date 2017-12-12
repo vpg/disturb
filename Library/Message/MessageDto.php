@@ -18,15 +18,21 @@ class MessageDto
     const TYPE_WF_CTRL = 'WF-CONTROL';
     const TYPE_WF_MONITOR = 'WF-MONITOR';
 
-    const ACTION_WF_CTRL_START = 'WF-CONTROL-START';
-    const ACTION_WF_CTRL_PAUSE = 'WF-CONTROL-PAUSE';
-    const ACTION_WF_CTRL_RESUME = 'WF-CONTROL-RESUME';
+    /**
+     * @const string ACTION_WF_CTRL_STOP Action workflow control to start the workflow
+     */
+    const ACTION_WF_CTRL_START = 'start';
+
+    /**
+     * @const string ACTION_WF_CTRL_STOP Action workflow control to stop the workflow
+     */
+    const ACTION_WF_CTRL_STOP = 'stop';
 
     const ACTION_WF_MONITOR_PING = 'WF-MONITOR-PING';
     const ACTION_WF_MONITOR_PONG = 'WF-MONITOR-PONG';
 
     const MSG_RETURN_SUCCESS = 'SUCCESS';
-    const MSG_RETURN_ERROR = 'ERROR';
+    const MSG_RETURN_FAILED = 'FAILED';
 
     private $rawHash = [];
 
@@ -189,7 +195,7 @@ class MessageDto
     }
 
     /**
-     * Get encoded result
+     * Get result
      *
      * @return array
      */
@@ -198,4 +204,13 @@ class MessageDto
         return $this->rawHash['result'] ?? [];
     }
 
+    /**
+     * Get step job result status
+     *
+     * @return string
+     */
+    public function getStepResultStatus(): string
+    {
+        return isset($this->rawHash['result']) ? $this->rawHash['result']['status'] ?? '' : '';
+    }
 }

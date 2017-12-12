@@ -52,6 +52,13 @@ class StepWorker extends AbstractWorker
     {
         $this->getDI()->get('logr')->info('messageDto : ' . $messageDto);
         try {
+            // $this->workerHostname
+            $this->ManagerService->registerStepJobStarted(
+                $messageDto->getId(),
+                $messageDto->getStepCode(),
+                $messageDto->getJobId(),
+                $this->workerHostname
+            );
             $resultHash = $this->service->execute($messageDto->getPayload());
         } catch (\Exception $exception) {
             $resultHash = [
@@ -95,5 +102,7 @@ class StepWorker extends AbstractWorker
             $this->paramHash['step'],
             $this->workflowConfig['name']
         );
+
+        $this->ManagerService = new ManagerService($this->paramHash['workflow']);
     }
 }

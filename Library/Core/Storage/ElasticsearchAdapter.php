@@ -231,6 +231,7 @@ class ElasticsearchAdapter extends Component implements StorageAdapterInterface
             ->setHosts([$this->config[self::CONFIG_HOST]])
             ->build();
 
+        $this->getDI()->get('logr')->info("Connecting to Elastic " . json_encode($this->config[self::CONFIG_HOST]));
         // Check host connexion
         if (! $this->client->ping()) {
             throw new StorageException('host : ' . $this->config[self::CONFIG_HOST] . ' not available');
@@ -387,12 +388,13 @@ class ElasticsearchAdapter extends Component implements StorageAdapterInterface
      *
      * @param string $id         id
      * @param array  $updateHash document hash
+     * @param int    $retryNb    The numer of time the update will be retried in case of conflict
      *
      * @return array
      *
      * @throws StorageException
      */
-    public function update(string $id, array $updateHash) : array
+    public function update(string $id, array $updateHash, int $retryNb = 0) : array
     {
         $this->di->get('logr')->debug(json_encode(func_get_args()));
         $this->checkParameters([$id, $updateHash]);
@@ -402,6 +404,9 @@ class ElasticsearchAdapter extends Component implements StorageAdapterInterface
                 ['id' => $id],
                 $this->commonRequestParamHash
             );
+            if ($retryNb) {
+                $requestParamHash['retry_on_conflict'] = $retryNb;
+            }
             return $this->client->update(array_merge($requestParamHash, ['body' => $updateHash]));
         } catch (\Exception $exception) {
             echo $exception->getMessage();

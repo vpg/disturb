@@ -62,11 +62,12 @@ class ManagerWorker extends Core\AbstractWorker
      */
     protected function processMessage(Message\MessageDto $messageDto)
     {
-        $this->getDI()->get('logr')->info('messageDto : ' . $messageDto);
+        $this->getDI()->get('logr')->debug($messageDto);
         switch ($messageDto->getType()) {
             case Message\MessageDto::TYPE_WF_CTRL:
                 switch ($messageDto->getAction()) {
-                    case 'start':
+                    case Message\MessageDto::ACTION_WF_CTRL_START:
+                        $this->getDI()->get('logr')->info("Starting workflow {$messageDto->getId()}");
                         try {
                             $this->workflowManagerService->init($messageDto->getId(), $messageDto->getPayload());
                         } catch (WorkflowException $wfException) {
@@ -80,15 +81,17 @@ class ManagerWorker extends Core\AbstractWorker
                 }
             break;
             case Message\MessageDto::TYPE_STEP_ACK:
-                $this->getDI()->get('logr')->debug(
-                    "Step " . $messageDto->getStepCode() . " says " . json_encode($messageDto->getResult())
+                $this->getDI()->get('logr')->info(
+                    "Step {$messageDto->getStepCode()} ack {$messageDto->getStepResultStatus()}"
                 );
-                $stepResultHash = $messageDto->getResult();
+                $this->getDI()->get('logr')->debug(
+                    "Step {$messageDto->getStepCode()} says " . json_encode($messageDto->getResult())
+                );
                 $this->workflowManagerService->processStepJobResult(
                     $messageDto->getId(),
                     $messageDto->getStepCode(),
                     $messageDto->getJobId(),
-                    $stepResultHash
+                    $messageDto->getResult()
                 );
 
                 $status = $this->workflowManagerService->getStatus($messageDto->getId());
@@ -97,15 +100,27 @@ class ManagerWorker extends Core\AbstractWorker
                     throw new WorkflowException("Id failed {$messageDto->getId()}");
                 }
 
-                switch ($this->workflowManagerService->getCurrentStepStatus($messageDto->getId())) {
+                $currentStepStatus = $this->workflowManagerService->getCurrentStepStatus($messageDto->getId());
+                $this->getDI()->get('logr')->info(
+                    "Workflow {$messageDto->getId()} - Current Step status : $currentStepStatus"
+                );
+                switch ($currentStepStatus) {
                     case ManagerService::STATUS_RUNNING:
                         // xxx check timeout
                     break;
                     case ManagerService::STATUS_SUCCESS:
-                        $this->runNextStep($messageDto->getId());
+                        if ($this->workflowManagerService->hasNextStep($messageDto->getId())) {
+                            $this->runNextStep($messageDto->getId());
+                        } else {
+                            $this->workflowManagerService->finalize(
+                                $messageDto->getId(),
+                                ManagerService::STATUS_SUCCESS
+                            );
+                        }
+
                     break;
                     case ManagerService::STATUS_FAILED:
-                        $this->workflowManagerService->setStatus(
+                        $this->workflowManagerService->finalize(
                             $messageDto->getId(),
                             ManagerService::STATUS_FAILED
                         );
@@ -129,7 +144,7 @@ class ManagerWorker extends Core\AbstractWorker
      */
     protected function runNextStep(string $workflowProcessId)
     {
-
+        $this->getDI()->get('logr')->debug(json_encode(func_get_args()));
         $stepHashList = $this->workflowManagerService->getNextStepList($workflowProcessId);
         if (empty($stepHashList)) {
             $this->getDI()->get('logr')->info("No more step to run, WF ends");
@@ -156,6 +171,7 @@ class ManagerWorker extends Core\AbstractWorker
                     ];
                     $stepMessageDto = new Message\MessageDto(json_encode($messageHash));
 
+                    $this->getDI()->get('logr')->info("Ask job #$jobId for $workflowProcessId : $stepCode");
                     $this->sendMessage(
                         Topic\TopicService::getWorkflowStepTopicName($stepCode, $this->workflowConfig['name']),
                         $stepMessageDto
@@ -163,7 +179,8 @@ class ManagerWorker extends Core\AbstractWorker
                 }
             }
         } catch (\Exception $exception) {
-            $this->workflowManagerService->setStatus(
+            $this->getDI()->get('logr')->error($exception->getMeassage());
+            $this->workflowManagerService->finalize(
                 $workflowProcessId,
                 ManagerService::STATUS_FAILED,
                 $exception->getMessage()
