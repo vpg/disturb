@@ -18,7 +18,10 @@ $loader->registerNamespaces(
     true
 );
 
-$loader->registerFiles([__DIR__ . '/../../vendor/autoload.php']);
+$loader->registerFiles([
+    __DIR__ . '/../../vendor/autoload.php',
+    __DIR__ . '/../../../autoload.php'
+]);
 $loader->register();
 
 require_once(__DIR__ . '/../Library/Core/DI.php');

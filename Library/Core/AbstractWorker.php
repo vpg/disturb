@@ -278,6 +278,7 @@ abstract class AbstractWorker extends Task implements WorkerInterface
      */
     private function lock()
     {
+        return true;
         $this->getDI()->get('logr')->debug(json_encode(func_get_args()));
         $pid = getMyPid();
         $lockFileName = $this->getLockFilePath();
