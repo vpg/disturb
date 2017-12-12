@@ -1,4 +1,29 @@
 {
-  "mappings": {
-  }
+    "settings" : {
+        "index" : {
+            "number_of_shards" : 3,
+            "number_of_replicas" : 0
+        }
+    },
+    "mappings": {
+        "worker": {
+            "dynamic": "false",
+            "properties": {
+                "status": { "type": "keyword" },
+                "runingOn": { "type": "keyword" },
+                "exitedAt": {
+                    "type": "date",
+                    "format": "yyyy-MM-dd HH:mm:ss"
+                },
+                "heartBeatAt": {
+                    "type": "date",
+                    "format": "yyyy-MM-dd HH:mm:ss"
+                },
+                "startedAt": {
+                    "type": "date",
+                    "format": "yyyy-MM-dd HH:mm:ss"
+                }
+            }
+        }
+    }
 }

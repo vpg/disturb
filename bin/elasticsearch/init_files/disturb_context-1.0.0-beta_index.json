@@ -1,4 +1,10 @@
 {
+    "settings" : {
+        "index" : {
+            "number_of_shards" : 3,
+            "number_of_replicas" : 0
+        }
+    },
     "mappings": {
         "workflow": {
             "dynamic": "false",
@@ -11,26 +17,23 @@
                     "type":   "date",
                     "format": "yyyy-MM-dd HH:mm:ss"
                 },
-                "workflow": {
+                "status":    { "type": "keyword"  },
+                "steps": {
+                    "type": "nested",
                     "properties": {
-                        "steps": {
+                        "name":    { "type": "keyword"  },
+                        "jobList": {
                             "type": "nested",
                             "properties": {
-                                "name":    { "type": "string"  },
-                                "jobList": {
-                                    "type": "nested",
-                                    "properties": {
-                                        "worker": { "type": "string" },
-                                        "status": { "type": "string" },
-                                        "finishedAt": {
-                                            "type":   "date",
-                                            "format": "yyyy-MM-dd HH:mm:ss"
-                                        },
-                                        "startedAt": {
-                                            "type":   "date",
-                                            "format": "yyyy-MM-dd HH:mm:ss"
-                                        }
-                                    }
+                                "worker": { "type": "keyword" },
+                                "status": { "type": "keyword" },
+                                "finishedAt": {
+                                    "type":   "date",
+                                    "format": "yyyy-MM-dd HH:mm:ss"
+                                },
+                                "startedAt": {
+                                    "type":   "date",
+                                    "format": "yyyy-MM-dd HH:mm:ss"
                                 }
                             }
                         }
