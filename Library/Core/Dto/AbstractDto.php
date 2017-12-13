@@ -14,12 +14,36 @@ use \Phalcon\Config\Adapter\Json;
  */
 abstract class AbstractDto extends Component
 {
+    /**
+     * @const string TYPE_STRING
+     */
     const TYPE_STRING = 'string';
+
+    /**
+     * @const string TYPE_HASH
+     */
     const TYPE_HASH = 'array';
+
+    /**
+     * @const string TYPE_PHALCON_CONFIG
+     */
     const TYPE_PHALCON_CONFIG = 'Phalcon\Config';
+
+    /**
+     * @const string TYPE_PHALCON_JSON_CONFIG
+     */
     const TYPE_PHALCON_JSON_CONFIG = 'Phalcon\Config\Adapter\Json';
 
-    private $dataType = null;
+    /**
+     * @const string TYPE_PHALCON_PHP_CONFIG
+     */
+    const TYPE_PHALCON_PHP_CONFIG = 'Phalcon\Config\Adapter\Php';
+
+    /**
+     * Raw hash
+     *
+     * @var array
+     */
     protected $rawHash = [];
 
     /**
@@ -56,6 +80,7 @@ abstract class AbstractDto extends Component
             break;
             case self::TYPE_PHALCON_CONFIG:
             case self::TYPE_PHALCON_JSON_CONFIG:
+            case self::TYPE_PHALCON_PHP_CONFIG:
                 $this->rawHash = $rawMixed->toArray();
             break;
             default:

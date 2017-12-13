@@ -11,13 +11,12 @@ namespace Vpg\Disturb\Workflow;
  */
 interface WorkflowManagerInterface
 {
-
     /**
      * Constructor
      *
-     * @param string $workflowConfigFilePath workflow config file path
+     * @param WorkflowConfigDto $workflowConfigDto workflow config
      */
-    public function __construct(string $workflowConfigFilePath);
+    public function __construct(WorkflowConfigDto $workflowConfigDto);
 
     /**
      * Initializes the workflow for the given process identifier
@@ -26,7 +25,7 @@ interface WorkflowManagerInterface
      * @param array  $payloadHash       the workflow initial payload
      *
      * @return void
-     * @throws Vpg\Disturb\Workflow\WorkflowException
+     * @throws \Vpg\Disturb\Workflow\WorkflowException
      */
     public function init(string $workflowProcessId, array $payloadHash);
 
@@ -36,7 +35,7 @@ interface WorkflowManagerInterface
      * @param string $workflowProcessId The workflow process identifier
      *
      * @return string the workflow status code
-     * @throws Vpg\Disturb\Workflow\WorkflowException
+     * @throws |Vpg\Disturb\Workflow\WorkflowException
      */
     public function getStatus(string $workflowProcessId) : string;
 
@@ -46,7 +45,7 @@ interface WorkflowManagerInterface
      * @param string $workflowProcessId The workflow process identifier
      *
      * @return array the next workflow step hash
-     * @throws Vpg\Disturb\Workflow\WorkflowException
+     * @throws |Vpg\Disturb\Workflow\WorkflowException
      */
     public function getNextStepList(string $workflowProcessId) : array;
 
@@ -59,7 +58,7 @@ interface WorkflowManagerInterface
      * @param array  $resultHash        The result info returned by the step to finalize
      *
      * @return void
-     * @throws Vpg\Disturb\Workflow\WorkflowException
+     * @throws |ÒVpg\Disturb\Workflow\WorkflowException
      */
     public function processStepJobResult(string $workflowProcessId, string $stepCode, int $jobId, array $resultHash);
 

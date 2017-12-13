@@ -1,10 +1,10 @@
 <?PHP
 namespace Vpg\Disturb\Workflow;
 
-use \Phalcon\Config\Adapter\Json;
 use \Phalcon\Mvc\User\Component;
 
 use Vpg\Disturb\Context\ContextStorageService;
+use Vpg\Disturb\Workflow\WorkflowConfigDto;
 
 /**
  * Class WorkflowManager
@@ -67,21 +67,12 @@ class ManagerService extends Component implements WorkflowManagerInterface
     /**
      * WorkflowManager constructor.
      *
-     * @param string $workflowConfigFilePath config file path
+     * @param WorkflowConfigDto $workflowConfigDto config
      */
-    public function __construct(string $workflowConfigFilePath)
+    public function __construct(WorkflowConfigDto $workflowConfigDto)
     {
-        $this->di->get('logr')->debug("Loading WF from '$workflowConfigFilePath'");
-
-        $this->di->setShared(
-            'WorkflowConfig',
-            new Json($workflowConfigFilePath)
-        );
-
-        $this->di->setShared(
-            'contextStorage',
-            new ContextStorageService($workflowConfigFilePath)
-        );
+        $this->di->setShared('WorkflowConfig', $workflowConfigDto);
+        $this->di->setShared('contextStorage', new ContextStorageService($workflowConfigDto));
     }
 
     /**

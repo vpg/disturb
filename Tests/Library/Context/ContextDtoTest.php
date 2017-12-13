@@ -15,56 +15,54 @@ class ContextDtoTest extends \Tests\DisturbUnitTestCase
 {
 
         private $contextHash = [
-            'workflow' => [
-                'steps' => [
-                    [
-                        'name' => 'bar',
-                        'jobList' => [
-                            [
-                                'result' => [
-                                    'bar' => 'a bar'
-                                ],
-                                'id' => 0,
+            'steps' => [
+                [
+                    'name' => 'bar',
+                    'jobList' => [
+                        [
+                            'result' => [
+                                'bar' => 'a bar'
                             ],
-                            [
-                                'result' => [
-                                    'bar' => 'a second bar'
-                                ],
-                                'id' => 1,
-                            ]
+                            'id' => 0,
                         ],
-                    ],
-                    [
-                        'name' => 'foo',
-                        'jobList' => [
-                            [
-                                'result' => [
-                                    'foo' => 'a foo'
-                                ],
-                                'id' => 0,
-                            ]
-                        ]
-                    ],
-                    [
-                        'name' => 'far',
-                        'jobList' => [
-                            [
-                                'result' => [],
-                                'id' => 0,
-                            ]
-                        ]
-                    ],
-                    [
-                        'name' => 'boo',
-                        'jobList' => [
-                            [
-                                'result' => [],
-                                'id' => 0,
+                        [
+                            'result' => [
+                                'bar' => 'a second bar'
                             ],
-                            [
-                                'result' => [],
-                                'id' => 1,
-                            ]
+                            'id' => 1,
+                        ]
+                    ],
+                ],
+                [
+                    'name' => 'foo',
+                    'jobList' => [
+                        [
+                            'result' => [
+                                'foo' => 'a foo'
+                            ],
+                            'id' => 0,
+                        ]
+                    ]
+                ],
+                [
+                    'name' => 'far',
+                    'jobList' => [
+                        [
+                            'result' => [],
+                            'id' => 0,
+                        ]
+                    ]
+                ],
+                [
+                    'name' => 'boo',
+                    'jobList' => [
+                        [
+                            'result' => [],
+                            'id' => 0,
+                        ],
+                        [
+                            'result' => [],
+                            'id' => 1,
                         ]
                     ]
                 ]

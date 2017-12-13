@@ -19,7 +19,7 @@ interface ManagerServiceInterface
      *
      * @return array the step to run input data
      *
-     * @throws Vpg\Disturb\Workflow\WorkflowException
+     * @throws \Vpg\Disturb\Workflow\WorkflowException
      */
     public function getStepInput(string $workflowProcessId, string $stepCode) : array;
 }

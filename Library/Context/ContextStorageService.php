@@ -1,11 +1,10 @@
 <?php
 namespace Vpg\Disturb\Context;
 
-use \Phalcon\Config;
 use \Phalcon\Mvc\User\Component;
 
 use Vpg\Disturb\Core\Storage;
-use Vpg\Disturb\Workflow;
+use Vpg\Disturb\Workflow\WorkflowConfigDto;
 
 /**
  * Class ContextStorage
@@ -66,16 +65,15 @@ class ContextStorageService extends Component
     /**
      * ContextStorage constructor
      *
-     * @param string $configFilePath config file path
+     * @param WorkflowConfigDto $workflowConfigDto config
      *
      * @throws StorageException
      */
-    public function __construct(string $configFilePath)
+    public function __construct(WorkflowConfigDto $workflowConfigDto)
     {
         $this->di->get('logr')->debug(json_encode(func_get_args()));
-        $config = new Workflow\WorkflowConfigDto($configFilePath);
         $this->adapter = Storage\StorageAdapterFactory::get(
-            $config,
+            $workflowConfigDto,
             Storage\StorageAdapterFactory::USAGE_CONTEXT
         );
     }

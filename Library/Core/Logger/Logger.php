@@ -79,15 +79,17 @@ class Logger extends \Phalcon\Logger\Multiple
     public function prefixMessage($message)
     {
         if (defined('DISTURB_DEBUG') && DISTURB_DEBUG == true) {
-            $dbt = debug_backtrace();
-            $message = '> ' .
-                $dbt[2]['class'] .
-                '\\' .
-                $dbt[2]['function'] .
-                ' : ' .
-                $message;
-        }
+            $debugBacktraceHash = debug_backtrace(DEBUG_BACKTRACE_PROVIDE_OBJECT, 2);
 
+            if (!empty($debugBacktraceHash[2])) {
+                $message = '> ' .
+                    $debugBacktraceHash[2]['class'] .
+                    '\\' .
+                    $debugBacktraceHash[2]['function'] .
+                    ' : ' .
+                    $message;
+            }
+        }
         return $message;
     }
 }
