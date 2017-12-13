@@ -1,5 +1,6 @@
 // foo
-const workflowFilePath = "./Full/test.json";
+//const workflowFilePath = "./Full/test.json";
+const workflowFilePath = "./Full/test.php";
 
 const managerScriptFilePath = "./vendor/bin/disturb-manager";
 const stepScriptFilePath = "./vendor/bin/disturb-step";

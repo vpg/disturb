@@ -35,7 +35,7 @@ interface WorkflowManagerInterface
      * @param string $workflowProcessId The workflow process identifier
      *
      * @return string the workflow status code
-     * @throws |Vpg\Disturb\Workflow\WorkflowException
+     * @throws \Vpg\Disturb\Workflow\WorkflowException
      */
     public function getStatus(string $workflowProcessId) : string;
 
@@ -58,7 +58,7 @@ interface WorkflowManagerInterface
      * @param array  $resultHash        The result info returned by the step to finalize
      *
      * @return void
-     * @throws |ÒVpg\Disturb\Workflow\WorkflowException
+     * @throws \Vpg\Disturb\Workflow\WorkflowException
      */
     public function processStepJobResult(string $workflowProcessId, string $stepCode, int $jobId, array $resultHash);
 

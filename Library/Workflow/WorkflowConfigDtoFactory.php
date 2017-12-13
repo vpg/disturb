@@ -29,14 +29,18 @@ class WorkflowConfigDtoFactory
     public static function get(string $workflowConfigFilePath) : WorkflowConfigDto
     {
         if (!file_exists($workflowConfigFilePath)) {
-            throw new WorkflowException('Workflow config file not found');
+            throw new WorkflowConfigDtoException(
+                'Workflow config file not found',
+                WorkflowConfigDtoException::CODE_NOT_FOUND
+            );
         }
 
         // get and check file ext
         $workflowConfigFileExtension = pathinfo($workflowConfigFilePath, PATHINFO_EXTENSION);
         if (!in_array($workflowConfigFileExtension, self::CONFIG_FILE_EXT_LIST)) {
-            throw new WorkflowException('Workflow config file only authorize extension : ' .
-                implode(',', self::CONFIG_FILE_EXT_LIST)
+            throw new WorkflowConfigDtoException(
+                'Workflow config file only authorize extension : ' . implode(',', self::CONFIG_FILE_EXT_LIST),
+                WorkflowConfigDtoException::CODE_BAD_EXT
             );
         }
 
