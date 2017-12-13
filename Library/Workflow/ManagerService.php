@@ -347,7 +347,7 @@ class ManagerService extends Component implements WorkflowManagerInterface
         }
         $jobHash['status'] = $resultHash['status'] ?? self::STATUS_FAILED;
         $jobHash['result'] = $resultHash['data'] ?? [];
-        $jobHash['finishedAt'] = date(ContextStorageService::DATE_FORMAT);
+        $jobHash['finishedAt'] = $resultHash['finishedAt'] ?? date(ContextStorageService::DATE_FORMAT);
         $this->di->get('contextStorage')->updateWorkflowStepJob(
             $workflowProcessId,
             $stepCode,

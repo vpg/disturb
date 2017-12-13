@@ -6,6 +6,7 @@ use Vpg\Disturb\Core\AbstractWorker;
 use Vpg\Disturb\Message;
 use Vpg\Disturb\Topic;
 use Vpg\Disturb\Workflow\ManagerService;
+use Vpg\Disturb\Context\ContextStorageService;
 
 /**
  * Generic Step task
@@ -60,6 +61,7 @@ class StepWorker extends AbstractWorker
                 $this->workerHostname
             );
             $resultHash = $this->service->execute($messageDto->getPayload());
+            $resultHash['finishedAt'] = date(ContextStorageService::DATE_FORMAT);
         } catch (\Exception $exception) {
             $resultHash = [
                 'status' => ManagerService::STATUS_FAILED,
