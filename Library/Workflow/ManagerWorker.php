@@ -95,7 +95,7 @@ class ManagerWorker extends Core\AbstractWorker
                 );
 
                 $status = $this->workflowManagerService->getStatus($messageDto->getId());
-                $this->getDI()->get('logr')->debug("Id {$messageDto->getId()} is '$status'");
+                $this->getDI()->get('logr')->info("Id {$messageDto->getId()} is '$status'");
                 if ($status == ManagerService::STATUS_FAILED) {
                     throw new WorkflowException("Id failed {$messageDto->getId()}");
                 }

@@ -150,7 +150,7 @@ abstract class AbstractWorker extends Task implements WorkerInterface
         );
         $this->kafkaConsumer->subscribe([$this->topicName]);
         while (true) {
-            sleep(1);
+            $processStartsAt = microtime(true);
             $msg = $this->kafkaConsumer->consume(10000);
             // xxx q&d err handling
             if (!$msg ||  $msg->err) {
@@ -180,10 +180,17 @@ abstract class AbstractWorker extends Task implements WorkerInterface
                 continue;
             }
             try {
+                $waitEndsAt = microtime(true);
+                $waitExecTime = round(($waitEndsAt - $processStartsAt), 3);
+                $this->getDI()->get('logr')->info("Idle during $waitExecTime secs");
+                $processStartsAt = microtime(true);
                 $this->processMessage($msgDto);
             } catch (\Exception $e) {
-                $this->getDI()->get('logger')->error($e->getMessage());
+                $this->getDI()->get('logr')->error($e->getMessage());
             }
+            $processEndsAt = microtime(true);
+            $processExecTime = round(($processEndsAt - $processStartsAt), 3);
+            $this->getDI()->get('logr')->info("Message processed in $processExecTime secs");
         }
     }
 
