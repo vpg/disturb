@@ -71,7 +71,7 @@ switch ($arguments['worker']) {
         $workerCode = Step\StepWorker::getWorkerCode($paramHash);
     break;
 }
-$monitoringService = new Monitoring\Service($workflowConfig);
+$monitoringService = new Monitoring\Service($workflowConfigDto);
 switch ($arguments['action']) {
     case 'start':
         $monitoringService->logWorkerStarted($workerCode, $paramHash['pid']);
