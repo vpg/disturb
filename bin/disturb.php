@@ -5,6 +5,8 @@ use \Vpg\Disturb\Workflow\WorkflowConfigDtoFactory;
 
 define('DISTURB_DEBUG', getenv('DISTURB_DEBUG'));
 define('DISTURB_TOPIC_PREFIX', getenv('DISTURB_TOPIC_PREFIX'));
+define('DISTURB_ELASTIC_HOST', getenv('DISTURB_ELASTIC_HOST'));
+define('DISTURB_KAFKA_BROKER', getenv('DISTURB_KAFKA_BROKER'));
 
 try {
     /**
@@ -28,7 +30,6 @@ try {
 
     $di->setShared('loader', $loader);
 
-
     // Create a console application
     $console = new ConsoleApp();
     $console->setDI($di);
@@ -50,12 +51,14 @@ try {
 
     // Load client boostrap file
     $paramHash = ConsoleApp::parseLongOpt(join($arguments['params'], ' '));
+
     $workflowConfigDto = WorkflowConfigDtoFactory::get($paramHash['workflow']);
     $projectBootstrapFilePath = $workflowConfigDto->getProjectBoostrapFilepath();
     if (is_readable($projectBootstrapFilePath)) {
         $di->get('logr')->info('Loading Bootstrap : ' . $projectBootstrapFilePath);
         require_once($projectBootstrapFilePath);
     }
+
     $di->get('disturb-config')->workflowConfigFilePath = $paramHash['workflow'];
 
     // Handle incoming arguments
