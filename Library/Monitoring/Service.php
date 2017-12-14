@@ -21,11 +21,11 @@ class Service extends Component
     /**
      * ContextStorage constructor
      *
-     * @param Workflow\WorkflowConfigDtoFactory $workflowConfigDto config
+     * @param Workflow\WorkflowConfigDto $workflowConfigDto config
      *
      * @throws ContextStorageException
      */
-    public function __construct(Workflow\WorkflowConfigDtoFactory $workflowConfigDto)
+    public function __construct(Workflow\WorkflowConfigDto $workflowConfigDto)
     {
         $this->di->get('logr')->debug(json_encode(func_get_args()));
         $this->config = $workflowConfigDto;
