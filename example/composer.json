@@ -10,6 +10,6 @@
         }
     ],
     "require": {
-        "vpg/disturb": "dev-worker_registration"
+        "vpg/disturb": "dev-dist_80"
     }
 }
