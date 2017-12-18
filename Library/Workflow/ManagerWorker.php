@@ -44,7 +44,6 @@ class ManagerWorker extends Core\AbstractWorker
     {
         $this->getDI()->get('logr')->debug(json_encode(func_get_args()));
         parent::initWorker();
-        // xxx Allow client to overwrite ?
         $this->workflowManagerService = new ManagerService($this->workflowConfigDto);
         $serviceFullName = $this->getServiceFullName();
         $this->getDI()->get('logr')->debug('Loading ' . $serviceFullName);
@@ -67,7 +66,7 @@ class ManagerWorker extends Core\AbstractWorker
     /**
      * Process Dtos message
      *
-     * @param Message\MessageDto $messageDto
+     * @param Message\MessageDto $messageDto message DTO
      *
      * @throws WorkflowException
      * @throws \Exception

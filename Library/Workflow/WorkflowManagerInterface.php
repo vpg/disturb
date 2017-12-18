@@ -45,7 +45,7 @@ interface WorkflowManagerInterface
      * @param string $workflowProcessId The workflow process identifier
      *
      * @return array the next workflow step hash
-     * @throws |Vpg\Disturb\Workflow\WorkflowException
+     * @throws \Vpg\Disturb\Workflow\WorkflowException
      */
     public function getNextStepList(string $workflowProcessId) : array;
 
