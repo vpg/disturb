@@ -2,8 +2,6 @@
 
 namespace Vpg\Disturb\Workflow;
 
-use \Phalcon\Config;
-
 use Vpg\Disturb\Core\Dto;
 
 
@@ -17,6 +15,11 @@ use Vpg\Disturb\Core\Dto;
 class WorkflowConfigDto extends Dto\AbstractDto
 {
 
+    /**
+     * Required properties list
+     *
+     * @var array
+     */
     private $requiredProps = [
         'name',
         ['storage','config','host']
@@ -81,4 +84,53 @@ class WorkflowConfigDto extends Dto\AbstractDto
         return $this->rawHash['storage']['adapter'] ?? '';
     }
 
+    /**
+     * Returns project bootstrap file path
+     *
+     * @return string
+     */
+    public function getProjectBoostrapFilepath() : string
+    {
+        return $this->rawHash['projectBootstrap'] ?? '';
+    }
+
+    /**
+     * Returns service class namespace
+     *
+     * @return string
+     */
+    public function getServicesClassNameSpace() : string
+    {
+        return $this->rawHash['servicesClassNameSpace'] ?? '';
+    }
+
+    /**
+     * Returns service class path
+     *
+     * @return string
+     */
+    public function getServicesClassPath() : string
+    {
+        return $this->rawHash['servicesClassPath'] ?? '';
+    }
+
+    /**
+     * Returns workflow name
+     *
+     * @return string
+     */
+    public function getWorkflowName() : string
+    {
+        return $this->rawHash['name'] ?? '';
+    }
+
+    /**
+     * Returns borker server list
+     *
+     * @return array
+     */
+    public function getBrokerServerList() : array
+    {
+        return $this->rawHash['brokerServerList'] ?? [];
+    }
 }

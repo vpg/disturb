@@ -80,7 +80,7 @@ class StepWorker extends AbstractWorker
         );
 
         $this->sendMessage(
-            Topic\TopicService::getWorkflowManagerTopicName($this->workflowConfig['name']),
+            Topic\TopicService::getWorkflowManagerTopicName($this->workflowConfigDto->getWorkflowName()),
             $msgDto
         );
     }
@@ -96,13 +96,13 @@ class StepWorker extends AbstractWorker
     {
         $this->getDI()->get('logr')->debug(json_encode(func_get_args()));
         parent::initWorker($this->paramHash);
-        $serviceFullName = $this->workflowConfig['servicesClassNameSpace'] . '\\' .
+        $serviceFullName = $this->workflowConfigDto->getServicesClassNameSpace() . '\\' .
             ucFirst($this->paramHash['step']) . 'Step';
         $this->service = new $serviceFullName($this->paramHash['workflow']);
 
         $this->topicName = Topic\TopicService::getWorkflowStepTopicName(
             $this->paramHash['step'],
-            $this->workflowConfig['name']
+            $this->workflowConfigDto->getWorkflowName()
         );
 
         $this->ManagerService = new ManagerService($this->paramHash['workflow']);

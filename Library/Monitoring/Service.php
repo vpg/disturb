@@ -3,7 +3,6 @@ namespace Vpg\Disturb\Monitoring;
 
 use \Phalcon\Config;
 use \Phalcon\Mvc\User\Component;
-use \Elasticsearch;
 
 use Vpg\Disturb\Workflow;
 use Vpg\Disturb\Core;
@@ -22,14 +21,14 @@ class Service extends Component
     /**
      * ContextStorage constructor
      *
-     * @param Json $config config
+     * @param Workflow\WorkflowConfigDto $workflowConfigDto config
      *
      * @throws ContextStorageException
      */
-    public function __construct(Config $config)
+    public function __construct(Workflow\WorkflowConfigDto $workflowConfigDto)
     {
         $this->di->get('logr')->debug(json_encode(func_get_args()));
-        $this->config = new Workflow\WorkflowConfigDto($config);
+        $this->config = $workflowConfigDto;
         $this->initClient();
     }
 
@@ -43,7 +42,6 @@ class Service extends Component
     private function initClient()
     {
         $this->di->get('logr')->debug(json_encode(func_get_args()));
-        $storageHost = $this->config->getStorageHost();
         $this->storageClient = Storage\StorageAdapterFactory::get(
             $this->config,
             Storage\StorageAdapterFactory::USAGE_MONITORING

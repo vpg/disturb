@@ -23,19 +23,6 @@ $di->set(
     'logr',
     function () use ($di) {
         $logger = new \Vpg\Disturb\Core\Logger\Logger();
-
-        // xxx - syslog
-        /*$syslog = new \Phalcon\Logger\Adapter\Syslog(
-            xxx - $logName,
-            [
-                'option' => LOG_NDELAY,
-                'facility' => LOG_LOCAL1
-            ]
-        );
-        $syslog->setFormatter(new \Disturb\Logger\Formatter\Syslog());
-        $syslog->setLogLevel(LOG_INFO);
-        $logger->push($syslog);*/
-
         $stdoutLogger = new \Phalcon\Logger\Adapter\Stream(
             'php://stdout'
         );

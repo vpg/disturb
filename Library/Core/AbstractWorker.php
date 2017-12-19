@@ -3,11 +3,10 @@
 namespace Vpg\Disturb\Core;
 
 use \Phalcon\Cli\Task;
-use \Phalcon\Loader;
-use \Phalcon\Config\Adapter\Json;
 
 use Vpg\Disturb\Message\MessageDto;
 use Vpg\Disturb\Workflow\WorkflowException;
+use Vpg\Disturb\Workflow\WorkflowConfigDtoFactory;
 
 /**
  * Abstract task
@@ -31,7 +30,6 @@ abstract class AbstractWorker extends Task implements WorkerInterface
      * @const string STATUS_EXITED
      */
     const STATUS_EXITED = 'exited';
-
 
     protected $taskOptionBaseList = [
         'workflow:', // required step code config file
@@ -59,7 +57,7 @@ abstract class AbstractWorker extends Task implements WorkerInterface
     protected $service = null;
 
     /**
-     * @var Phalcon\Config $workflowConfig Current workflow config
+     * @var \Phalcon\Config $workflowConfig Current workflow config
      */
     protected $workflowConfig;
 
@@ -75,15 +73,16 @@ abstract class AbstractWorker extends Task implements WorkerInterface
      *  - Init MQ sys
      *
      * @return void
+     *
+     * @throws WorkflowException
      */
     protected function initWorker()
     {
         $this->getDI()->get('logr')->debug(json_encode(func_get_args()));
-        // xxx check if file exists, throw exc on err
-        $this->workflowConfig = new Json($this->paramHash['workflow']);
+        $this->workflowConfigDto = WorkflowConfigDtoFactory::get($this->paramHash['workflow']);
         $this->registerClientNS(
-            $this->workflowConfig['servicesClassNameSpace'],
-            $this->workflowConfig['servicesClassPath']
+            $this->workflowConfigDto->getServicesClassNameSpace(),
+            $this->workflowConfigDto->getServicesClassPath()
         );
         $this->workerHostname = php_uname('n');
         $this->initMq();
@@ -145,7 +144,7 @@ abstract class AbstractWorker extends Task implements WorkerInterface
         // xxx Factorize stdout/err support
         $this->getDI()->get('logr')->info(
             "Worker listening on \033[32m" .
-            implode(',', $this->workflowConfig['brokerServerList']->toArray()) .
+            implode(',', $this->workflowConfigDto->getBrokerServerList()->toArray()) .
             ":\033[32m" . $this->topicName . "\033[0m"
         );
         $this->kafkaConsumer->subscribe([$this->topicName]);
@@ -253,7 +252,7 @@ abstract class AbstractWorker extends Task implements WorkerInterface
     private function initMq()
     {
         $this->getDI()->get('logr')->debug(json_encode(func_get_args()));
-        $brokers = implode(',', $this->workflowConfig['brokerServerList']->toArray());
+        $brokers = implode(',', $this->workflowConfigDto->getBrokerServerList());
 
         // xxx put kafka\TopicConf in DI and config in a config file
         $this->kafkaTopicConf = new \RdKafka\TopicConf();

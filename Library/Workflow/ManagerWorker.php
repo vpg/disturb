@@ -36,29 +36,49 @@ class ManagerWorker extends Core\AbstractWorker
      * Init work with parameters
      *
      * @return void
+     *
+     * @throws WorkflowException
+     * @throws \Exception
      */
     protected function initWorker()
     {
         $this->getDI()->get('logr')->debug(json_encode(func_get_args()));
         parent::initWorker();
-        $serviceFullName = $this->workflowConfig['servicesClassNameSpace'] . "\\" .
-            ucFirst($this->workflowConfig['name']) . 'Manager';
-        // xxx Allow client to overwrite ?
-        $this->workflowManagerService = new ManagerService($this->paramHash['workflow']);
+        $this->workflowManagerService = new ManagerService($this->workflowConfigDto);
+        $serviceFullName = $this->getServiceFullName();
         $this->getDI()->get('logr')->debug('Loading ' . $serviceFullName);
         $this->service = new $serviceFullName();
 
-        $this->topicName = Topic\TopicService::getWorkflowManagerTopicName($this->workflowConfig['name']);
+        $this->topicName = Topic\TopicService::getWorkflowManagerTopicName($this->workflowConfigDto->getWorkflowName());
+    }
+
+    /**
+     * Get service full name
+     *
+     * @return string
+     */
+    private function getServiceFullName() : string
+    {
+        $serviceFullName = $this->workflowConfigDto->getServicesClassNameSpace() . "\\" .
+            ucFirst($this->workflowConfigDto->getWorkflowName()) . 'Manager';
+
+        if (!class_exists($serviceFullName)) {
+            throw new WorkflowException(
+                $serviceFullName . ' manager class not found',
+                WorkflowException::CODE_MANAGER_CLASS_NOT_FOUND
+            );
+        }
+
+        return $serviceFullName;
     }
 
     /**
      * Process Dtos message
      *
-     * @param Message\MessageDto $messageDto message object
+     * @param Message\MessageDto $messageDto message DTO
      *
      * @throws WorkflowException
-     *
-     * @return void
+     * @throws \Exception
      */
     protected function processMessage(Message\MessageDto $messageDto)
     {
@@ -173,7 +193,7 @@ class ManagerWorker extends Core\AbstractWorker
 
                     $this->getDI()->get('logr')->info("Ask job #$jobId for $workflowProcessId : $stepCode");
                     $this->sendMessage(
-                        Topic\TopicService::getWorkflowStepTopicName($stepCode, $this->workflowConfig['name']),
+                        Topic\TopicService::getWorkflowStepTopicName($stepCode, $this->workflowConfigDto->getWorkflowName()),
                         $stepMessageDto
                     );
                 }

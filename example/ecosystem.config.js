@@ -1,5 +1,8 @@
-// foo
-const workflowFilePath = "./Full/test.json";
+// Example PM2 config
+
+//const workflowFilePath = "./Full/testWorkflowConfig.json";
+const workflowFilePath = "./Full/testWorkflowConfig.php";
+
 
 const managerScriptFilePath = "./vendor/bin/disturb-manager";
 const stepScriptFilePath = "./vendor/bin/disturb-step";
@@ -8,27 +11,39 @@ const baseArgs = `start --workflow=${workflowFilePath}`;
 const interpreter = "bash";
 const watch = false;
 
-let envHash = {
-    env: {
-        ENV_SUB: "fr"
-    },
-    env_debug: {
-        ENV_SUB: "fr",
-        DISTURB_DEBUG : 1
-    }
-};
 
-let workflow = require(workflowFilePath);
+// display disturb env var
+console.info('====================');
+console.info('= DISTURB ENV VARS =');
+console.info('====================');
+let processEnvHash = process.env;
+Object.keys(processEnvHash).forEach(function (name) {
+    if (name.substring(0, 7) === 'DISTURB') {
+        console.info(name + ':' + processEnvHash[name]);
+    }
+});
+console.info('');
+
+let workflow;
+
+// check conf ext
+if (workflowFilePath.substr(-3) === 'php') {
+    // PHP
+    workflow = JSON.parse(require('child_process').execSync('php ' + workflowFilePath + ' --format=json').toString());
+} else {
+    // JSON
+    workflow = require(workflowFilePath);
+}
 
 let appList = [];
 let managerHash = {
     name  : "test-manager-fr",
-    script      : "./vendor/bin/disturb-manager",
+    script      : managerScriptFilePath,
     watch       : watch,
     args        : baseArgs,
     interpreter : interpreter
 };
-appList.push(Object.assign(managerHash, envHash));
+appList.push(managerHash);
 
 workflow.steps.forEach(step => {
     if(step instanceof Array) {
@@ -52,15 +67,12 @@ function addApp(workflowName, step) {
             watch       : watch,
             args        : baseArgs + ` --step=${step.name} --workerId=${i}`,
             interpreter : interpreter
-        }
-        appList.push(Object.assign(appHash, envHash));
+        };
+        appList.push(appHash);
     }
-
 }
 
-console.log(appList);
-
-let conf = {}
+let conf = {};
 conf.apps = appList;
 
 module.exports = conf;

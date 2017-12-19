@@ -1,74 +1,82 @@
 <?php
 
-use \Phalcon\Config\Adapter\Json;
-
 use \Vpg\Disturb\Core\Cli\Console as ConsoleApp;
+use \Vpg\Disturb\Workflow\WorkflowConfigDtoFactory;
 
 define('DISTURB_DEBUG', getenv('DISTURB_DEBUG'));
 define('DISTURB_TOPIC_PREFIX', getenv('DISTURB_TOPIC_PREFIX'));
-
-/**
- * Register the autoloader and tell it to register the tasks directory
- */
-$loader = new \Phalcon\Loader();
-$loader->registerNamespaces(
-    [
-        'Vpg\Disturb' => realpath(__DIR__ . '/../Library/')
-    ],
-    true
-);
-
-$loader->registerFiles([
-    __DIR__ . '/../../vendor/autoload.php',
-    __DIR__ . '/../../../autoload.php'
-]);
-$loader->register();
-
-require_once(__DIR__ . '/../Library/Core/DI.php');
-
-$di->setShared('loader', $loader);
-
-
-// Create a console application
-$console = new ConsoleApp();
-$console->setDI($di);
-
-/**
- * Process the console arguments
- */
-$arguments = [];
-
-foreach ($argv as $k => $arg) {
-    if ($k === 1) {
-        $arguments['task'] = $arg;
-    } elseif ($k === 2) {
-        $arguments['action'] = $arg;
-    } elseif ($k >= 3) {
-        $arguments['params'][] = $arg;
-    }
-}
-
-// Load client boostrap file
-$paramHash = ConsoleApp::parseLongOpt(join($arguments['params'], ' '));
-$workflowConfig = new Json($paramHash['workflow']);
-$projectBootstrapFilePath = $workflowConfig['projectBootstrap'] ?? '';
-if (is_readable($projectBootstrapFilePath)) {
-    $di->get('logr')->info('Loading Bootstrap : ' . $projectBootstrapFilePath);
-    require_once($projectBootstrapFilePath);
-}
-$di->get('disturb-config')->workflowConfigFilePath = $paramHash['workflow'];
+define('DISTURB_ELASTIC_HOST', getenv('DISTURB_ELASTIC_HOST'));
+define('DISTURB_KAFKA_BROKER', getenv('DISTURB_KAFKA_BROKER'));
 
 try {
+    /**
+     * Register the autoloader and tell it to register the tasks directory
+     */
+    $loader = new \Phalcon\Loader();
+    $loader->registerNamespaces(
+        [
+            'Vpg\Disturb' => realpath(__DIR__ . '/../Library/')
+        ],
+        true
+    );
+
+    $loader->registerFiles([
+        __DIR__ . '/../../vendor/autoload.php',
+        __DIR__ . '/../../../autoload.php'
+    ]);
+    $loader->register();
+
+    require_once(__DIR__ . '/../Library/Core/DI.php');
+
+    $di->setShared('loader', $loader);
+
+    // Create a console application
+    $console = new ConsoleApp();
+    $console->setDI($di);
+
+    /**
+     * Process the console arguments
+     */
+    $arguments = [];
+
+    foreach ($argv as $k => $arg) {
+        if ($k === 1) {
+            $arguments['task'] = $arg;
+        } elseif ($k === 2) {
+            $arguments['action'] = $arg;
+        } elseif ($k >= 3) {
+            $arguments['params'][] = $arg;
+        }
+    }
+
+    // Load client boostrap file
+    $paramHash = ConsoleApp::parseLongOpt(join($arguments['params'], ' '));
+
+    $workflowConfigDto = WorkflowConfigDtoFactory::get($paramHash['workflow']);
+    $projectBootstrapFilePath = $workflowConfigDto->getProjectBoostrapFilepath();
+    if (is_readable($projectBootstrapFilePath)) {
+        $di->get('logr')->info('Loading Bootstrap : ' . $projectBootstrapFilePath);
+        require_once($projectBootstrapFilePath);
+    }
+
+    $di->get('disturb-config')->workflowConfigFilePath = $paramHash['workflow'];
+
     // Handle incoming arguments
     $console->handle($arguments);
+
 } catch (\Phalcon\Exception $e) {
     // Do Phalcon related stuff here
-    fwrite(STDERR, $e->getMessage() . PHP_EOL);
-    exit(1);
-} catch (\Throwable $throwable) {
-    fwrite(STDERR, $throwable->getMessage() . PHP_EOL);
+    $di->get('logr')->error($e->getMessage());
+    $di->get('logr')->error($e->getTraceAsString());
     exit(1);
 } catch (\Exception $exception) {
-    fwrite(STDERR, $exception->getMessage() . PHP_EOL);
+    // Other php exception
+    $di->get('logr')->error($exception->getMessage());
+    $di->get('logr')->error($exception->getTraceAsString());
+    exit(1);
+} catch (\Throwable $throwable) {
+    // run time error
+    $di->get('logr')->error($throwable->getMessage());
+    $di->get('logr')->error($throwable->getTraceAsString());
     exit(1);
 }

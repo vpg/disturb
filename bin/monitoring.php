@@ -1,15 +1,14 @@
 <?php
 
-use \Phalcon\Config\Adapter\Json;
-
 use \Vpg\Disturb\Core\Cli\Console as ConsoleApp;
-use \Vpg\Disturb\Core;
 use \Vpg\Disturb\Workflow;
 use \Vpg\Disturb\Step;
 use \Vpg\Disturb\Monitoring;
 
 define('DISTURB_DEBUG', getenv('DISTURB_DEBUG'));
 define('DISTURB_TOPIC_PREFIX', getenv('DISTURB_TOPIC_PREFIX'));
+define('DISTURB_ELASTIC_HOST', getenv('DISTURB_ELASTIC_HOST'));
+define('DISTURB_KAFKA_BROKER', getenv('DISTURB_KAFKA_BROKER'));
 
 /**
  * Register the autoloader and tell it to register the tasks directory
@@ -56,9 +55,9 @@ foreach ($argv as $k => $arg) {
 
 
 $paramHash = ConsoleApp::parseLongOpt(join($arguments['params'], ' '));
-$workflowConfig = new Json($paramHash['workflow']);
 
-$projectBootstrapFilePath = $workflowConfig['projectBootstrap'] ?? '';
+$workflowConfigDto = Workflow\WorkflowConfigDtoFactory::get($paramHash['workflow']);
+$projectBootstrapFilePath = $workflowConfigDto->getProjectBoostrapFilepath();
 if (is_readable($projectBootstrapFilePath)) {
     $di->get('logr')->info('Loading Bootstrap : ' . $projectBootstrapFilePath);
     require_once($projectBootstrapFilePath);
@@ -72,7 +71,7 @@ switch ($arguments['worker']) {
         $workerCode = Step\StepWorker::getWorkerCode($paramHash);
     break;
 }
-$monitoringService = new Monitoring\Service($workflowConfig);
+$monitoringService = new Monitoring\Service($workflowConfigDto);
 switch ($arguments['action']) {
     case 'start':
         $monitoringService->logWorkerStarted($workerCode, $paramHash['pid']);

@@ -7,7 +7,7 @@
     "storage" : {
         "adapter": "elasticsearch",
         "config": {
-            "host": "http://localhost:9200"
+            "host": "http://10.13.22.227:9200"
         }
     },
     "steps" : [
