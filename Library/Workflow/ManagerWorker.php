@@ -59,8 +59,17 @@ class ManagerWorker extends Core\AbstractWorker
      */
     private function getServiceFullName() : string
     {
-        return $this->workflowConfigDto->getServicesClassNameSpace() . "\\" . ucFirst($this->workflowConfigDto->getWorkflowName()) .
-            'Manager';
+        $serviceFullName = $this->workflowConfigDto->getServicesClassNameSpace() . "\\" .
+            ucFirst($this->workflowConfigDto->getWorkflowName()) . 'Manager';
+
+        if (!class_exists($serviceFullName)) {
+            throw new WorkflowException(
+                $serviceFullName . ' manager class not found',
+                WorkflowException::CODE_MANAGER_CLASS_NOT_FOUND
+            );
+        }
+
+        return $serviceFullName;
     }
 
     /**
