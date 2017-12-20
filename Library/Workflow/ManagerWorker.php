@@ -56,6 +56,8 @@ class ManagerWorker extends Core\AbstractWorker
      * Get service full name
      *
      * @return string
+     *
+     * @throws WorkflowException
      */
     private function getServiceFullName() : string
     {
