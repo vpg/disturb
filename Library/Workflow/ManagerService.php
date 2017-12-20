@@ -93,7 +93,7 @@ class ManagerService extends Component implements WorkflowManagerInterface
         $this->di->get('contextStorage')->save(
             $workflowProcessId,
             [
-                'steps' => $this->di->get('WorkflowConfig')['steps']->toArray(),
+                'steps' => $this->di->get('WorkflowConfig')->getStepList(),
                 'initialPayload' => $payloadHash,
                 'status' => self::STATUS_STARTED,
                 'currentStepPos' => -1,
@@ -198,12 +198,12 @@ class ManagerService extends Component implements WorkflowManagerInterface
         $nextStepPos = $contextDto->getWorkflowCurrentPosition() + 1;
 
         // Manage case when there is no more step to run
-        if (empty($this->di->get('WorkflowConfig')->steps[$nextStepPos])) {
+        if (empty($this->di->get('WorkflowConfig')->getStepList()[$nextStepPos])) {
             $this->setStatus($workflowProcessId, self::STATUS_FINISHED);
             return [];
         }
 
-        $stepNode = $this->di->get('WorkflowConfig')->steps[$nextStepPos]->toArray();
+        $stepNode = $this->di->get('WorkflowConfig')->getStepList()[$nextStepPos];
         if (!$this->isStepParallelized($stepNode)) {
             return [$stepNode];
         }
@@ -222,7 +222,7 @@ class ManagerService extends Component implements WorkflowManagerInterface
         $this->di->get('logr')->debug(json_encode(func_get_args()));
         $contextDto = $this->di->get('contextStorage')->get($workflowProcessId);
         $nextStepPos = $contextDto->getWorkflowCurrentPosition() + 1;
-        return !empty($this->di->get('WorkflowConfig')->steps[$nextStepPos]);
+        return !empty($this->di->get('WorkflowConfig')->getStepList()[$nextStepPos]);
     }
 
 

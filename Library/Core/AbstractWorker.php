@@ -185,7 +185,7 @@ abstract class AbstractWorker extends Task implements WorkerInterface
                 $processStartsAt = microtime(true);
                 $this->processMessage($msgDto);
             } catch (\Exception $e) {
-                $this->getDI()->get('logr')->error($e->getMessage());
+                $this->getDI()->get('logr')->error('Failed to process message : ' . $e->getMessage());
             }
             $processEndsAt = microtime(true);
             $processExecTime = round(($processEndsAt - $processStartsAt), 3);

@@ -133,4 +133,14 @@ class WorkflowConfigDto extends Dto\AbstractDto
     {
         return $this->rawHash['brokerServerList'] ?? [];
     }
+
+    /**
+     * Returns wf steps list
+     *
+     * @return array
+     */
+    public function getStepList() : array
+    {
+        return $this->rawHash['steps'] ?? [];
+    }
 }

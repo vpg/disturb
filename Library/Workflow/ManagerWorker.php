@@ -84,7 +84,7 @@ class ManagerWorker extends Core\AbstractWorker
      */
     protected function processMessage(Message\MessageDto $messageDto)
     {
-        $this->getDI()->get('logr')->debug($messageDto);
+        $this->getDI()->get('logr')->debug((string)$messageDto);
         switch ($messageDto->getType()) {
             case Message\MessageDto::TYPE_WF_CTRL:
                 switch ($messageDto->getAction()) {
