@@ -91,7 +91,7 @@ class ManagerWorker extends Core\AbstractWorker
                     case Message\MessageDto::ACTION_WF_CTRL_START:
                         $this->getDI()->get('logr')->info("Starting workflow {$messageDto->getId()}");
                         try {
-                            $this->workflowManagerService->init($messageDto->getId(), $messageDto->getPayload());
+                            $this->workflowManagerService->init($messageDto->getId(), $messageDto->getPayload(), $this->workerHostname);
                         } catch (WorkflowException $wfException) {
                             $this->getDI()->get('logr')->error(
                                 "Failed to start workflow : {$wfException->getMessage()}"
@@ -179,6 +179,7 @@ class ManagerWorker extends Core\AbstractWorker
             foreach ($stepHashList as $stepHash) {
                 $stepCode = $stepHash['name'];
                 $stepInputList = $this->service->getStepInput($workflowProcessId, $stepCode);
+                $this->getDI()->get('logr')->info("Nb job(s) to run for $stepCode : " . count($stepInputList));
 
                 // run through the "job" to send to each step
                 foreach ($stepInputList as $jobId => $stepJobHash) {

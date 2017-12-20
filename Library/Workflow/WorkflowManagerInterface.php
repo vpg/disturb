@@ -23,11 +23,12 @@ interface WorkflowManagerInterface
      *
      * @param string $workflowProcessId The workflow process identifier
      * @param array  $payloadHash       the workflow initial payload
+     * @param string $workerHostname    the worker on which the WF has been init
      *
      * @return void
      * @throws \Vpg\Disturb\Workflow\WorkflowException
      */
-    public function init(string $workflowProcessId, array $payloadHash);
+    public function init(string $workflowProcessId, array $payloadHash, string $workerHostname);
 
     /**
      * Returns the current status of the workflow for the given process identifier

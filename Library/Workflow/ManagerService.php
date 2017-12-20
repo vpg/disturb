@@ -80,10 +80,11 @@ class ManagerService extends Component implements WorkflowManagerInterface
      *
      * @param string $workflowProcessId the workflow process identifier
      * @param array  $payloadHash       the workflow initial payload
+     * @param string $workerHostname    the worker on which the WF has been init
      *
      * @return void
      */
-    public function init(string $workflowProcessId, array $payloadHash)
+    public function init(string $workflowProcessId, array $payloadHash, string $workerHostname)
     {
         $this->di->get('logr')->debug(json_encode(func_get_args()));
         if ($this->di->get('contextStorage')->exists($workflowProcessId)) {
@@ -96,7 +97,8 @@ class ManagerService extends Component implements WorkflowManagerInterface
                 'initialPayload' => $payloadHash,
                 'status' => self::STATUS_STARTED,
                 'currentStepPos' => -1,
-                'startedAt' => date(ContextStorageService::DATE_FORMAT)
+                'startedAt' => date(ContextStorageService::DATE_FORMAT),
+                'startedOn' => $workerHostname
                 ]
         );
     }
