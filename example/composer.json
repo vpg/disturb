@@ -10,6 +10,6 @@
         }
     ],
     "require": {
-        "vpg/disturb": "dev-dist_80"
+        "vpg/disturb": "dev-poc"
     }
 }

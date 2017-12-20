@@ -93,6 +93,8 @@ class StepWorker extends AbstractWorker
      * @throws StepException
      * @throws \Exception
      * @throws \Vpg\Disturb\Workflow\WorkflowException
+     *
+     * @return void
      */
     protected function initWorker()
     {
