@@ -16,6 +16,7 @@ $configHash = [
     'brokerServerList' => defined('DISTURB_KAFKA_BROKER') ? explode(',', DISTURB_KAFKA_BROKER) : [],
     'servicesClassPath' => './Full/',
     'servicesClassNameSpace' => 'Vpg\\Disturb\\Example\\Test',
+    'projectBootstrap' => '',
     'storage' => [
         'adapter' => 'elasticsearch',
         'config' => [

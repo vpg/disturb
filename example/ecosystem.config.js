@@ -3,7 +3,6 @@
 //const workflowFilePath = "./Full/testWorkflowConfig.json";
 const workflowFilePath = "./Full/testWorkflowConfig.php";
 
-
 const managerScriptFilePath = "./vendor/bin/disturb-manager";
 const stepScriptFilePath = "./vendor/bin/disturb-step";
 
@@ -11,18 +10,15 @@ const baseArgs = `start --workflow=${workflowFilePath}`;
 const interpreter = "bash";
 const watch = false;
 
-
-// display disturb env var
-console.info('====================');
-console.info('= DISTURB ENV VARS =');
-console.info('====================');
-let processEnvHash = process.env;
-Object.keys(processEnvHash).forEach(function (name) {
-    if (name.substring(0, 7) === 'DISTURB') {
-        console.info(name + ':' + processEnvHash[name]);
+let envHash = {
+    env: {
+        DISTURB_ELASTIC_HOST: 'http://10.13.22.227:9200',
+        DISTURB_KAFKA_BROKER: '10.13.11.27,10.13.11.28,10.13.11.29'
+    },
+    env_debug: {
+        DISTURB_DEBUG: 1
     }
-});
-console.info('');
+};
 
 let workflow;
 
@@ -43,17 +39,18 @@ let managerHash = {
     args        : baseArgs,
     interpreter : interpreter
 };
-appList.push(managerHash);
+appList.push(Object.assign(managerHash, envHash));
+
 
 workflow.steps.forEach(step => {
     if(step instanceof Array) {
-        step.forEach(step => {
-            addApp(workflow.name, step)
-        });
-    }
-    else {
+    step.forEach(step => {
+        addApp(workflow.name, step)
+});
+}
+else {
     addApp(workflow.name, step)
-    }
+}
 });
 
 function addApp(workflowName, step) {
@@ -68,7 +65,7 @@ function addApp(workflowName, step) {
             args        : baseArgs + ` --step=${step.name} --workerId=${i}`,
             interpreter : interpreter
         };
-        appList.push(appHash);
+        appList.push(Object.assign(appHash, envHash));
     }
 }
 

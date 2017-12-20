@@ -13,4 +13,10 @@ use Vpg\Disturb\Core;
  */
 class StepException extends Core\Exception
 {
+    /**
+     * Code manager class not found const
+     *
+     * @const int CODE_MANAGER_CLASS_NOT_FOUND
+     */
+    const CODE_STEP_CLASS_NOT_FOUND = 0;
 }

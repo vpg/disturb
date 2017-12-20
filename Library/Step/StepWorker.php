@@ -90,21 +90,42 @@ class StepWorker extends AbstractWorker
      *  - Sets the topic
      *  - Instanciates the "Client" service
      *
-     * @return void
+     * @throws StepException
+     * @throws \Exception
+     * @throws \Vpg\Disturb\Workflow\WorkflowException
      */
     protected function initWorker()
     {
         $this->getDI()->get('logr')->debug(json_encode(func_get_args()));
         parent::initWorker($this->paramHash);
-        $serviceFullName = $this->workflowConfigDto->getServicesClassNameSpace() . '\\' .
-            ucFirst($this->paramHash['step']) . 'Step';
-        $this->service = new $serviceFullName($this->paramHash['workflow']);
+        $serviceFullName = $this->getServiceFullName();
+        $this->service = new $serviceFullName($this->workflowConfigDto);
 
         $this->topicName = Topic\TopicService::getWorkflowStepTopicName(
             $this->paramHash['step'],
             $this->workflowConfigDto->getWorkflowName()
         );
+        $this->ManagerService = new ManagerService($this->workflowConfigDto);
+    }
 
-        $this->ManagerService = new ManagerService($this->paramHash['workflow']);
+    /**
+     * Get service full name
+     *
+     * @return string
+     *
+     * @throws StepException
+     */
+    private function getServiceFullName() : string
+    {
+        $serviceFullName = $this->workflowConfigDto->getServicesClassNameSpace() . '\\' .
+            ucFirst($this->paramHash['step']) . 'Step';
+
+        if (!class_exists($serviceFullName)) {
+            throw new StepException(
+                $serviceFullName . ' step class not found',
+                StepException::CODE_STEP_CLASS_NOT_FOUND
+            );
+        }
+        return $serviceFullName;
     }
 }

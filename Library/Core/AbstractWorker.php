@@ -144,7 +144,7 @@ abstract class AbstractWorker extends Task implements WorkerInterface
         // xxx Factorize stdout/err support
         $this->getDI()->get('logr')->info(
             "Worker listening on \033[32m" .
-            implode(',', $this->workflowConfigDto->getBrokerServerList()->toArray()) .
+            implode(',', $this->workflowConfigDto->getBrokerServerList()) .
             ":\033[32m" . $this->topicName . "\033[0m"
         );
         $this->kafkaConsumer->subscribe([$this->topicName]);

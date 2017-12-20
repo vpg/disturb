@@ -83,7 +83,7 @@ class Logger extends \Phalcon\Logger\Multiple
         }
 
         $debugBacktraceHash = debug_backtrace(DEBUG_BACKTRACE_PROVIDE_OBJECT, 2);
-        if (!empty($debugBacktraceHash[2])) {
+        if (empty($debugBacktraceHash[2])) {
             return $message;
         }
 
