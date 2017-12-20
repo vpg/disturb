@@ -81,6 +81,8 @@ class ManagerWorker extends Core\AbstractWorker
      *
      * @throws WorkflowException
      * @throws \Exception
+     *
+     * @return void
      */
     protected function processMessage(Message\MessageDto $messageDto)
     {
@@ -89,9 +91,13 @@ class ManagerWorker extends Core\AbstractWorker
             case Message\MessageDto::TYPE_WF_CTRL:
                 switch ($messageDto->getAction()) {
                     case Message\MessageDto::ACTION_WF_CTRL_START:
-                        $this->getDI()->get('logr')->info("Starting workflow {$messageDto->getId()}");
+                        $this->getDI()->get('logr')->info("🚀 Starting workflow {$messageDto->getId()}");
                         try {
-                            $this->workflowManagerService->init($messageDto->getId(), $messageDto->getPayload(), $this->workerHostname);
+                            $this->workflowManagerService->init(
+                                $messageDto->getId(),
+                                $messageDto->getPayload(),
+                                $this->workerHostname
+                            );
                         } catch (WorkflowException $wfException) {
                             $this->getDI()->get('logr')->error(
                                 "Failed to start workflow : {$wfException->getMessage()}"
@@ -138,14 +144,17 @@ class ManagerWorker extends Core\AbstractWorker
                                 $messageDto->getId(),
                                 ManagerService::STATUS_SUCCESS
                             );
+                            $this->getDI()->get('logr')->info(
+                                "🎉 Workflow {$messageDto->getId()} is now finished in success"
+                            );
                         }
-
                     break;
                     case ManagerService::STATUS_FAILED:
                         $this->workflowManagerService->finalize(
                             $messageDto->getId(),
                             ManagerService::STATUS_FAILED
                         );
+                        $this->getDI()->get('logr')->error("💥Workflow {$messageDto->getId()} has just failed");
                     break;
                     default:
                     throw new WorkflowException('Can\'t retrieve current step status');
@@ -196,7 +205,10 @@ class ManagerWorker extends Core\AbstractWorker
 
                     $this->getDI()->get('logr')->info("Ask job #$jobId for $workflowProcessId : $stepCode");
                     $this->sendMessage(
-                        Topic\TopicService::getWorkflowStepTopicName($stepCode, $this->workflowConfigDto->getWorkflowName()),
+                        Topic\TopicService::getWorkflowStepTopicName(
+                            $stepCode,
+                            $this->workflowConfigDto->getWorkflowName()
+                        ),
                         $stepMessageDto
                     );
                 }

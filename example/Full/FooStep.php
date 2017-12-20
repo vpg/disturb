@@ -4,7 +4,7 @@ namespace Vpg\Disturb\Example\Test;
 use \Vpg\Disturb;
 use \Vpg\Disturb\Message\MessageDto as Message;
 
-class FooStep implements Disturb\Step\StepServiceInterface
+class FooStep extends TestStepAbstract
 {
     public function execute(array $paramHash) : array {
         $resultHash = [];

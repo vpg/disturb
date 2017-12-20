@@ -60,7 +60,9 @@ class StepWorker extends AbstractWorker
                 $messageDto->getJobId(),
                 $this->workerHostname
             );
+            $this->service->beforeExecute($messageDto->getPayload());
             $resultHash = $this->service->execute($messageDto->getPayload());
+            $this->service->afterExecute($messageDto->getPayload(), $resultHash);
             $resultHash['finishedAt'] = date(ContextStorageService::DATE_FORMAT);
         } catch (\Exception $exception) {
             $resultHash = [
