@@ -1,7 +1,7 @@
 // Example PM2 config
 
-//const workflowFilePath = "./Full/testWorkflowConfig.json";
-const workflowFilePath = "./Full/testWorkflowConfig.php";
+const workflowFilePath = "./Full/testWorkflowConfig.json";
+//const workflowFilePath = "./Full/testWorkflowConfig.php";
 
 
 const managerScriptFilePath = "./vendor/bin/disturb-manager";

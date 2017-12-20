@@ -98,13 +98,13 @@ class StepWorker extends AbstractWorker
         parent::initWorker($this->paramHash);
         $serviceFullName = $this->workflowConfigDto->getServicesClassNameSpace() . '\\' .
             ucFirst($this->paramHash['step']) . 'Step';
-        $this->service = new $serviceFullName($this->paramHash['workflow']);
+        $this->service = new $serviceFullName($this->workflowConfigDto);
 
         $this->topicName = Topic\TopicService::getWorkflowStepTopicName(
             $this->paramHash['step'],
             $this->workflowConfigDto->getWorkflowName()
         );
 
-        $this->ManagerService = new ManagerService($this->paramHash['workflow']);
+        $this->ManagerService = new ManagerService($this->workflowConfigDto);
     }
 }
