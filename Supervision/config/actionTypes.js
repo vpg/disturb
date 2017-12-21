@@ -1,0 +1,2 @@
+export const FETCH_WF = 'FETCH_WF';
+export const DISPLAY_EXECTIME_GRAPH = 'DISPLAY_EXECTIME_GRAPH';

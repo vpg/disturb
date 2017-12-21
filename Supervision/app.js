@@ -13,7 +13,7 @@ import rx from 'rxjs'
 // UI
 import { MuiThemeProvider, createMuiTheme, withTheme } from 'material-ui/styles';
 
-//import relectronReducers from './reducers/index'
+import disturbReducers from './reducers/index'
 //import {relectronEpics} from './epics/index'
 
 import App from './components/App.jsx'
@@ -26,13 +26,15 @@ const notificationStream = new rx.Subject();
 
 // Reduc Store
 var initialState = {
-    notification: {notificationStream}
+    workflow: {
+        stats: {}
+    }
 }
 /*
 const epicMiddleware = createEpicMiddleware(relectronEpics)
-const createStoreWithMiddleware = applyMiddleware(thunk, epicMiddleware)(createStore)
 */
-//const store = createStoreWithMiddleware(relectronReducers, initialState);
+const createStoreWithMiddleware = applyMiddleware(thunk)(createStore)
+const store = createStoreWithMiddleware(disturbReducers, initialState);
 
 const theme = createMuiTheme({
     palette: {
@@ -44,10 +46,9 @@ class Main extends Component {
     constructor (props) {
         super(props)
     }
-            //<Provider store={store}>
     render() {
         return (
-            <Provider>
+            <Provider store={store}>
                 <BrowserRouter>
                     <MuiThemeProvider theme={theme}>
                         <App loginStream={this.loginStream} repositoryStream={this.repositoryStream}>
