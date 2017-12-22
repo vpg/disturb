@@ -6,8 +6,8 @@ import {withTheme, withStyles} from 'material-ui/styles'
 import Drawer from 'material-ui/Drawer'
 import List, { ListItem, ListItemAvatar, ListItemIcon, ListItemText } from 'material-ui/List'
 import Divider from 'material-ui/Divider'
-import ReleaseIcon from 'material-ui-icons/Flight'
-import StarIcon from 'material-ui-icons/Star'
+import WorkflowIcon from 'material-ui-icons/Share'
+import WorkerIcon from 'material-ui-icons/FitnessCenter'
 import SettingsIcon from 'material-ui-icons/Settings'
 
 import IconButton from 'material-ui/IconButton'
@@ -42,13 +42,13 @@ class Menu extends React.Component {
                 <List>
                     <ListItem button component={Link} to="/workflows">
                         <ListItemIcon>
-                            <ReleaseIcon />
+                            <WorkflowIcon />
                         </ListItemIcon>
                         <ListItemText primary="Workflows" />
                     </ListItem>
                     <ListItem button component={Link} to="/workers">
                         <ListItemIcon>
-                            <ReleaseIcon />
+                            <WorkerIcon />
                         </ListItemIcon>
                         <ListItemText primary="Workers" />
                     </ListItem>

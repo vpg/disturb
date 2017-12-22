@@ -10,6 +10,8 @@ import Paper from 'material-ui/Paper';
 import Typography from 'material-ui/Typography';
 import RefreshIcon from 'material-ui-icons/Refresh';
 
+
+import StepExectimeBarChart from './charts/StepExectimeBarChart.jsx';
 import * as actions from '../actions/workflows.js';
 
 
@@ -22,7 +24,7 @@ const styles = theme => ({
     },
     paper: {
         margin: '8px',
-        width: '100%',
+        width: '800px',
         height: '400px'
     }
 });
@@ -31,18 +33,22 @@ class Workflows extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            stepsExectimeData: props.stepsExectimeData || []
+            stepsExectimeData: props.stepsExectimeData || [],
+            stepsPendingtimeData: props.stepsPendingtimeData || []
         }
     }
     componentWillReceiveProps(props) {
         console.log('componentWillReceiveProp', props);
         this.setState({
-            stepsExectimeData: props.stepsExectimeData
+            stepsExectimeData: props.stepsExectimeData,
+            stepsPendingtimeData: props.stepsPendingtimeData
         })
     }
     render() {
         const { classes } = this.props;
         console.log(this.state)
+        const b = <StepExectimeBarChart width="800" height="300" xLabel="Steps" yLabel="Time" data={this.state.stepsExectimeData} />
+        const pendingTimeChart = <StepExectimeBarChart width="800" height="300" xLabel="Steps" yLabel="Time" data={this.state.stepsPendingtimeData} />
         return (
             <div>
                 <Typography type="headline" component="h1">
@@ -62,13 +68,13 @@ class Workflows extends Component {
                     <Typography type="headline" component="h3">
                         Steps avg execution time
                     </Typography>
-                    {
-                        this.state.stepsExectimeData.map( (stepHash, i) => {
-                            return <Typography key={i} component="p">
-                                {stepHash.code} : {stepHash.exectime} 
-                            </Typography>
-                        })
-                    }
+                    {b}
+                </Paper>
+                <Paper className={classes.paper} elevation={4}>
+                    <Typography type="headline" component="h3">
+                        Steps avg Waiting time
+                    </Typography>
+                    {pendingTimeChart}
                 </Paper>
             </div>
         )
@@ -78,7 +84,8 @@ class Workflows extends Component {
 const mapStateToProps = (state, ownProps) => {
     console.log('workflows.mapStateToProps', state, ownProps)
     return {
-        stepsExectimeData: state.workflow.stats.stepsExectimeData
+        stepsExectimeData: state.workflow.stats.stepsExectimeData,
+        stepsPendingtimeData: state.workflow.stats.stepsPendingtimeData
     }
 }
 

@@ -14,7 +14,8 @@ export default function(state, action) {
                 state,
                 {
                     stats: {
-                        stepsExectimeData: action.data
+                        stepsExectimeData: action.data[0],
+                        stepsPendingtimeData: action.data[1]
                     }
                 }
             )

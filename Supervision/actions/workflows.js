@@ -12,7 +12,7 @@ const fetchWorkflowById = () => {
         wf.get('test_50')
         .then( workflow => {
             console.log(workflow)
-        }); 
+        });
     }
 }
 
@@ -22,10 +22,14 @@ const fetchStepsExecTime = (date) => {
         const state = getState()
         console.log('STATE', state)
         const wf = new Workflow();
-        wf.execTime('test_50')
-        .then( workflow => {
-            dispatch(displayExectimeGraph(date, workflow))
-        }); 
+        let promList = [
+            wf.execTime('test_50'),
+            wf.pendingTime('test_50')
+        ]
+        Promise.all(promList)
+        .then( resultList => {
+            dispatch(displayExectimeGraph(date, resultList))
+        });
     }
 }
 

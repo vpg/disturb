@@ -16,8 +16,7 @@ import { APP_SETTING } from '../config'
 const styles = theme => ({
     root: {
         width: '100%',
-        height: 900,
-        marginTop: theme.spacing.unit * 3,
+        height: '100%',
         zIndex: 1,
         overflow: 'hidden',
     },
