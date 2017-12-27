@@ -16,33 +16,35 @@ const fetchWorkflowById = () => {
     }
 }
 
-const fetchStepsExecTime = (date) => {
+const fetchStats = (dateRange) => {
     return function (dispatch, getState) {
-        console.log('actions.workflows.fetchStepsExecTime')
+        console.log('actions.workflows.fetchStats')
         const state = getState()
         console.log('STATE', state)
+
         const wf = new Workflow();
         let promList = [
-            wf.execTime('test_50'),
-            wf.pendingTime('test_50')
+            wf.execTime(),
+            wf.pendingTime(),
+            wf.getHisto()
         ]
         Promise.all(promList)
         .then( resultList => {
-            dispatch(displayExectimeGraph(date, resultList))
+            dispatch(displayExectimeGraph(dateRange, resultList))
         });
     }
 }
 
-const displayExectimeGraph = (date, data) => {
+const displayExectimeGraph = (dateRange, data) => {
     console.log('actions.workflows.displayExectimeGraph')
     return {
         type: actionTypes.DISPLAY_EXECTIME_GRAPH,
-        date: date,
+        dateRange: dateRange,
         data: data
     }
 }
 
 export {
     fetchWorkflowById,
-    fetchStepsExecTime
+    fetchStats
 }

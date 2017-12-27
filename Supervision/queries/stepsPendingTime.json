@@ -3,8 +3,8 @@
         "query": {
             "range" : {
                 "startedAt" : {
-                    "gte" : "now-1d/d",
-                    "lt" :  "now/d"
+                    "gte" : "now/d",
+                    "lte" :  "now/d"
                 }
             }
         },
