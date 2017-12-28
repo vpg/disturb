@@ -12,3 +12,6 @@ vendor/
 package-lock.json
 
 .tags
+
+#Supervision
+Supervision/node_modules/
