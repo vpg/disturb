@@ -47,6 +47,7 @@ install:
 before_script:
     - ./bin/elasticsearch/initialize.sh http://127.0.0.1:9200
     - curl http://127.0.0.1:9200
+    - for f in $(grep -rl '192.168.100.100' Tests/Library/); do sed -i 's/192.168.100.100/127.0.0.1/' $f; done
 
 script:
   - vendor/bin/phpcs --standard=./ruleset.xml ./Library/
