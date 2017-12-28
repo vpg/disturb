@@ -42,7 +42,8 @@ install:
   - $(phpenv which php) --ri phalcon
   - wget ${ES_DOWNLOAD_URL}
   - tar -xzf elasticsearch-${ES_VERSION}.tar.gz
-  - 'echo "script.disable_dynamic: false" | sudo tee -a ./elasticsearch-${ES_VERSION}/elasticsearch.yml'
+  - 'echo "script.allowed_types: inline" | sudo tee -a ./elasticsearch-${ES_VERSION}/elasticsearch.yml'
+  - 'echo "script.allowed_contexts: search, update" | sudo tee -a ./elasticsearch-${ES_VERSION}/elasticsearch.yml'
   - ./elasticsearch-${ES_VERSION}/bin/elasticsearch &
   - sleep 20
 
