@@ -1,0 +1,40 @@
+{
+    "query" : {
+        "query": {
+            "range" : {
+                "startedAt" : {
+                    "gte" : "now-10d/d",
+                    "lte" :  "now/d"
+                }
+            }
+        },
+        "size":"0",
+        "aggs": {
+            "group_by_date": {
+                "terms": {
+                    "script" : {
+                        "lang" : "groovy",
+                        "inline" : "def c = new Date(doc.startedAt.value).format(\"YYY-M-d\")"
+                    }
+                },
+                "aggs": {
+                    "group_by_status": {
+                        "terms": {
+                            "field" : "status"
+                        },
+                        "aggs" : {
+                            "avg_WF_exectime_in_sec" : {
+                                "avg" : {
+                                    "script" : {
+                                        "lang" : "groovy",
+                                        "inline" : "def c = new Date(doc.startedAt.value).getTime(); def d= new Date(doc.finishedAt.value).getTime(); return (d-c)/1000"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

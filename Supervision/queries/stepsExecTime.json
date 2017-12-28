@@ -1,0 +1,55 @@
+{ 
+    "query" : {
+        "query": {
+            "range" : {
+                "startedAt" : {
+                    "gte" : "now/d",
+                    "lte" :  "now/d"
+                }
+            }
+        },
+        "size":"0",
+        "aggs": {
+            "group_by_date": {
+                "terms": {
+                    "script" : {
+                        "lang" : "groovy",
+                        "inline" : "def c = new Date(doc.startedAt.value).format(\"YYY-M-d\")"
+                    }
+                },
+                "aggs" : {
+                    "steps" : {
+                        "nested" : {
+                            "path" : "steps"
+                        },
+                        "aggs": {
+                            "group_by_stepname": {
+                                "terms": {
+                                    "field" : "steps.name"
+                                },
+                                "aggs" : {
+                                    "to_job" : {
+                                        "nested" : {
+                                            "path" : "steps.jobList"
+                                        },
+
+                                        "aggs" : {
+                                            "avg_job_exectime_in_sec" : {
+                                                "avg" : {
+                                                    "script" : {
+                                                        "lang" : "groovy",
+                                                        "inline" : "def c = new Date(doc['steps.jobList.startedAt'].value).getTime(); def d= new Date(doc['steps.jobList.finishedAt'].value).getTime(); return (d-c)/1000"
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
