@@ -179,8 +179,8 @@ class ContextDto extends Dto\AbstractDto
         foreach ($this->rawHash['steps'] as $stepHash) {
             // if // steps
             if (!(array_keys($stepHash) !== array_keys(array_keys($stepHash)))) {
-                foreach ($stepHash as $parallelizedSTtepHash) {
-                    if ($parallelizedSTtepHash['name'] == $code) {
+                foreach ($stepHash as $parallelizedStepHash) {
+                    if ($parallelizedStepHash['name'] == $code) {
                         return $stepHash;
                     }
                 }
