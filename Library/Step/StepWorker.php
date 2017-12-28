@@ -54,7 +54,7 @@ class StepWorker extends AbstractWorker
     {
         $this->getDI()->get('logr')->info('messageDto : ' . $messageDto);
         try {
-            $this->ManagerService->reserveStepJob(
+            $this->workflowManagerService->reserveStepJob(
                 $messageDto->getId(),
                 $messageDto->getStepCode(),
                 $messageDto->getJobId(),
@@ -62,7 +62,7 @@ class StepWorker extends AbstractWorker
                 $this->workerCode
             );
 
-            $this->ManagerService->registerStepJobStarted(
+            $this->workflowManagerService->registerStepJobStarted(
                 $messageDto->getId(),
                 $messageDto->getStepCode(),
                 $messageDto->getJobId(),
@@ -77,7 +77,7 @@ class StepWorker extends AbstractWorker
             return;
         } catch (\Exception $exception) {
             $resultHash = [
-                'status' => ManagerService::STATUS_FAILED,
+                'status' => workflowManagerService::STATUS_FAILED,
                 'info' => $exception->getMessage()
             ];
         }
@@ -120,7 +120,7 @@ class StepWorker extends AbstractWorker
             $this->paramHash['step'],
             $this->workflowConfigDto->getWorkflowName()
         );
-        $this->ManagerService = new ManagerService($this->workflowConfigDto);
+        $this->workflowManagerService = new ManagerService($this->workflowConfigDto);
     }
 
     /**
