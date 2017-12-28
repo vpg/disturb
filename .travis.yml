@@ -48,7 +48,8 @@ before_script:
     - for f in $(grep -rl '192.168.100.100' Tests/Library/); do sed -i 's/192.168.100.100/127.0.0.1/' $f; done
     - 'echo "script.disable_dynamic: false" | sudo tee -a /etc/elasticsearch/elasticsearch.yml'
     - sudo service elasticsearch restart
-    - sleep 10
+    - echo $?
+    - sleep 20
     - curl http://127.0.0.1:9200
 
 
