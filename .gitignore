@@ -15,3 +15,4 @@ package-lock.json
 
 #Supervision
 Supervision/node_modules/
+Supervision/bundle.js
