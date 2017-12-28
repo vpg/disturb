@@ -6,6 +6,7 @@ use Vpg\Disturb\Core\AbstractWorker;
 use Vpg\Disturb\Message;
 use Vpg\Disturb\Topic;
 use Vpg\Disturb\Workflow\ManagerService;
+use Vpg\Disturb\Workflow\WorkflowJobReservationException;
 use Vpg\Disturb\Context\ContextStorageService;
 
 /**
@@ -53,7 +54,14 @@ class StepWorker extends AbstractWorker
     {
         $this->getDI()->get('logr')->info('messageDto : ' . $messageDto);
         try {
-            // $this->workerHostname
+            $this->ManagerService->reserveStepJob(
+                $messageDto->getId(),
+                $messageDto->getStepCode(),
+                $messageDto->getJobId(),
+                $this->workerHostname,
+                $this->workerCode
+            );
+
             $this->ManagerService->registerStepJobStarted(
                 $messageDto->getId(),
                 $messageDto->getStepCode(),
@@ -62,8 +70,11 @@ class StepWorker extends AbstractWorker
             );
             $this->service->beforeExecute($messageDto->getPayload());
             $resultHash = $this->service->execute($messageDto->getPayload());
-            $this->service->afterExecute($messageDto->getPayload(), $resultHash);
+            $this->service->afterExecute($messageDto->getPayload(), $resultHash ?? []);
             $resultHash['finishedAt'] = date(ContextStorageService::DATE_FORMAT);
+        } catch (WorkflowJobReservationException $workflowJobReservationException) {
+            $this->getDI()->get('logr')->warning($workflowJobReservationException->getMessage());
+            return;
         } catch (\Exception $exception) {
             $resultHash = [
                 'status' => ManagerService::STATUS_FAILED,

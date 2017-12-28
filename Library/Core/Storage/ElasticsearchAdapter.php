@@ -409,9 +409,8 @@ class ElasticsearchAdapter extends Component implements StorageAdapterInterface
             }
             return $this->client->update(array_merge($requestParamHash, ['body' => $updateHash]));
         } catch (\Exception $exception) {
-            echo $exception->getMessage();
             throw new StorageException(
-                'Fail to update document',
+                'Fail to update document : ' . $exception->getMessage(),
                 StorageException::CODE_SAVE,
                 $exception
             );
