@@ -3,7 +3,6 @@
 language: php
 
 php:
-  - 7.0
   - 7.1
 
 # The cache’s purpose is to make installing language-specific dependencies easy and fast,
@@ -48,13 +47,14 @@ before_script:
     - ./bin/elasticsearch/initialize.sh http://127.0.0.1:9200
     - curl http://127.0.0.1:9200
     - for f in $(grep -rl '192.168.100.100' Tests/Library/); do sed -i 's/192.168.100.100/127.0.0.1/' $f; done
+    - 'echo "script.disable_dynamic: false" | sudo tee -a /etc/elasticsearch/elasticsearch.yml'
+    - sudo service elastic restart
+
 
 script:
   - vendor/bin/phpcs --standard=./ruleset.xml ./Library/
   - vendor/bin/phpcs --standard=./ruleset.xml ./Tests/
   - vendor/phpunit/phpunit/phpunit -c Tests/phpunit.xml
 
-# Receive notifications for build results.
-# @link https://docs.travis-ci.com/user/notifications/#Email-notifications
 notifications:
     email: false
