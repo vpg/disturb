@@ -279,7 +279,8 @@ eot;
                 ]
             ]
         ];
-        return $this->adapter->update($workflowProcessId, $updateHash, 2);
+        // xxx put the retry nb in conf
+        return $this->adapter->update($workflowProcessId, $updateHash, $retryNb = 2);
     }
 
     /**
@@ -358,7 +359,8 @@ eot;
                 ]
             ]
         ];
-        return $this->adapter->update($workflowProcessId, $updateHash, 2);
+        // xxx put the retry nb in conf
+        return $this->adapter->update($workflowProcessId, $updateHash, $retryNb = 2);
     }
 
 }
