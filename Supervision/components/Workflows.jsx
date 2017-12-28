@@ -69,9 +69,6 @@ class Workflows extends Component {
         }
         return (
             <div>
-                <Typography type="headline" component="h1">
-                    Workflows
-                </Typography>
                 <IconButton className={classes.button} aria-label="Refresh"
                     onClick={this.props.fetchStats}
                 >

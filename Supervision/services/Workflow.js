@@ -9,7 +9,7 @@ import * as pendingTimeQuery from '../queries/stepsPendingTime.json'
 class Workflow {
     constructor() {
         this.client = new Elasticsearch.Client({
-            host: 'http://192.168.100.100:9200',
+            host: 'http://10.13.22.227:9200',
             log: 'trace'
         });
     }

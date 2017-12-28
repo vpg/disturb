@@ -3,11 +3,9 @@ import PropTypes from 'prop-types'
 
 // UI
 import {withTheme, withStyles} from 'material-ui/styles'
-import Typography from 'material-ui/Typography'
-import AppBar from 'material-ui/AppBar'
-import Toolbar from 'material-ui/Toolbar'
 
 import Menu from './Menu.jsx'
+import TopBar from './TopBar.jsx'
 
 import { APP_SETTING } from '../config'
 
@@ -25,11 +23,6 @@ const styles = theme => ({
         display: 'flex',
         width: '100%',
         height: '100%',
-    },
-    appBar: {
-        position: 'absolute',
-        width: `calc(100% - ${APP_SETTING.DrawerWidth}px)`,
-        marginLeft: APP_SETTING.DrawerWidth,
     },
     content: {
         backgroundColor: theme.palette.background.default,
@@ -56,13 +49,7 @@ class App extends React.Component {
         return (
             <div className={classes.root}>
                 <div className={classes.appFrame}>
-                    <AppBar position="static" color="default" className={classes.appBar}>
-                        <Toolbar>
-                            <Typography type="title" color="inherit">
-                                Disturb Supervision
-                            </Typography>
-                        </Toolbar>
-                    </AppBar>
+                    <TopBar />
                     <Menu />
                     <main className={classes.content}>
                         {children}
