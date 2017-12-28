@@ -60,7 +60,6 @@ before_script:
 
 script:
   - vendor/bin/phpcs --standard=./ruleset.xml ./Library/
-  - vendor/bin/phpcs --standard=./ruleset.xml ./Tests/
   - vendor/phpunit/phpunit/phpunit -c Tests/phpunit.xml
 
 notifications:
