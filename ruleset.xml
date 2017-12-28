@@ -204,9 +204,6 @@
     <rule ref="PEAR.Commenting.ClassComment.MissingLinkTag">
         <severity>0</severity>
     </rule>
-    <rule ref="PEAR.Commenting.ClassComment.MissingThrowTag">
-        <severity>0</severity>
-    </rule>
     <rule ref="PEAR.Commenting.ClassComment.MissingLicenseTag">
         <severity>0</severity>
     </rule>
@@ -216,5 +213,7 @@
     <rule ref="PEAR.Commenting.ClassComment.MissingAuthorTag">
         <severity>0</severity>
     </rule>
-
+    <rule ref="Squiz.Commenting.FunctionCommentThrowTag.Missing">
+        <severity>0</severity>
+    </rule>
 </ruleset>
