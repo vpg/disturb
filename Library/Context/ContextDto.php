@@ -76,14 +76,32 @@ class ContextDto extends Dto\AbstractDto
         $this->di->get('logr')->debug(json_encode(func_get_args()));
         $allStepResultHash = [];
         foreach ($this->rawHash['steps'] as $stepHash) {
-            if(!isset($stepHash['jobList'])){
-                continue;
+            // if // steps
+            if (!(array_keys($stepHash) !== array_keys(array_keys($stepHash)))) {
+                foreach ($stepHash as $parallelizedStepHash) {
+                    if (!isset($parallelizedStepHash['jobList'])) {
+                        continue;
+                    }
+                    $stepResultHash = array_column($parallelizedStepHash['jobList'], 'result');
+                    if (!$stepResultHash || empty(array_filter($stepResultHash))) {
+                        continue;
+                    }
+                    $allStepResultHash[$parallelizedStepHash['name']] = array_column(
+                        $parallelizedStepHash['jobList'],
+                        'result'
+                    );
+                }
+
+            } else {
+                if (!isset($stepHash['jobList'])) {
+                    continue;
+                }
+                $stepResultHash = array_column($stepHash['jobList'], 'result');
+                if (!$stepResultHash || empty(array_filter($stepResultHash))) {
+                    continue;
+                }
+                $allStepResultHash[$stepHash['name']] = array_column($stepHash['jobList'], 'result');
             }
-            $stepResultHash = array_column($stepHash['jobList'], 'result');
-            if (!$stepResultHash || empty(array_filter($stepResultHash))) {
-                continue;
-            }
-            $allStepResultHash[$stepHash['name']] = array_column($stepHash['jobList'], 'result');
         }
         return $allStepResultHash;
     }
@@ -143,5 +161,35 @@ class ContextDto extends Dto\AbstractDto
     {
         $this->di->get('logr')->debug(json_encode(func_get_args()));
         return $this->rawHash['steps'][$positionNo] ?? [];
+    }
+
+    /**
+     * Returns the step node related to the given code
+     *
+     * @param string $code the step code
+     *
+     * @return array the step node
+     *               [
+     *                  'stepName' => ['foo' => 'bar'],
+     *               ]
+     */
+    public function getStep(string $code) : array
+    {
+        $this->di->get('logr')->debug(json_encode(func_get_args()));
+        foreach ($this->rawHash['steps'] as $stepHash) {
+            // if // steps
+            if (!(array_keys($stepHash) !== array_keys(array_keys($stepHash)))) {
+                foreach ($stepHash as $parallelizedStepHash) {
+                    if ($parallelizedStepHash['name'] == $code) {
+                        return $stepHash;
+                    }
+                }
+            } else {
+                if ($stepHash['name'] == $code) {
+                    return $stepHash;
+                }
+            }
+        }
+        return [];
     }
 }

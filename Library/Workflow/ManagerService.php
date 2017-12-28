@@ -424,7 +424,7 @@ class ManagerService extends Component implements WorkflowManagerInterface
      * @param string $workflowProcessId the wf process identifier to which belongs the step's job result
      * @param string $stepCode          the step to which belongs the job
      * @param int    $jobId             the job identifier related to the step
-     * @param string $workerHostname    the worker hostnampe on which the step has been executed
+     * @param string $workerHostname    the worker hostname on which the step has been executed
      *
      * @return void
      */
@@ -438,9 +438,43 @@ class ManagerService extends Component implements WorkflowManagerInterface
             [
                 'status' => self::STATUS_STARTED,
                 'startedAt' => date(ContextStorageService::DATE_FORMAT),
-                'worker' => $workerHostname
             ]
         );
+    }
+
+    /**
+     * Reserves a jobb to process if it has not been already reserved
+     *
+     * @param string $workflowProcessId the wf process identifier to which belongs the step's job result
+     * @param string $stepCode          the step to which belongs the job
+     * @param int    $jobId             the job identifier related to the step
+     * @param string $workerHostname    the worker hostname on which the step has been executed
+     * @param string $workerCode        the worker instance code
+     *
+     * @return void
+     */
+    public function reserveStepJob(
+        string $workflowProcessId,
+        string $stepCode,
+        int $jobId,
+        string $workerHostname,
+        string $workerCode
+    ) {
+        $this->di->get('logr')->debug(json_encode(func_get_args()));
+        $reservationResultHash = $this->di->get('contextStorage')->reserveJob(
+            $workflowProcessId,
+            $stepCode,
+            $jobId,
+            $workerHostname,
+            $workerCode
+        );
+        $this->di->get('logr')->debug('Reservation result : ' . json_encode($reservationResultHash));
+        // check if the reservation has been made
+        if ($reservationResultHash['result'] == 'noop') {
+            throw new WorkflowJobReservationException(
+                "Failed to reserve job workflow#$workflowProcessId/$stepCode#$jobId : Already reserved"
+            );
+        }
     }
 
     /**
