@@ -45,8 +45,8 @@ install:
   - $(phpenv which php) --ri phalcon
 
 before_script:
-    - ./bin/elasticsearch/initialize.sh http://127.0.0.1
-    - curl http://127.0.0.1
+    - ./bin/elasticsearch/initialize.sh http://127.0.0.1:9200
+    - curl http://127.0.0.1:9200
 
 script:
   - vendor/bin/phpcs --standard=./ruleset.xml ./Library/
