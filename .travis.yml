@@ -58,6 +58,7 @@ before_script:
     - curl http://127.0.0.1:9200
 
 script:
+  - mkdir -p Tests/build/logs
   - vendor/bin/phpcs --standard=./ruleset.xml ./Library/
   - vendor/phpunit/phpunit/phpunit -c Tests/phpunit.xml
 

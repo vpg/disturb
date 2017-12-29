@@ -38,7 +38,7 @@
     },
     "require-dev": {
         "phalcon/devtools":"3.0.*",
-        "phpunit/phpunit": "6.2.3",
+        "phpunit/phpunit": "6.*",
         "squizlabs/php_codesniffer": "3.*",
         "php-coveralls/php-coveralls": "^2.0@dev",
         "techpivot/phalcon-ci-installer": "~1.0"

@@ -12,3 +12,5 @@ vendor/
 package-lock.json
 
 .tags
+
+Tests/build/
