@@ -77,7 +77,7 @@ class StepWorker extends AbstractWorker
             return;
         } catch (\Exception $exception) {
             $resultHash = [
-                'status' => workflowManagerService::STATUS_FAILED,
+                'status' => ManagerService::STATUS_FAILED,
                 'info' => $exception->getMessage()
             ];
         }

@@ -10,6 +10,6 @@
         }
     ],
     "require": {
-        "vpg/disturb": "dev-poc"
+        "vpg/disturb": "dev-alpha"
     }
 }
