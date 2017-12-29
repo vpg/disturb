@@ -57,10 +57,12 @@ before_script:
     - for f in $(grep -rl '192.168.100.100' Tests/Library/); do sed -i 's/192.168.100.100/127.0.0.1/' $f; done
     - curl http://127.0.0.1:9200
 
-
 script:
   - vendor/bin/phpcs --standard=./ruleset.xml ./Library/
   - vendor/phpunit/phpunit/phpunit -c Tests/phpunit.xml
+
+after_success:
+    - travis_retry php vendor/bin/php-coveralls -v
 
 notifications:
     email: false
