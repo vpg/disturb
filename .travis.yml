@@ -50,7 +50,7 @@ install:
   - 'echo "script.search: true" | sudo tee -a ./elasticsearch-${ES_VERSION}/config/elasticsearch.yml'
   - grep -r script ./elasticsearch-${ES_VERSION}/config/ 
   - ./elasticsearch-${ES_VERSION}/bin/elasticsearch &
-  - sleep 10
+  - sleep 20
 
 before_script:
     - ./bin/elasticsearch/initialize.sh http://127.0.0.1:9200
