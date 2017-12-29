@@ -13,4 +13,4 @@ package-lock.json
 
 .tags
 
-Tests/build/
+build/
