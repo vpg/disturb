@@ -67,7 +67,6 @@ class MessageDto
      * Validates the current message is valid
      *
      * @throws InvalidMessageException
-     * @throws Exception
      *
      * @return void
      */

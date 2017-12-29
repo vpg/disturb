@@ -3,7 +3,6 @@
 language: php
 
 php:
-  - 7.0
   - 7.1
 
 # The cache’s purpose is to make installing language-specific dependencies easy and fast,
@@ -25,10 +24,8 @@ env:
     - CC="ccache gcc"
     - PATH="$PATH:~/bin"
     - PHALCON_VERSION="v3.2.1"
+    - ES_VERSION=5.5.1 ES_DOWNLOAD_URL=https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-${ES_VERSION}.tar.gz
 
-# Use this to prepare the system to install prerequisites or dependencies.
-# e.g. sudo apt-get update.
-# Failures in this section will result in build status 'errored'.
 before_install:
   - sudo apt-get -qq update
   - export PHP_MAJOR="$(echo $TRAVIS_PHP_VERSION | cut -d '.' -f 1)"
@@ -43,21 +40,30 @@ install:
   - phpenv config-add $HOME/cphalcon/$PHALCON_VERSION/tests/_ci/phalcon.ini
   - cd $TRAVIS_BUILD_DIR
   - $(phpenv which php) --ri phalcon
+  - wget ${ES_DOWNLOAD_URL}
+  - ls -l
+  - tar -xzf elasticsearch-${ES_VERSION}.tar.gz
+  - ls ./elasticsearch-${ES_VERSION}/
+  - 'echo "script.inline: true" | sudo tee -a ./elasticsearch-${ES_VERSION}/config/elasticsearch.yml'
+  - 'echo "script.update: true" | sudo tee -a ./elasticsearch-${ES_VERSION}/config/elasticsearch.yml'
+  - 'echo "script.aggs: true" | sudo tee -a ./elasticsearch-${ES_VERSION}/config/elasticsearch.yml'
+  - 'echo "script.search: true" | sudo tee -a ./elasticsearch-${ES_VERSION}/config/elasticsearch.yml'
+  - grep -r script ./elasticsearch-${ES_VERSION}/config/ 
+  - ./elasticsearch-${ES_VERSION}/bin/elasticsearch &
+  - sleep 20
 
-# Use this to prepare your build for testing.
-# e.g. copy database configurations, environment variables, etc.
-# Failures in this section will result in build status 'errored'.
-# before_script:
+before_script:
+    - ./bin/elasticsearch/initialize.sh http://127.0.0.1:9200
+    - for f in $(grep -rl '192.168.100.100' Tests/Library/); do sed -i 's/192.168.100.100/127.0.0.1/' $f; done
+    - curl http://127.0.0.1:9200
 
-# Run test script commands.
-# Default is specific to project language.
-# All commands must exit with code 0 on success. Anything else is considered failure.
 script:
+  - mkdir -p build/cov
   - vendor/bin/phpcs --standard=./ruleset.xml ./Library/
-  - vendor/bin/phpcs --standard=./ruleset.xml ./Tests/
   - vendor/phpunit/phpunit/phpunit -c Tests/phpunit.xml
 
-# Receive notifications for build results.
-# @link https://docs.travis-ci.com/user/notifications/#Email-notifications
+after_success:
+    - travis_retry php vendor/bin/php-coveralls -v
+
 notifications:
     email: false

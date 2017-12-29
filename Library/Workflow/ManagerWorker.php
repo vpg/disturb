@@ -38,7 +38,6 @@ class ManagerWorker extends Core\AbstractWorker
      * @return void
      *
      * @throws WorkflowException
-     * @throws \Exception
      */
     protected function initWorker()
     {
@@ -80,7 +79,6 @@ class ManagerWorker extends Core\AbstractWorker
      * @param Message\MessageDto $messageDto message DTO
      *
      * @throws WorkflowException
-     * @throws \Exception
      *
      * @return void
      */
@@ -171,6 +169,7 @@ class ManagerWorker extends Core\AbstractWorker
      * @param string $workflowProcessId workflow process id
      *
      * @return void
+     *
      * @throws \Exception
      */
     protected function runNextStep(string $workflowProcessId)

@@ -20,7 +20,7 @@ class WorkflowConfigDtoFactory
     /**
      * Get workflow config dto
      *
-     * @param string $workflowConfigFilePath
+     * @param string $workflowConfigFilePath file path of the config
      *
      * @return \Vpg\Disturb\Workflow\WorkflowConfigDto
      *

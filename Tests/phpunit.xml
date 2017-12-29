@@ -1,31 +1,24 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <phpunit bootstrap="./DisturbBootstrapTest.php"
-         backupGlobals="false"
-         backupStaticAttributes="false"
-         verbose="true"
-         colors="true"
-         convertErrorsToExceptions="true"
-         convertNoticesToExceptions="true"
-         convertWarningsToExceptions="true"
-         processIsolation="false"
-         stopOnFailure="false"
-         syntaxCheck="true">
+    backupGlobals="false"
+    backupStaticAttributes="false"
+    verbose="true"
+    colors="true"
+    convertErrorsToExceptions="true"
+    convertNoticesToExceptions="true"
+    convertWarningsToExceptions="true"
+    processIsolation="false"
+    stopOnFailure="false"
+    syntaxCheck="true">
     <testsuite name="Disturb">
         <directory>./</directory>
     </testsuite>
     <filter>
-        <blacklist>
-            <directory suffix=".php">../vendor</directory>
-            <directory suffix=".php">../Tests/</directory>
-            <directory suffix=".php">../example/</directory>
-            <directory suffix=".php">../bin/</directory>
-        </blacklist>
         <whitelist processUncoveredFilesFromWhitelist="true">
-            <directory suffix=".php">../</directory>
-            <exclude>
-                <directory suffix=".php">../vendor/</directory>
-                <directory suffix=".php">../Tests/</directory>
-            </exclude>
+            <directory suffix=".php">../Library</directory>
         </whitelist>
     </filter>
+    <logging>
+        <log type="coverage-clover" target="../build/cov/clover.xml"/>
+    </logging>
 </phpunit>
