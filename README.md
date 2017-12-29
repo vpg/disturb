@@ -6,7 +6,10 @@
 
 ----
 
-[![](https://img.shields.io/travis/vpg/disturb.svg)]() [![license](https://img.shields.io/github/license/vpg/disturb.svg)]()
+[![](https://img.shields.io/travis/vpg/disturb.svg)](https://travis-ci.org/vpg/disturb)
+[![Coverage Status](https://coveralls.io/repos/github/vpg/disturb/badge.svg?branch=poc)](https://coveralls.io/github/vpg/disturb?branch=poc)
+[![license](https://img.shields.io/github/license/vpg/disturb.svg)]()
+
 
 ## Arch
 ![Arch](https://raw.githubusercontent.com/wiki/vpg/disturb/images/disturb_arch.png)

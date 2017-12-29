@@ -6,6 +6,7 @@ use Vpg\Disturb\Core\AbstractWorker;
 use Vpg\Disturb\Message;
 use Vpg\Disturb\Topic;
 use Vpg\Disturb\Workflow\ManagerService;
+use Vpg\Disturb\Workflow\WorkflowJobReservationException;
 use Vpg\Disturb\Context\ContextStorageService;
 
 /**
@@ -53,18 +54,30 @@ class StepWorker extends AbstractWorker
     {
         $this->getDI()->get('logr')->info('messageDto : ' . $messageDto);
         try {
-            // $this->workerHostname
-            $this->ManagerService->registerStepJobStarted(
+            $this->workflowManagerService->reserveStepJob(
+                $messageDto->getId(),
+                $messageDto->getStepCode(),
+                $messageDto->getJobId(),
+                $this->workerHostname,
+                $this->workerCode
+            );
+
+            $this->workflowManagerService->registerStepJobStarted(
                 $messageDto->getId(),
                 $messageDto->getStepCode(),
                 $messageDto->getJobId(),
                 $this->workerHostname
             );
+            $this->service->beforeExecute($messageDto->getPayload());
             $resultHash = $this->service->execute($messageDto->getPayload());
+            $this->service->afterExecute($messageDto->getPayload(), $resultHash ?? []);
             $resultHash['finishedAt'] = date(ContextStorageService::DATE_FORMAT);
+        } catch (WorkflowJobReservationException $workflowJobReservationException) {
+            $this->getDI()->get('logr')->warning($workflowJobReservationException->getMessage());
+            return;
         } catch (\Exception $exception) {
             $resultHash = [
-                'status' => ManagerService::STATUS_FAILED,
+                'status' => workflowManagerService::STATUS_FAILED,
                 'info' => $exception->getMessage()
             ];
         }
@@ -107,7 +120,7 @@ class StepWorker extends AbstractWorker
             $this->paramHash['step'],
             $this->workflowConfigDto->getWorkflowName()
         );
-        $this->ManagerService = new ManagerService($this->workflowConfigDto);
+        $this->workflowManagerService = new ManagerService($this->workflowConfigDto);
     }
 
     /**

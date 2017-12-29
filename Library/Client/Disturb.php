@@ -35,7 +35,7 @@ class Disturb extends Component
     public function getWorkflow(string $workflowProcessId)
     {
         $this->di->get('logr')->debug(json_encode(func_get_args()));
-        $contextStorage = new Context\ContextStorageService($this->di->get('disturb-config')->get('workflowConfigFilePath'));
+        $contextStorage = new Context\ContextStorageService($this->di->get('WorkflowConfig'));
         return $contextStorage->get($workflowProcessId);
     }
 }

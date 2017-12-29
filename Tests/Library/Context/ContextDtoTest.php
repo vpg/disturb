@@ -45,6 +45,30 @@ class ContextDtoTest extends \Tests\DisturbUnitTestCase
                     ]
                 ],
                 [
+                    [
+                        'name' => 'goo',
+                        'jobList' => [
+                            [
+                                'result' => [
+                                    'goo' => 'a goo'
+                                ],
+                                'id' => 0,
+                            ]
+                        ]
+                    ],
+                    [
+                        'name' => 'goobis',
+                        'jobList' => [
+                            [
+                                'result' => [
+                                    'goo' => 'a goobis'
+                                ],
+                                'id' => 0,
+                            ]
+                        ]
+                    ]
+                ],
+                [
                     'name' => 'far',
                     'jobList' => [
                         [
@@ -114,9 +138,39 @@ class ContextDtoTest extends \Tests\DisturbUnitTestCase
                 ],
                 'foo' => [
                     ['foo' => 'a foo']
+                ],
+                'goo' => [
+                    ['goo' => 'a goo']
+                ],
+                'goobis' => [
+                    ['goo' => 'a goobis']
                 ]
             ],
             $stepResultHash
+        );
+    }
+
+    /**
+     * Test getStep
+     *
+     * @return void
+     */
+    public function testGetStep()
+    {
+        // Testing hash
+        $contextDto = new Context\ContextDto($this->contextHash);
+        $stepHash = $contextDto->getStep('far');
+        $this->assertEquals(
+            [
+                'name' => 'far',
+                'jobList' => [
+                    [
+                        'result' => [],
+                        'id' => 0,
+                    ]
+                ]
+            ],
+            $stepHash
         );
     }
 }

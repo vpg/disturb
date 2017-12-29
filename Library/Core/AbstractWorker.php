@@ -67,6 +67,11 @@ abstract class AbstractWorker extends Task implements WorkerInterface
     protected $workerHostname = '';
 
     /**
+     * @var string $workerCode Worker code
+     */
+    protected $workerCode = '';
+
+    /**
      * Inits the current worker according to the given workflow config
      *  - Loads the config
      *  - Register Client biz classes
@@ -85,6 +90,7 @@ abstract class AbstractWorker extends Task implements WorkerInterface
             $this->workflowConfigDto->getServicesClassPath()
         );
         $this->workerHostname = php_uname('n');
+        $this->workerCode = $this->workerHostname . '-' . $this->getWorkerCode($this->paramHash);
         $this->initMq();
     }
 
@@ -185,7 +191,7 @@ abstract class AbstractWorker extends Task implements WorkerInterface
                 $processStartsAt = microtime(true);
                 $this->processMessage($msgDto);
             } catch (\Exception $e) {
-                $this->getDI()->get('logr')->error($e->getMessage());
+                $this->getDI()->get('logr')->error('Failed to process message : ' . $e->getMessage());
             }
             $processEndsAt = microtime(true);
             $processExecTime = round(($processEndsAt - $processStartsAt), 3);
