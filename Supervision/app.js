@@ -26,6 +26,8 @@ const notificationStream = new rx.Subject();
 
 // Reduc Store
 var initialState = {
+    workers: {
+    },
     workflow: {
         stats: {}
     }
