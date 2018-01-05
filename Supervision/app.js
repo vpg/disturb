@@ -11,10 +11,10 @@ import { createEpicMiddleware } from 'redux-observable';
 import rx from 'rxjs'
 
 // UI
-import { MuiThemeProvider, createMuiTheme, withTheme } from 'material-ui/styles';
+import { MuiThemeProvider, createMuiTheme, } from 'material-ui/styles';
+import blue from 'material-ui/colors/lightBlue';
 
 import disturbReducers from './reducers/index'
-//import {relectronEpics} from './epics/index'
 
 import App from './components/App.jsx'
 import Home from './components/Home.jsx'
@@ -41,6 +41,8 @@ const store = createStoreWithMiddleware(disturbReducers, initialState);
 const theme = createMuiTheme({
     palette: {
         type: 'dark',
+        primary: blue,
+        secondary: blue
     },
 });
 

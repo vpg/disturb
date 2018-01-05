@@ -60,7 +60,7 @@ class Workflow {
 
     pendingTime(from, to) {
         console.log(`Workflow.pendingTime`, from, to)
-        from = typeof from == 'undefined' ? 'now-10d/d' : moment(from).format('YYYY-MM-DD h:mm:ss');
+        from = typeof from == 'undefined' ? 'now/d' : moment(from).format('YYYY-MM-DD h:mm:ss');
         to = typeof to == 'undefined' ? 'now/d' : moment(to).format('YYYY-MM-DD h:mm:ss');
         pendingTimeQuery.query.query.range.startedAt.gte = from;
         pendingTimeQuery.query.query.range.startedAt.lte = to;
@@ -75,12 +75,21 @@ class Workflow {
 
         .then( data => {
             console.log(data)
-            const stepHashList = data.aggregations.group_by_date.buckets[0].steps.group_by_stepname.buckets.map( step => {
-                return {
-                    x: step.key,
-                    y: step.to_job.avg_job_waiting_time_in_sec.value
-                };
-            })
+            const stepHashList = data.aggregations.group_by_date.buckets[0].steps.group_by_stepname.buckets
+
+                .filter( step => {
+                    let keepIt = true
+                    const val = step.to_job.avg_job_waiting_time_in_sec.value
+                    if (!val) keepIt = false
+                    if (val < 0) keepIt = false
+                    return keepIt
+                })
+                .map( step => {
+                    return {
+                        x: step.key,
+                        y: step.to_job.avg_job_waiting_time_in_sec.value
+                    };
+                })
             return Promise.resolve(stepHashList);
         })
     }
@@ -124,7 +133,7 @@ class Workflow {
         )
         .then( data => {
             const wfCountHashList = data.aggregations.group_by_date.buckets.map( step => {
-                const statusAggs = step.group_by_status.buckets.reduce( 
+                const statusAggs = step.group_by_status.buckets.reduce(
                     (statusHash, status)  => {
                         statusHash[status.key] = status.doc_count;
                         return statusHash;

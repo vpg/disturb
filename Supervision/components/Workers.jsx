@@ -88,7 +88,7 @@ class Workers extends Component {
 
         return (
             <div>
-                <AppBar position="static">
+                <AppBar position="static" color="default">
                     <Toolbar>
                         <IconButton className={classes.button} aria-label="Refresh"
                             onClick={this.props.fetchConsumerGroupList}

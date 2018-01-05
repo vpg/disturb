@@ -4,12 +4,13 @@ import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
 
 import {withTheme, withStyles} from 'material-ui/styles'
+import AppBar from 'material-ui/AppBar';
+import Toolbar from 'material-ui/Toolbar';
 import Button from 'material-ui/Button';
 import IconButton from 'material-ui/IconButton';
 import Paper from 'material-ui/Paper';
 import Typography from 'material-ui/Typography';
 import RefreshIcon from 'material-ui-icons/Refresh';
-
 
 import BarChartV from './charts/BarChartV.jsx';
 import StackChartV from './charts/StackChartV.jsx';
@@ -67,13 +68,19 @@ class Workflows extends Component {
                 }
             );
         }
+
         return (
             <div>
-                <IconButton className={classes.button} aria-label="Refresh"
-                    onClick={this.props.fetchStats}
-                >
-                    <RefreshIcon />
-                </IconButton>
+                <AppBar position="static" color="default">
+                    <Toolbar>
+                        <IconButton className={classes.button} aria-label="Refresh"
+                            onClick={this.props.fetchStats}
+                        >
+                            <RefreshIcon />
+                        </IconButton>
+                        <Typography type="title" color="inherit" className={classes.flex} />
+                    </Toolbar>
+                </AppBar>
                 <div style={{ display: "flex", flexWrap: "wrap", height:"300px" }}>
                     <LineChartV
                         title="Nb Workflows"
@@ -108,7 +115,7 @@ class Workflows extends Component {
 }
 
 const mapStateToProps = (state, ownProps) => {
-    console.log('workflows.mapStateToProps', state, ownProps)
+    console.log('workflows.mapStateToProps', state, ownProps);
     return {
         stepsExectimeData: state.workflow.stats.stepsExectimeData,
         stepsPendingtimeData: state.workflow.stats.stepsPendingtimeData,
