@@ -18,9 +18,13 @@ import Switch from 'material-ui/Switch';
 
 
 import ConsumerGroup from './workers/ConsumerGroup.jsx';
-import * as actions from '../actions/workers.js';
+import * as actions from '../../actions/workers.js';
 
 const styles = theme => ({
+    root: {
+      width: '100%',
+      height: '100%',
+    },
     button: {
         marginLeft: -12,
         marginRight: 20
@@ -37,6 +41,10 @@ const styles = theme => ({
     formControl: {
         margin: theme.spacing.unit,
     },
+    menuBar:{
+        marginTop: "10px",
+        marginBottom: "10px"
+    }
 });
 
 class Workers extends Component {
@@ -87,8 +95,8 @@ class Workers extends Component {
         const open = Boolean(anchorEl);
 
         return (
-            <div>
-                <AppBar position="static" color="default">
+            <div className={classes.root}>
+                <AppBar position="static" color="default" className={classes.menuBar}>
                     <Toolbar>
                         <IconButton className={classes.button} aria-label="Refresh"
                             onClick={this.props.fetchConsumerGroupList}
@@ -105,7 +113,7 @@ class Workers extends Component {
                             aria-owns={open ? 'menu-appbar' : null}
                             aria-haspopup="true"
                             onClick={this.handleMenu}
-                            color="contrast"
+                            className={classes.button}
                         >
                             <FilterIcon />
                         </IconButton>
@@ -155,14 +163,12 @@ class Workers extends Component {
 }
 
 const mapStateToProps = (state, ownProps) => {
-    console.log('workflows.mapStateToProps', state, ownProps)
     return {
         consumerGroupList: state.workers.consumerGroupList
     }
 }
 
 const mapDispatchToProps = (dispatch, ownProps) => {
-    console.log('workflows.mapDispatchToProps', dispatch, ownProps)
     return {
         fetchConsumerGroupList: bindActionCreators(actions.fetchConsumerGroupList, dispatch)
     }

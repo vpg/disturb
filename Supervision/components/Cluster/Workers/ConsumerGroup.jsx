@@ -4,17 +4,17 @@ import PropTypes from 'prop-types'
 import {withTheme, withStyles} from 'material-ui/styles'
 import Typography from 'material-ui/Typography'
 import Card, { CardHeader, CardMedia, CardContent, CardActions } from 'material-ui/Card';
-import Collapse from 'material-ui/transitions/Collapse';
 import Avatar from 'material-ui/Avatar';
 import IconButton from 'material-ui/IconButton';
 import {red, green} from 'material-ui/colors';
 import ShareIcon from 'material-ui-icons/Share';
-import MoreVertIcon from 'material-ui-icons/MoreVert'; 
+import MoreVertIcon from 'material-ui-icons/MoreVert';
 
 const styles = theme => ({
     card: {
         width: 420,
-        margin: 1
+        margin: 1,
+        backgroundColor: "#163f46",
     },
     title: {
         marginBottom: 16,

@@ -32,8 +32,8 @@ class Workflow {
 
     execTime(from, to) {
         console.log(`Workflow.execTime`)
-        from = typeof from == 'undefined' ? 'now-10d/d' : moment(from).format('YYYY-MM-DD h:mm:ss');
-        to = typeof to == 'undefined' ? 'now/d' : moment(to).format('YYYY-MM-DD h:mm:ss');
+        from = typeof from == 'undefined' ? 'now/d' : moment(from).format('YYYY-MM-DD') + ' 00:00:00';
+        to = typeof to == 'undefined' ? 'now/d' : moment(to).format('YYYY-MM-DD') + ' 23:59:59';
         execTimeQuery.query.query.range.startedAt.gte = from;
         execTimeQuery.query.query.range.startedAt.lte = to;
         console.log('exec', JSON.stringify(execTimeQuery.query));
@@ -60,8 +60,8 @@ class Workflow {
 
     pendingTime(from, to) {
         console.log(`Workflow.pendingTime`, from, to)
-        from = typeof from == 'undefined' ? 'now/d' : moment(from).format('YYYY-MM-DD h:mm:ss');
-        to = typeof to == 'undefined' ? 'now/d' : moment(to).format('YYYY-MM-DD h:mm:ss');
+        from = typeof from == 'undefined' ? 'now/d' : moment(from).format('YYYY-MM-DD') + ' 00:00:00';
+        to = typeof to == 'undefined' ? 'now/d' : moment(to).format('YYYY-MM-DD') + ' 23:59:59';
         pendingTimeQuery.query.query.range.startedAt.gte = from;
         pendingTimeQuery.query.query.range.startedAt.lte = to;
         console.log(pendingTimeQuery.query);
@@ -94,34 +94,10 @@ class Workflow {
         })
     }
 
-    getHisto2(from, to) {
-        console.log(`Workflow.getHisto`, from, to)
-        from = typeof from == 'undefined' ? 'now-10d/d' : moment(from).format('YYYY-MM-DD h:mm:ss');
-        to = typeof to == 'undefined' ? 'now/d' : moment(to).format('YYYY-MM-DD h:mm:ss');
-        execTimeQuery.query.query.range.startedAt.gte = from;
-        execTimeQuery.query.query.range.startedAt.lte = to;
-        return this.client.search(
-            {
-                index: 'disturb_context',
-                type: 'workflow',
-                body: execTimeQuery.query
-            }
-        )
-        .then( data => {
-            console.log(data)
-            const stepHashList = data.aggregations.group_by_date.buckets[0].steps.group_by_stepname.buckets.map( step => {
-                return {
-                    code: step.key,
-                    time: step.to_job.avg_job_exectime_in_sec.value
-                };
-            })
-            return Promise.resolve(stepHashList);
-        })
-    }
     getHisto(from, to) {
-        console.log(`Workflow.getHisto`, from, to)
-        from = typeof from == 'undefined' ? 'now-10d/d' : moment(from).format('YYYY-MM-DD h:mm:ss');
-        to = typeof to == 'undefined' ? 'now/d' : moment(to).format('YYYY-MM-DD h:mm:ss');
+        console.log(`Workflow.getHisto `, from, to)
+        from = typeof from == 'undefined' ? 'now/d' : moment(from).format('YYYY-MM-DD') + ' 00:00:00';
+        to = typeof to == 'undefined' ? 'now/d' : moment(to).format('YYYY-MM-DD') + ' 23:59:59';
         wfHistoQuery.query.query.range.startedAt.gte = from;
         wfHistoQuery.query.query.range.startedAt.lte = to;
         return this.client.search(

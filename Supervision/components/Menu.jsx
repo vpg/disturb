@@ -46,11 +46,11 @@ class Menu extends React.Component {
                         </ListItemIcon>
                         <ListItemText primary="Workflows" />
                     </ListItem>
-                    <ListItem button component={Link} to="/workers">
+                    <ListItem button component={Link} to="/cluster">
                         <ListItemIcon>
                             <WorkerIcon />
                         </ListItemIcon>
-                        <ListItemText primary="Workers" />
+                        <ListItemText primary="Cluster" />
                     </ListItem>
                     <ListItem button component={Link} to="/settings">
                         <ListItemIcon>

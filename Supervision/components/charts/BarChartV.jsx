@@ -48,9 +48,9 @@ export default class BarChartV extends React.Component {
                         style={{
                             data: {
                                 fill: (d) => {
-                                   return  parseFloat(d.y) >= avgCeil1 ? 
+                                   return  parseFloat(d.y) >= avgCeil1 ?
                                         "#c43a31" :
-                                        parseFloat(d.y) >= avgCeil2 ? 
+                                        parseFloat(d.y) >= avgCeil2 ?
                                         "#c3793d" :
                                         "#087b1a"
                                 }
@@ -61,7 +61,7 @@ export default class BarChartV extends React.Component {
                             onLoad: { duration: 1000 }
                             }}
                         labels={(d) => `${d.x} : ${d.y}s`}
-                        labelComponent={<VictoryTooltip/>} 
+                        labelComponent={<VictoryTooltip/>}
                         data={data}
                     />
                 </VictoryChart>

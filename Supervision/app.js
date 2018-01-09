@@ -18,7 +18,7 @@ import disturbReducers from './reducers/index'
 
 import App from './components/App.jsx'
 import Home from './components/Home.jsx'
-import Workers from './components/Workers.jsx'
+import Cluster from './components/Cluster.jsx'
 import Workflows from './components/Workflows.jsx'
 import Settings from './components/Settings.jsx'
 
@@ -59,7 +59,7 @@ class Main extends Component {
                             <Switch>
                                 <Route exact path="/" render={() => <Home />} />
                                 <Route path="/workflows" render={() => <Workflows />} />
-                                <Route path="/workers" render={() => <Workers />} />
+                                <Route path="/cluster" render={() => <Cluster />} />
                                 <Route path="/Settings" render={() => <Settings />} />
                             </Switch>
                         </App>

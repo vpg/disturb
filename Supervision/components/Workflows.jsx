@@ -11,6 +11,18 @@ import IconButton from 'material-ui/IconButton';
 import Paper from 'material-ui/Paper';
 import Typography from 'material-ui/Typography';
 import RefreshIcon from 'material-ui-icons/Refresh';
+import DateRangeIcon from 'material-ui-icons/DateRange';
+
+import Dialog, {
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
+} from 'material-ui/Dialog';
+import Slide from 'material-ui/transitions/Slide';
+
+
+import { DateRange } from 'react-date-range';
 
 import BarChartV from './charts/BarChartV.jsx';
 import StackChartV from './charts/StackChartV.jsx';
@@ -36,6 +48,16 @@ const styles = theme => ({
         margin: '8px',
         width: '600px',
         height: '400px'
+    },
+    dateRangeModal: {
+        width: 400,
+        height: 200,
+        border: '1px solid #e5e5e5',
+        backgroundColor: '#fff',
+        boxShadow: '0 5px 15px rgba(0, 0, 0, .5)',
+    },
+    menuBar:{
+        marginBottom: "10px"
     }
 });
 
@@ -44,7 +66,9 @@ class Workflows extends Component {
         super(props);
         this.state = {
             stepsExectimeData: props.stepsExectimeData || [],
-            stepsPendingtimeData: props.stepsPendingtimeData || []
+            stepsPendingtimeData: props.stepsPendingtimeData || [],
+            anchorEl: null,
+            open: false
         }
     }
     componentWillReceiveProps(props) {
@@ -55,8 +79,37 @@ class Workflows extends Component {
             wfHistoData: props.wfHistoData
         })
     }
+
+    handleSelect = dateHash => {
+        this.props.fetchStats(dateHash)
+        this.closeDateRange()
+    }
+
+    openDateRange = event => {
+        this.setState(
+            {
+                open: true,
+                anchorEl: event.currentTarget
+            }
+        );
+    }
+    closeDateRange = () => {
+        this.setState(
+            {
+                open: false,
+                anchorEl: null
+            }
+        );
+    }
+    Transition(props) {
+      return <Slide direction="up" {...props} />;
+    }
+
+
     render() {
         const { classes } = this.props;
+        const { anchorEl } = this.state;
+        const open = Boolean(anchorEl);
         const timelineDateList = [];
         for(let i = 10; i > 0; i--) {
             let d = new Date();
@@ -71,42 +124,64 @@ class Workflows extends Component {
 
         return (
             <div>
-                <AppBar position="static" color="default">
+                <AppBar position="static" color="default" className={classes.menuBar}>
                     <Toolbar>
-                        <IconButton className={classes.button} aria-label="Refresh"
+                        <IconButton
+                            className={classes.button}
+                            aria-label="Refresh"
                             onClick={this.props.fetchStats}
                         >
                             <RefreshIcon />
                         </IconButton>
                         <Typography type="title" color="inherit" className={classes.flex} />
+                        <IconButton
+                            className={classes.button}
+                            aria-label="Filtre date range"
+                            onClick={this.openDateRange}
+                        >
+                            <DateRangeIcon />
+                        </IconButton>
                     </Toolbar>
                 </AppBar>
-                <div style={{ display: "flex", flexWrap: "wrap", height:"300px" }}>
+                <Dialog
+                    open={this.state.open}
+                    transition={this.Transition}
+                    keepMounted
+                    onClose={this.closeDateRange}
+                    aria-labelledby="alert-dialog-slide-title"
+                    aria-describedby="alert-dialog-slide-description"
+                >
+                    <DialogTitle id="alert-dialog-slide-title">
+                        {"Select the date range"}
+                    </DialogTitle>
+                    <DialogContent>
+                        <DateRange
+                            onInit={this.handleSelect}
+                            onChange={this.handleSelect}
+                            twoStepChange={true}
+                            calendars={1}
+                            lang="fr"
+                        />
+                    </DialogContent>
+                </Dialog>
+                <div style={{ display: "flex", flexWrap: "wrap", height:"400px", justifyContent: "center" }}>
                     <LineChartV
                         title="Nb Workflows"
                         maxWidth="100%"
                         width={800}
-                        height={200}
+                        height={400}
                         xLabel="Nb"
                         yLabel="Date"
                         data={(this.state.wfHistoData ? this.state.wfHistoData.wfCountHashList || [] : [])}
                     />
                     <BarChartV
                         title="Steps avg Waiting time"
-                        maxWidth="50%"
+                        maxWidth="100%"
                         width={400}
                         height={200}
                         xLabel="Steps"
                         yLabel="Time"
-                        data={this.state.stepsPendingtimeData} />
-                    <StackChartV
-                        title="Steps avg Waiting time"
-                        maxWidth="50%"
-                        width={400}
-                        height={200}
-                        xLabel="Nb"
-                        yLabel="Date"
-                        data={(this.state.wfHistoData ? this.state.wfHistoData.wfStatusCountHash || [] : [])}
+                        data={this.state.stepsPendingtimeData}
                     />
                 </div>
             </div>

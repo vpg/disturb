@@ -16,7 +16,7 @@ const fetchWorkflowById = () => {
     }
 }
 
-const fetchStats = (dateRange) => {
+const fetchStats = (dateHash) => {
     return function (dispatch, getState) {
         console.log('actions.workflows.fetchStats')
         const state = getState()
@@ -24,13 +24,13 @@ const fetchStats = (dateRange) => {
 
         const wf = new Workflow();
         let promList = [
-            wf.execTime(),
-            wf.pendingTime(),
-            wf.getHisto()
+            wf.execTime(dateHash['startDate'], dateHash['endDate']),
+            wf.pendingTime(dateHash['startDate'], dateHash['endDate']),
+            wf.getHisto(dateHash['startDate'], dateHash['endDate'])
         ]
         Promise.all(promList)
         .then( resultList => {
-            dispatch(displayExectimeGraph(dateRange, resultList))
+            dispatch(displayExectimeGraph(dateHash, resultList))
         });
     }
 }

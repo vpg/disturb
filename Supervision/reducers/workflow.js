@@ -8,7 +8,6 @@ export default function(state, action) {
     let newState = null
     switch(action.type) {
         case actionTypes.DISPLAY_EXECTIME_GRAPH:
-            console.log('FETCH_WF', state, action)
             return Object.assign(
                 {},
                 state,
