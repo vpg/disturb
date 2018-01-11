@@ -328,6 +328,7 @@ class ManagerService extends Component implements WorkflowManagerInterface
      * @param array  $resultHash        the result data
      *
      * @throws WorkflowException in case of no job found
+     * @throws WorkflowJobFinalizationException in case of ack received twice or more
      *
      * @return void
      */

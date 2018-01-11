@@ -369,8 +369,9 @@ eot;
      * @param string $workflowProcessId the workflow identifier
      * @param string $stepCode          the step code
      * @param int    $jobId             the step job id
-     * @param string $workerHostname    the worker hostname on which the step has been executed
-     * @param string $workerCode        the worker instance code
+     * @param string $jobStatus         the step job status
+     * @param string $jobFinishedAt     the datetime as string standing for the job's end
+     * @param array  $jobResultHash     the job result
      *
      * @return array
      */
@@ -380,7 +381,7 @@ eot;
         int $jobId,
         string $jobStatus,
         string $jobFinishedAt,
-        array $jobResult
+        array $jobResultHash
     ) {
         $this->di->get('logr')->debug(json_encode(func_get_args()));
         $script = <<<eot
@@ -437,7 +438,7 @@ eot;
                     'jobId' => $jobId,
                     'jobStatus' => $jobStatus,
                     'jobFinishedAt' => $jobFinishedAt,
-                    'jobResult' => $jobResult
+                    'jobResult' => $jobResultHash
                 ]
             ]
         ];
