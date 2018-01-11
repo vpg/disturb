@@ -399,7 +399,7 @@ eot;
                         for (jobIndex = 0; jobIndex < nbJob; jobIndex++) {
                             def job = step[parallelizedStepIndex]['jobList'][jobIndex];
                             if (job.id == jobId) {
-                                // if job's already reserved : noop
+                                // if job's already finalized : noop
                                 if (job.containsKey('finishedAt')) {
                                     ctx.op = 'noop';
                                     break;
@@ -416,7 +416,7 @@ eot;
                 for (jobIndex = 0; jobIndex < nbJob; jobIndex++) {
                     def job = ctx._source.steps[stepIndex]['jobList'][jobIndex];
                     if (job.id == jobId) {
-                        // if job's already reserved : noop
+                        // if job's already finalized : noop
                         if (job.containsKey('finishedAt')) {
                             ctx.op = 'noop';
                             break;
