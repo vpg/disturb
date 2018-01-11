@@ -78,4 +78,38 @@ class ManagerServiceTest extends \Tests\DisturbUnitTestCase
         // clean db
         $this->contextStorageService->delete($wfId);
     }
+
+    /**
+     * Test processStepJobResult()
+     *
+     * @return void
+     */
+    public function testProcessStepJobResult()
+    {
+        $wfId = 'test' . microtime();
+        $this->workflowManagerService->init($wfId, ['foo' => 'bar'], $this->workerHostname);
+        $this->workflowManagerService->initNextStep($wfId);
+        $this->workflowManagerService->registerStepJob($wfId, 'foo', 0);
+        $this->workflowManagerService->registerStepJobStarted($wfId, 'foo', 0, $this->workerHostname);
+
+        // Test finalization
+        $resultHash = [
+            'status' => Workflow\ManagerService::STATUS_SUCCESS,
+            'finishedAt' => '2018-01-01 01:01:01',
+            'data' => ['foo' => 'ok']
+        ];
+        $this->workflowManagerService->processStepJobResult($wfId, 'foo', 0, $resultHash);
+        $wfContextDto = $this->workflowManagerService->getContext($wfId);
+        $this->assertEquals(
+            $resultHash['finishedAt'],
+            $wfContextDto->getStep('foo')['jobList'][0]['finishedAt']
+        );
+
+        // Test finalization collision
+        $this->expectException(Workflow\WorkflowJobFinalizationException::class);
+        $this->workflowManagerService->processStepJobResult($wfId, 'foo', 0, $resultHash);
+
+        // clean db
+        $this->contextStorageService->delete($wfId);
+    }
 }

@@ -328,6 +328,7 @@ class ManagerService extends Component implements WorkflowManagerInterface
      * @param array  $resultHash        the result data
      *
      * @throws WorkflowException in case of no job found
+     * @throws WorkflowJobFinalizationException in case of ack received twice or more
      *
      * @return void
      */
@@ -338,15 +339,23 @@ class ManagerService extends Component implements WorkflowManagerInterface
         if (!isset($stepHash['jobList']) || !isset($stepHash['jobList'][$jobId])) {
             throw new WorkflowException('Cannot find any job');
         }
-        $jobHash['status'] = $resultHash['status'] ?? self::STATUS_FAILED;
-        $jobHash['result'] = $resultHash['data'] ?? [];
-        $jobHash['finishedAt'] = $resultHash['finishedAt'] ?? date(ContextStorageService::DATE_FORMAT);
-        $this->di->get('contextStorage')->updateWorkflowStepJob(
+        $jobStatus = $resultHash['status'] ?? self::STATUS_FAILED;
+        $jobResult = $resultHash['data'] ?? [];
+        $jobFinishedAt = $resultHash['finishedAt'] ?? date(ContextStorageService::DATE_FORMAT);
+        $updateResultHash = $this->di->get('contextStorage')->finalizeWorkflowStepJob(
             $workflowProcessId,
             $stepCode,
             $jobId,
-            $jobHash
+            $jobStatus,
+            $jobFinishedAt,
+            $jobResult
         );
+
+        if ($updateResultHash['result'] == 'noop') {
+            throw new WorkflowJobFinalizationException(
+                "Failed to finalize job workflow#$workflowProcessId/$stepCode#$jobId : Already finalized"
+            );
+        }
 
         if ($stepHash['jobList'][$jobId]['status'] == self::STATUS_FAILED) {
             $this->processStepJobFailure($workflowProcessId, $stepCode, $jobId, $resultHash);
