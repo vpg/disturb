@@ -363,4 +363,85 @@ eot;
         return $this->adapter->update($workflowProcessId, $updateHash, $retryNb = 2);
     }
 
+    /**
+     * Sets the given step job related to the given workflow/stepcode/jobid to finished
+     *
+     * @param string $workflowProcessId the workflow identifier
+     * @param string $stepCode          the step code
+     * @param int    $jobId             the step job id
+     * @param string $workerHostname    the worker hostname on which the step has been executed
+     * @param string $workerCode        the worker instance code
+     *
+     * @return array
+     */
+    public function finalizeWorkflowStepJob(
+        string $workflowProcessId,
+        string $stepCode,
+        int $jobId,
+        string $jobStatus,
+        string $jobFinishedAt,
+        array $jobResult
+    ) {
+        $this->di->get('logr')->debug(json_encode(func_get_args()));
+        $script = <<<eot
+        def nbStep = ctx._source.steps.size();
+        def jobHash = [status:jobStatus, finishedAt:jobFinishedAt, data:jobResult];
+        // loop over steps
+        for (stepIndex = 0; stepIndex < nbStep; stepIndex++) {
+            def step = ctx._source.steps[stepIndex];
+            // if its a parrallelized steps node, loop over each
+            if (step instanceof List) {
+                def nbParallelizedStep = step.size();
+                for (parallelizedStepIndex= 0; parallelizedStepIndex< nbParallelizedStep; parallelizedStepIndex++) {
+                    // if the given step is found, look for the given job
+                    if (step[parallelizedStepIndex].name == stepCode) {
+                        def nbJob = step[parallelizedStepIndex]['jobList'].size();
+                        for (jobIndex = 0; jobIndex < nbJob; jobIndex++) {
+                            def job = step[parallelizedStepIndex]['jobList'][jobIndex];
+                            if (job.id == jobId) {
+                                // if job's already reserved : noop
+                                if (job.containsKey('finishedAt')) {
+                                    ctx.op = 'noop';
+                                    break;
+                                }
+                                ctx._source.steps[stepIndex][parallelizedStepIndex]['jobList'][jobIndex] << jobHash
+                                break;
+                            }
+                         }
+                        break;
+                    }
+                }
+            } else if (step.name == stepCode) {
+                def nbJob = step.jobList.size();
+                for (jobIndex = 0; jobIndex < nbJob; jobIndex++) {
+                    def job = ctx._source.steps[stepIndex]['jobList'][jobIndex];
+                    if (job.id == jobId) {
+                        // if job's already reserved : noop
+                        if (job.containsKey('finishedAt')) {
+                            ctx.op = 'noop';
+                            break;
+                        }
+                        ctx._source.steps[stepIndex]['jobList'][jobIndex] << jobHash
+                        break;
+                    }
+                }
+            }
+        }
+eot;
+        $updateHash = [
+            'script' => [
+                'lang' => 'groovy',
+                'inline' => $script,
+                'params' => [
+                    'stepCode' => $stepCode,
+                    'jobId' => $jobId,
+                    'jobStatus' => $jobStatus,
+                    'jobFinishedAt' => $jobFinishedAt,
+                    'jobResult' => $jobResult
+                ]
+            ]
+        ];
+        // xxx put the retry nb in conf
+        return $this->adapter->update($workflowProcessId, $updateHash, $retryNb = 2);
+    }
 }

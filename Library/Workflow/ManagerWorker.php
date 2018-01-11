@@ -113,12 +113,17 @@ class ManagerWorker extends Core\AbstractWorker
                 $this->getDI()->get('logr')->debug(
                     "Step {$messageDto->getStepCode()} says " . json_encode($messageDto->getResult())
                 );
-                $this->workflowManagerService->processStepJobResult(
-                    $messageDto->getId(),
-                    $messageDto->getStepCode(),
-                    $messageDto->getJobId(),
-                    $messageDto->getResult()
-                );
+                try {
+                    $this->workflowManagerService->processStepJobResult(
+                        $messageDto->getId(),
+                        $messageDto->getStepCode(),
+                        $messageDto->getJobId(),
+                        $messageDto->getResult()
+                    );
+                } catch (WorkflowJobFinalizationException $workflowJobFinalizationException) {
+                    $this->getDI()->get('logr')->warning($workflowJobFinalizationException->getMessage());
+                    return;
+                }
 
                 $status = $this->workflowManagerService->getStatus($messageDto->getId());
                 $this->getDI()->get('logr')->info("Id {$messageDto->getId()} is '$status'");
