@@ -7,7 +7,7 @@
 ----
 
 [![](https://img.shields.io/travis/vpg/disturb.svg)](https://travis-ci.org/vpg/disturb)
-[![Coverage Status](https://coveralls.io/repos/github/vpg/disturb/badge.svg?branch=alpha)](https://coveralls.io/github/vpg/disturb?branch=alpha)
+[![Coverage Status](https://coveralls.io/repos/github/vpg/disturb/badge.svg?branch=alpha&service=github)](https://coveralls.io/github/vpg/disturb?branch=alpha)
 [![license](https://img.shields.io/github/license/vpg/disturb.svg)]()
 
 
