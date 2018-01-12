@@ -37,13 +37,24 @@ class ManagerServiceTest extends \Tests\DisturbUnitTestCase
     }
 
     /**
+     * returns a new wfid
+     *
+     * @return string a brand new wf id
+     */
+    private function generateWfId(): string
+    {
+        return str_replace(' ', '', 'test' . microtime());
+    }
+
+
+    /**
      * Test init()
      *
      * @return void
      */
-    public function tesInit()
+    public function testInit()
     {
-        $wfId = 'test' . microtime();
+        $wfId = $this->generateWfId();
         $this->expectException(Workflow\WorkflowException::class);
         $this->workflowManagerService->init($wfId, ['foo' => 'bar'], $this->workerHostname);
         $this->workflowManagerService->init($wfId, ['foo' => 'bar'], $this->workerHostname);
@@ -58,7 +69,7 @@ class ManagerServiceTest extends \Tests\DisturbUnitTestCase
      */
     public function testReserveStepJob()
     {
-        $wfId = 'test' . microtime();
+        $wfId = $this->generateWfId();
         $this->workflowManagerService->init($wfId, ['foo' => 'bar'], $this->workerHostname);
         $this->workflowManagerService->initNextStep($wfId);
         $this->workflowManagerService->registerStepJob($wfId, 'foo', 0);
@@ -86,7 +97,7 @@ class ManagerServiceTest extends \Tests\DisturbUnitTestCase
      */
     public function testProcessStepJobResult()
     {
-        $wfId = 'test' . microtime();
+        $wfId = $this->generateWfId();
         $this->workflowManagerService->init($wfId, ['foo' => 'bar'], $this->workerHostname);
         $this->workflowManagerService->initNextStep($wfId);
         $this->workflowManagerService->registerStepJob($wfId, 'foo', 0);
@@ -108,6 +119,71 @@ class ManagerServiceTest extends \Tests\DisturbUnitTestCase
         // Test finalization collision
         $this->expectException(Workflow\WorkflowJobFinalizationException::class);
         $this->workflowManagerService->processStepJobResult($wfId, 'foo', 0, $resultHash);
+
+        // clean db
+        $this->contextStorageService->delete($wfId);
+    }
+
+    /**
+     * Test a full WF execution
+     *
+     * @return void
+     */
+    public function testFullWorkflowExec()
+    {
+        $wfId = $this->generateWfId();
+        // init Work
+        $this->workflowManagerService->init($wfId, ['foo' => 'bar'], $this->workerHostname);
+        $wfNextStepList = $this->workflowManagerService->getNextStepList($wfId);
+        $this->assertEquals(
+            [['name' => 'foo']],
+            $wfNextStepList
+        );
+        // Process next step foo
+        $this->workflowManagerService->initNextStep($wfId);
+        $this->workflowManagerService->registerStepJob($wfId, $wfNextStepList[0]['name'], 0);
+        $this->workflowManagerService->registerStepJobStarted($wfId, 'foo', 0, $this->workerHostname);
+        $resultHash = [
+            'status' => Workflow\ManagerService::STATUS_SUCCESS,
+            'finishedAt' => '2018-01-01 01:01:01',
+            'data' => ['foo' => 'ok']
+        ];
+        $this->workflowManagerService->processStepJobResult($wfId, 'foo', 0, $resultHash);
+        // Process next step bar
+        $wfNextStepList = $this->workflowManagerService->getNextStepList($wfId);
+        $this->assertEquals(
+            [['name' => 'bar']],
+            $wfNextStepList
+        );
+        $this->workflowManagerService->initNextStep($wfId);
+        $this->workflowManagerService->registerStepJob($wfId, $wfNextStepList[0]['name'], 0);
+        $this->workflowManagerService->registerStepJobStarted($wfId, 'bar', 0, $this->workerHostname);
+        $resultHash = [
+            'status' => Workflow\ManagerService::STATUS_SUCCESS,
+            'finishedAt' => '2018-01-01 01:02:01',
+            'data' => ['bar' => 'ok']
+        ];
+        $this->workflowManagerService->processStepJobResult($wfId, 'bar', 0, $resultHash);
+        $wfContextDto = $this->workflowManagerService->getContext($wfId);
+        $this->assertEquals(
+            $resultHash['data'],
+            $wfContextDto->getStep('bar')['jobList'][0]['data']
+        );
+        $wfCurrentStepStatus = $this->workflowManagerService->getCurrentStepStatus($wfId);
+        $this->assertEquals(
+            Workflow\ManagerService::STATUS_SUCCESS,
+            $wfCurrentStepStatus
+        );
+
+        // Finalize
+        $wfHasNextStep = $this->workflowManagerService->hasNextStep($wfId);
+        $this->assertFalse($wfHasNextStep);
+        $this->workflowManagerService->finalize($wfId, Workflow\ManagerService::STATUS_SUCCESS);
+        $wfStatus = $this->workflowManagerService->getStatus($wfId);
+        $this->assertEquals(
+            Workflow\ManagerService::STATUS_SUCCESS,
+            $wfStatus
+        );
 
         // clean db
         $this->contextStorageService->delete($wfId);

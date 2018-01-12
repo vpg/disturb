@@ -199,25 +199,29 @@ class ContextStorageService extends Component
     {
         $this->di->get('logr')->debug(json_encode(func_get_args()));
         $script = <<<EOT
-        def nbStep = ctx._source.steps.size();
-        for (stepIndex = 0; stepIndex < nbStep; stepIndex++) {
+        int nbStep = ctx._source.steps.size();
+        for (int stepIndex = 0; stepIndex < nbStep; stepIndex++) {
             if (ctx._source.steps[stepIndex] instanceof List) {
-                def nbParallelizedStep = ctx._source.steps[stepIndex].size();
-                for (parallelizedStepIndex = 0; parallelizedStepIndex < nbParallelizedStep; parallelizedStepIndex++) {
-                    if (ctx._source.steps[stepIndex][parallelizedStepIndex].name == stepCode) {
-                        ctx._source.steps[stepIndex][parallelizedStepIndex] = stepHash;
+                int nbParallelizedStep = ctx._source.steps[stepIndex].size();
+                for (
+                    int parallelizedStepIndex = 0;
+                    parallelizedStepIndex < nbParallelizedStep;
+                    parallelizedStepIndex++
+                ) {
+                    if (ctx._source.steps[stepIndex][parallelizedStepIndex].name == params.stepCode) {
+                        ctx._source.steps[stepIndex][parallelizedStepIndex] = params.stepHash;
                         break;
                     }
                 }
-            } else if (ctx._source.steps[stepIndex].name == stepCode) {
-                ctx._source.steps[stepIndex] = stepHash;
+            } else if (ctx._source.steps[stepIndex].name == params.stepCode) {
+                ctx._source.steps[stepIndex] = params.stepHash;
             }
         }
 EOT;
         $updateHash = [
             'script' => [
-                'lang' => 'groovy',
-                'inline' => $script,
+                'lang' => 'painless',
+                'source' => $script,
                 'params' => [
                     'stepCode' => $stepCode,
                     'stepHash' => $stepHash
@@ -241,27 +245,34 @@ EOT;
     {
         $this->di->get('logr')->debug(json_encode(func_get_args()));
         $script = <<<eot
-        def nbStep = ctx._source.steps.size();
-        for (stepIndex = 0; stepIndex < nbStep; stepIndex++) {
+        int nbStep = ctx._source.steps.size();
+        for (int stepIndex = 0; stepIndex < nbStep; stepIndex++) {
             if (ctx._source.steps[stepIndex] instanceof List) {
-                def nbParallelizedStep = ctx._source.steps[stepIndex].size();
-                for (parallelizedStepIndex= 0; parallelizedStepIndex< nbParallelizedStep; parallelizedStepIndex++) {
-                    if (ctx._source.steps[stepIndex][parallelizedStepIndex].name == stepCode) {
-                        def nbJob = ctx._source.steps[stepIndex][parallelizedStepIndex]['jobList'].size();
-                        for (jobIndex = 0; jobIndex < nbJob; jobIndex++) {
-                            if (ctx._source.steps[stepIndex][parallelizedStepIndex]['jobList'][jobIndex].id == jobId) {
-                                ctx._source.steps[stepIndex][parallelizedStepIndex]['jobList'][jobIndex] << jobHash
+                int nbParallelizedStep = ctx._source.steps[stepIndex].size();
+                for (
+                    int parallelizedStepIndex = 0;
+                    parallelizedStepIndex < nbParallelizedStep;
+                    parallelizedStepIndex++
+                ) {
+                    if (ctx._source.steps[stepIndex][parallelizedStepIndex].name == params.stepCode) {
+                        int nbJob = ctx._source.steps[stepIndex][parallelizedStepIndex]['jobList'].size();
+                        for (int jobIndex = 0; jobIndex < nbJob; jobIndex++) {
+                            int jobId = ctx._source.steps[stepIndex][parallelizedStepIndex]['jobList'][jobIndex].id;
+                            if (jobId == params.jobId) {
+                                ctx._source
+                                    .steps[stepIndex][parallelizedStepIndex]['jobList'][jobIndex]
+                                    .putAll(params.jobHash);
                                 break;
                             }
                          }
                         break;
                     }
                 }
-            } else if (ctx._source.steps[stepIndex].name == stepCode) {
+            } else if (ctx._source.steps[stepIndex].name == params.stepCode) {
                 def nbJob = ctx._source.steps[stepIndex]['jobList'].size();
-                for (jobIndex = 0; jobIndex < nbJob; jobIndex++) {
-                    if (ctx._source.steps[stepIndex]['jobList'][jobIndex].id == jobId) {
-                        ctx._source.steps[stepIndex]['jobList'][jobIndex] << jobHash
+                for (int jobIndex = 0; jobIndex < nbJob; jobIndex++) {
+                    if (ctx._source.steps[stepIndex]['jobList'][jobIndex].id == params.jobId) {
+                        ctx._source.steps[stepIndex]['jobList'][jobIndex].putAll(params.jobHash);
                         break;
                     }
                 }
@@ -270,8 +281,8 @@ EOT;
 eot;
         $updateHash = [
             'script' => [
-                'lang' => 'groovy',
-                'inline' => $script,
+                'lang' => 'painless',
+                'source' => $script,
                 'params' => [
                     'stepCode' => $stepCode,
                     'jobId' => $jobId,
@@ -304,43 +315,44 @@ eot;
         $this->di->get('logr')->debug(json_encode(func_get_args()));
         $script = <<<eot
         def nbStep = ctx._source.steps.size();
-        def jobHash = [reservedBy:workerCode, executedOn:workerHostname];
+        def jobHash = ['reservedBy':params.workerCode, 'executedOn':params.workerHostname];
         // loop over steps
-        for (stepIndex = 0; stepIndex < nbStep; stepIndex++) {
+        for (int stepIndex = 0; stepIndex < nbStep; stepIndex++) {
             def step = ctx._source.steps[stepIndex];
             // if its a parrallelized steps node, loop over each
             if (step instanceof List) {
                 def nbParallelizedStep = step.size();
-                for (parallelizedStepIndex= 0; parallelizedStepIndex< nbParallelizedStep; parallelizedStepIndex++) {
+                for (int parallelizedStepIndex= 0; parallelizedStepIndex< nbParallelizedStep; parallelizedStepIndex++) {
                     // if the given step is found, look for the given job
-                    if (step[parallelizedStepIndex].name == stepCode) {
+                    if (step[parallelizedStepIndex].name == params.stepCode) {
                         def nbJob = step[parallelizedStepIndex]['jobList'].size();
-                        for (jobIndex = 0; jobIndex < nbJob; jobIndex++) {
+                        for (int jobIndex = 0; jobIndex < nbJob; jobIndex++) {
                             def job = step[parallelizedStepIndex]['jobList'][jobIndex];
-                            if (job.id == jobId) {
+                            if (job.id == params.jobId) {
                                 // if job's already reserved : noop
                                 if (job.containsKey('reservedBy')) {
                                     ctx.op = 'noop';
                                     break;
                                 }
-                                ctx._source.steps[stepIndex][parallelizedStepIndex]['jobList'][jobIndex] << jobHash
+                                ctx._source.steps[stepIndex][parallelizedStepIndex]['jobList'][jobIndex]
+                                .putAll(jobHash);
                                 break;
                             }
                          }
                         break;
                     }
                 }
-            } else if (step.name == stepCode) {
+            } else if (step.name == params.stepCode) {
                 def nbJob = step.jobList.size();
-                for (jobIndex = 0; jobIndex < nbJob; jobIndex++) {
+                for (int jobIndex = 0; jobIndex < nbJob; jobIndex++) {
                     def job = ctx._source.steps[stepIndex]['jobList'][jobIndex];
-                    if (job.id == jobId) {
+                    if (job.id == params.jobId) {
                         // if job's already reserved : noop
                         if (job.containsKey('reservedBy')) {
                             ctx.op = 'noop';
                             break;
                         }
-                        ctx._source.steps[stepIndex]['jobList'][jobIndex] << jobHash
+                        ctx._source.steps[stepIndex]['jobList'][jobIndex].putAll(jobHash);
                         break;
                     }
                 }
@@ -349,8 +361,8 @@ eot;
 eot;
         $updateHash = [
             'script' => [
-                'lang' => 'groovy',
-                'inline' => $script,
+                'lang' => 'painless',
+                'source' => $script,
                 'params' => [
                     'stepCode' => $stepCode,
                     'jobId' => $jobId,
@@ -385,44 +397,45 @@ eot;
     ) {
         $this->di->get('logr')->debug(json_encode(func_get_args()));
         $script = <<<eot
-        def nbStep = ctx._source.steps.size();
-        def jobHash = [status:jobStatus, finishedAt:jobFinishedAt, data:jobResult];
+        int nbStep = ctx._source.steps.size();
+        def jobHash = ['status':params.jobStatus, 'finishedAt':params.jobFinishedAt, 'data':params.jobResult];
         // loop over steps
-        for (stepIndex = 0; stepIndex < nbStep; stepIndex++) {
+        for (int stepIndex = 0; stepIndex < nbStep; stepIndex++) {
             def step = ctx._source.steps[stepIndex];
             // if its a parrallelized steps node, loop over each
             if (step instanceof List) {
-                def nbParallelizedStep = step.size();
-                for (parallelizedStepIndex= 0; parallelizedStepIndex< nbParallelizedStep; parallelizedStepIndex++) {
+                int nbParallelizedStep = step.size();
+                for (int parallelizedStepIndex= 0; parallelizedStepIndex< nbParallelizedStep; parallelizedStepIndex++) {
                     // if the given step is found, look for the given job
-                    if (step[parallelizedStepIndex].name == stepCode) {
+                    if (step[parallelizedStepIndex].name == params.stepCode) {
                         def nbJob = step[parallelizedStepIndex]['jobList'].size();
-                        for (jobIndex = 0; jobIndex < nbJob; jobIndex++) {
+                        for (int jobIndex = 0; jobIndex < nbJob; jobIndex++) {
                             def job = step[parallelizedStepIndex]['jobList'][jobIndex];
-                            if (job.id == jobId) {
+                            if (job.id == params.jobId) {
                                 // if job's already finalized : noop
                                 if (job.containsKey('finishedAt')) {
                                     ctx.op = 'noop';
                                     break;
                                 }
-                                ctx._source.steps[stepIndex][parallelizedStepIndex]['jobList'][jobIndex] << jobHash
+                                ctx._source.steps[stepIndex][parallelizedStepIndex]['jobList'][jobIndex]
+                                .putAll(jobHash);
                                 break;
                             }
                          }
                         break;
                     }
                 }
-            } else if (step.name == stepCode) {
-                def nbJob = step.jobList.size();
-                for (jobIndex = 0; jobIndex < nbJob; jobIndex++) {
+            } else if (step.name == params.stepCode) {
+                int nbJob = step.jobList.size();
+                for (int jobIndex = 0; jobIndex < nbJob; jobIndex++) {
                     def job = ctx._source.steps[stepIndex]['jobList'][jobIndex];
-                    if (job.id == jobId) {
+                    if (job.id == params.jobId) {
                         // if job's already finalized : noop
                         if (job.containsKey('finishedAt')) {
                             ctx.op = 'noop';
                             break;
                         }
-                        ctx._source.steps[stepIndex]['jobList'][jobIndex] << jobHash
+                        ctx._source.steps[stepIndex]['jobList'][jobIndex].putAll(jobHash);
                         break;
                     }
                 }
@@ -431,8 +444,8 @@ eot;
 eot;
         $updateHash = [
             'script' => [
-                'lang' => 'groovy',
-                'inline' => $script,
+                'lang' => 'painless',
+                'source' => $script,
                 'params' => [
                     'stepCode' => $stepCode,
                     'jobId' => $jobId,
