@@ -203,7 +203,11 @@ class ContextStorageService extends Component
         for (int stepIndex = 0; stepIndex < nbStep; stepIndex++) {
             if (ctx._source.steps[stepIndex] instanceof List) {
                 int nbParallelizedStep = ctx._source.steps[stepIndex].size();
-                for (int parallelizedStepIndex = 0; parallelizedStepIndex < nbParallelizedStep; parallelizedStepIndex++) {
+                for (
+                    int parallelizedStepIndex = 0;
+                    parallelizedStepIndex < nbParallelizedStep;
+                    parallelizedStepIndex++
+                ) {
                     if (ctx._source.steps[stepIndex][parallelizedStepIndex].name == params.stepCode) {
                         ctx._source.steps[stepIndex][parallelizedStepIndex] = params.stepHash;
                         break;
@@ -245,12 +249,19 @@ EOT;
         for (int stepIndex = 0; stepIndex < nbStep; stepIndex++) {
             if (ctx._source.steps[stepIndex] instanceof List) {
                 int nbParallelizedStep = ctx._source.steps[stepIndex].size();
-                for (int parallelizedStepIndex = 0; parallelizedStepIndex < nbParallelizedStep; parallelizedStepIndex++) {
+                for (
+                    int parallelizedStepIndex = 0;
+                    parallelizedStepIndex < nbParallelizedStep;
+                    parallelizedStepIndex++
+                ) {
                     if (ctx._source.steps[stepIndex][parallelizedStepIndex].name == params.stepCode) {
                         int nbJob = ctx._source.steps[stepIndex][parallelizedStepIndex]['jobList'].size();
                         for (int jobIndex = 0; jobIndex < nbJob; jobIndex++) {
-                            if (ctx._source.steps[stepIndex][parallelizedStepIndex]['jobList'][jobIndex].id == params.jobId) {
-                                ctx._source.steps[stepIndex][parallelizedStepIndex]['jobList'][jobIndex].putAll(params.jobHash);
+                            int jobId = ctx._source.steps[stepIndex][parallelizedStepIndex]['jobList'][jobIndex].id;
+                            if (jobId == params.jobId) {
+                                ctx._source
+                                    .steps[stepIndex][parallelizedStepIndex]['jobList'][jobIndex]
+                                    .putAll(params.jobHash);
                                 break;
                             }
                          }
@@ -323,7 +334,8 @@ eot;
                                     ctx.op = 'noop';
                                     break;
                                 }
-                                ctx._source.steps[stepIndex][parallelizedStepIndex]['jobList'][jobIndex].putAll(jobHash);
+                                ctx._source.steps[stepIndex][parallelizedStepIndex]['jobList'][jobIndex]
+                                .putAll(jobHash);
                                 break;
                             }
                          }
@@ -405,7 +417,8 @@ eot;
                                     ctx.op = 'noop';
                                     break;
                                 }
-                                ctx._source.steps[stepIndex][parallelizedStepIndex]['jobList'][jobIndex].putAll(jobHash);
+                                ctx._source.steps[stepIndex][parallelizedStepIndex]['jobList'][jobIndex]
+                                .putAll(jobHash);
                                 break;
                             }
                          }
