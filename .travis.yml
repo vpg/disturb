@@ -24,7 +24,7 @@ env:
     - CC="ccache gcc"
     - PATH="$PATH:~/bin"
     - PHALCON_VERSION="v3.2.1"
-    - ES_VERSION=5.5.1 ES_DOWNLOAD_URL=https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-${ES_VERSION}.tar.gz
+    - ES_VERSION=6.1.1 ES_DOWNLOAD_URL=https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-${ES_VERSION}.tar.gz
 
 before_install:
   - sudo apt-get -qq update
