@@ -7,7 +7,7 @@
     "storage" : {
         "adapter": "elasticsearch",
         "config": {
-            "host": "http://10.13.22.227:9200"
+            "host": "vp-aix-elsdisturb.aix.vpg.lan:9200"
         }
     },
     "steps" : [

@@ -218,7 +218,7 @@ class ManagerWorker extends Core\AbstractWorker
                 }
             }
         } catch (\Exception $exception) {
-            $this->getDI()->get('logr')->error($exception->getMeassage());
+            $this->getDI()->get('logr')->error($exception->getMessage());
             $this->workflowManagerService->finalize(
                 $workflowProcessId,
                 ManagerService::STATUS_FAILED,
