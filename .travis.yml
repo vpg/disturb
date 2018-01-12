@@ -44,10 +44,10 @@ install:
   - ls -l
   - tar -xzf elasticsearch-${ES_VERSION}.tar.gz
   - ls ./elasticsearch-${ES_VERSION}/
-  - 'echo "script.inline: true" | sudo tee -a ./elasticsearch-${ES_VERSION}/config/elasticsearch.yml'
-  - 'echo "script.update: true" | sudo tee -a ./elasticsearch-${ES_VERSION}/config/elasticsearch.yml'
-  - 'echo "script.aggs: true" | sudo tee -a ./elasticsearch-${ES_VERSION}/config/elasticsearch.yml'
-  - 'echo "script.search: true" | sudo tee -a ./elasticsearch-${ES_VERSION}/config/elasticsearch.yml'
+
+
+  - 'echo "script.allowed_types: inline" | sudo tee -a ./elasticsearch-${ES_VERSION}/config/elasticsearch.yml'
+  - 'echo "script.allowed_contexts: search, update" | sudo tee -a ./elasticsearch-${ES_VERSION}/config/elasticsearch.yml'
   - grep -r script ./elasticsearch-${ES_VERSION}/config/ 
   - ./elasticsearch-${ES_VERSION}/bin/elasticsearch &
   - sleep 20
