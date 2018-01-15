@@ -37,7 +37,7 @@ before_install:
   - if [ ! -z "${GH_TOKEN}" ]; then composer config github-oauth.github.com ${GH_TOKEN}; echo "Configured Github token"; fi;
   - if [ ! -f "$HOME/cphalcon/$PHALCON_VERSION/tests/_ci/phalcon.ini" ]; then mkdir -p $HOME/cphalcon/$PHALCON_VERSION && git clone -q --depth=1 https://github.com/phalcon/cphalcon.git $HOME/cphalcon/$PHALCON_VERSION >/dev/null 2>&1; fi;
   # Kafka
-  - wget https://www.apache.org/dyn/closer.cgi?path=/kafka/1.0.0/kafka_2.11-1.0.0.tgz -O kafka.tgz
+  - wget http://mirrors.standaloneinstaller.com/apache/kafka/1.0.0/kafka_2.11-1.0.0.tgz -O kafka.tgz
   - mkdir -p kafka && tar xzf kafka.tgz -C kafka --strip-components 1
   - nohup bash -c "cd kafka && bin/zookeeper-server-start.sh config/zookeeper.properties &"
   - nohup bash -c "cd kafka && bin/kafka-server-start.sh config/server.properties &"
