@@ -25,6 +25,7 @@ env:
     - PATH="$PATH:~/bin"
     - PHALCON_VERSION="v3.2.1"
     - ES_VERSION=6.1.1 ES_DOWNLOAD_URL=https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-${ES_VERSION}.tar.gz
+    - CC_TEST_REPORTER_ID=6494dfcb48d910c8f64f3a3c0634de13eeedfe6ba62d94d16a35c28f586c7b87
 
 before_install:
   - sudo apt-get -qq update
@@ -54,14 +55,19 @@ install:
 
 before_script:
     - ./bin/elasticsearch/initialize.sh http://127.0.0.1:9200
-    - for f in $(grep -rl 'vp-aix-elsdisturb.aix.vpg.lan' Tests/Library/); do sed -i 's/vp-aix-elsdisturb.aix.vpg.lan/127.0.0.1/' $f; done
+    - for f in $(grep -rl 'vp-aix-elsdisturb.aix.vpg.lan' Tests/); do sed -i 's/vp-aix-elsdisturb.aix.vpg.lan/127.0.0.1/' $f; done
     - curl http://127.0.0.1:9200
+    - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
+    - chmod +x ./cc-test-reporter
+    - ./cc-test-reporter before-build
 
 script:
   - mkdir -p build/cov
   - vendor/bin/phpcs --standard=./ruleset.xml ./Library/
   - vendor/phpunit/phpunit/phpunit -c Tests/phpunit.xml
 
+after_script:
+    - ./cc-test-reporter after-build --exit-code $TRAVIS_TEST_RESULT
 after_success:
     - travis_retry php vendor/bin/php-coveralls -v
 

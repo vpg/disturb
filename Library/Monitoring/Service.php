@@ -104,4 +104,30 @@ class Service extends Component
         ];
         $this->storageClient->save($workerCode, $workerHash);
     }
+
+    /**
+     * Gets the worker info
+     *
+     * @param string $workerCode the worker's code to register
+     *
+     * @return array the worker info hash
+     */
+    public function getWorkerInfo(string $workerCode)
+    {
+        $this->di->get('logr')->debug(json_encode(func_get_args()));
+        return $this->storageClient->get($workerCode);
+    }
+
+    /**
+     * Deletes the worker info
+     *
+     * @param string $workerCode the worker's code to register
+     *
+     * @return void
+     */
+    public function deleteWorkerInfo(string $workerCode)
+    {
+        $this->di->get('logr')->debug(json_encode(func_get_args()));
+        $this->storageClient->delete($workerCode);
+    }
 }

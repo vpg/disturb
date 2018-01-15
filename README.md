@@ -8,6 +8,7 @@
 
 [![](https://img.shields.io/travis/vpg/disturb.svg)](https://travis-ci.org/vpg/disturb)
 [![Coverage Status](https://coveralls.io/repos/github/vpg/disturb/badge.svg?branch=alpha&service=github)](https://coveralls.io/github/vpg/disturb?branch=alpha)
+[![Maintainability](https://api.codeclimate.com/v1/badges/951f80b49e11dcd4b2bb/maintainability)](https://codeclimate.com/github/vpg/disturb/maintainability)
 [![license](https://img.shields.io/github/license/vpg/disturb.svg)]()
 
 

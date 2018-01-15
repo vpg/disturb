@@ -168,24 +168,6 @@ class ContextStorageService extends Component
         $this->save($workflowProcessId, $contextHash);
     }
 
-
-    /**
-     * Set workflow step list
-     *
-     * @param string $workflowProcessId the workflow process id
-     * @param array  $workflowStepList  the workflow step list
-     *
-     * @return array
-     */
-    public function setWorkflowStepList(string $workflowProcessId, array $workflowStepList)
-    {
-        $this->di->get('logr')->debug(json_encode(func_get_args()));
-        // xxx use partial update
-        $contextHash = $this->get($workflowProcessId);
-        $contextHash[self::WORKFLOW_STEPS] = $workflowStepList;
-        $this->save($workflowProcessId, $contextHash);
-    }
-
     /**
      * Update the given step related to the given workflow/stepcode
      *

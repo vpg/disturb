@@ -174,16 +174,6 @@ class MessageDto
     }
 
     /**
-     * Get contract id
-     *
-     * @return string
-     */
-    public function getContract(): string
-    {
-        return $this->rawHash['contract'] ?? '';
-    }
-
-    /**
      * Get step code
      *
      * @return string
