@@ -21,6 +21,18 @@ class ContextStorageServiceTest extends \Tests\DisturbUnitTestCase
 
     protected $workerHostname = 'worker-test-hostname';
 
+    protected $validWFHash = [
+        'steps' => [
+            [
+                'name' => 'foo'
+            ]
+        ],
+        'initialPayload' => [
+            'foo' => 'bar',
+        ],
+        'status' => 'STARTED',
+    ];
+
     /**
      * Setup
      *
@@ -54,13 +66,13 @@ class ContextStorageServiceTest extends \Tests\DisturbUnitTestCase
     public function testSetStatus()
     {
         $wfId = $this->generateWfId();
-        $this->workflowManagerService->init($wfId, ['foo' => 'bar'], $this->workerHostname);
+        $this->workflowManagerService->init($wfId, $this->validWFHash, $this->workerHostname);
         $this->contextStorageService->setWorkflowStatus($wfId, Workflow\ManagerService::STATUS_SUCCESS, 'test');
         $wfStatus = $this->workflowManagerService->getStatus($wfId);
-        $this->assertEquals(
-            Workflow\ManagerService::STATUS_SUCCESS,
-            $wfStatus
-        );
+        $this->assertEquals(Workflow\ManagerService::STATUS_SUCCESS, $wfStatus);
+        $wfDto = $this->contextStorageService->get($wfId);
+        $wfInfo = $wfDto->getWorkflowInfo($wfId);
+        $this->assertEquals('test', $wfInfo);
         $this->contextStorageService->delete($wfId);
     }
 }

@@ -173,4 +173,21 @@ class ContextDtoTest extends \Tests\DisturbUnitTestCase
             $stepHash
         );
     }
+
+    /**
+     * Test invalid WF
+     *
+     * @return void
+     */
+    public function testInvalidWorkflow()
+    {
+        // Testing hash
+        $this->expectException(Context\ContextStorageException::class);
+        $contextDto = new Context\ContextDto(
+            [
+                'foo' => 'bar'
+            ]
+        );
+        $stepHash = $contextDto->validate();
+    }
 }
