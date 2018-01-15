@@ -4,6 +4,7 @@ namespace Tests\Library\Topic;
 
 use \phalcon\Config;
 use \Vpg\Disturb\Topic\TopicService;
+use \Vpg\Disturb\Topic\TopicException;
 
 /**
  * Workflow Manager Service test class
@@ -27,12 +28,16 @@ class TopicServiceTest extends \Tests\DisturbUnitTestCase
      *
      * @return void
      */
-    public function testGetWorkflowTopicNameWithoiutPrefix()
+    public function testGetWorkflowTopicNameWithoutPrefix()
     {
         $wfName = 'foo';
         $stepName = 'bar';
+        $this->expectException(TopicException::class);
+        $topicName = TopicService::getWorkflowManagerTopicName('');
         $topicName = TopicService::getWorkflowManagerTopicName($wfName);
         $this->assertEquals('disturb-foo-manager', $topicName);
+        $this->expectException(TopicException::class);
+        $topicName = TopicService::getWorkflowStepTopicName('', '');
         $topicName = TopicService::getWorkflowStepTopicName($stepName, $wfName);
         $this->assertEquals('disturb-foo-bar-step', $topicName);
     }

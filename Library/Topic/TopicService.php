@@ -32,13 +32,13 @@ class TopicService
      *
      * @param String $workflowName Workflow Name
      *
-     * @throws \Exception Required parameters
+     * @throws Core\Exception Required parameters
      * @return String
      */
     public static function getWorkflowManagerTopicName(string $workflowName) : string
     {
         if (empty($workflowName)) {
-            throw new \Exception('Parameters required - workflow name can not be null or empty');
+            throw new TopicException('Parameters required - workflow name can not be null or empty');
         }
 
         return str_replace(
@@ -56,13 +56,13 @@ class TopicService
      * @param String $stepName     Step Name
      * @param String $workflowName Workflow Name
      *
-     * @throws \Exception Required parameters
+     * @throws Core\Exception Required parameters
      * @return String
      */
     public static function getWorkflowStepTopicName(string $stepName, string $workflowName) : string
     {
         if (empty($stepName) || empty($workflowName)) {
-            throw new \Exception('Parameters required - step name or workflow name can not be null or empty');
+            throw new TopicException('Parameters required - step name or workflow name can not be null or empty');
         }
 
         return str_replace(
