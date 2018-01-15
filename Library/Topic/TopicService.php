@@ -43,7 +43,7 @@ class TopicService
 
         return str_replace(
             ['@prefix@', '@workflow_name@'],
-            [defined('DISTURB_TOPIC_PREFIX') ? DISTURB_TOPIC_PREFIX : '', $workflowName],
+            [defined('DISTURB_TOPIC_PREFIX') ? trim(DISTURB_TOPIC_PREFIX) : '', $workflowName],
             self::TOPIC_WORKFLOW_MANAGER_NAME
         );
     }
@@ -67,7 +67,7 @@ class TopicService
 
         return str_replace(
             ['@prefix@', '@step_name@','@workflow_name@'],
-            [defined('DISTURB_TOPIC_PREFIX') ? DISTURB_TOPIC_PREFIX : '', $stepName, $workflowName],
+            [defined('DISTURB_TOPIC_PREFIX') ? trim(DISTURB_TOPIC_PREFIX) : '', $stepName, $workflowName],
             self::TOPIC_WORKFLOW_MANAGER_STEP_NAME
         );
     }
