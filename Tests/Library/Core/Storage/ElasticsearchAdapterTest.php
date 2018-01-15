@@ -225,6 +225,13 @@ class ElasticsearchAdapterTest extends \Tests\DisturbUnitTestCase
         } catch (\Exception $exception) {
             $this->fail('ElasticsearchAdapter initClient : ' . $exception->getMessage());
         }
+
+        // Bbad init
+        $config = new Json(
+            realpath(__DIR__ . '/Config/elasticsearchConfig.json')
+        );
+        $this->expectException(StorageException::class);
+        $this->elasticsearchAdapter->initialize($config, 'badUsage');
     }
 
     /**
@@ -261,6 +268,12 @@ class ElasticsearchAdapterTest extends \Tests\DisturbUnitTestCase
         } catch (\Exception $exception) {
             $this->fail('Elasticsearch save failed : ' . $exception->getMessage());
         }
+
+        $this->expectException(StorageException::class);
+        $f = $this->elasticsearchAdapter->save('', self::TEST_DOCUMENT);
+
+        $this->expectException(StorageException::class);
+        $f = $this->elasticsearchAdapter->update('', self::TEST_DOCUMENT);
     }
 
     /**
@@ -371,6 +384,9 @@ class ElasticsearchAdapterTest extends \Tests\DisturbUnitTestCase
                 $this->fail('Exception code expected : ' . StorageException::CODE_EXIST);
             }
         }
+
+        $this->expectException(StorageException::class);
+        $f = $this->elasticsearchAdapter->exists('');
     }
 
     /**
@@ -428,6 +444,9 @@ class ElasticsearchAdapterTest extends \Tests\DisturbUnitTestCase
                 $this->fail('Exception code expected : ' . StorageException::CODE_DELETE);
             }
         }
+
+        $this->expectException(StorageException::class);
+        $f = $this->elasticsearchAdapter->delete('');
     }
 
     /**
