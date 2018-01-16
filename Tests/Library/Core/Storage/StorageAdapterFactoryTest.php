@@ -5,6 +5,7 @@ namespace Tests\Library\Core\Storage;
 use \Vpg\Disturb\Core\Storage;
 use \Vpg\Disturb\Workflow;
 use \Vpg\Disturb\Workflow\WorkflowConfigDtoFactory;
+use \Vpg\Disturb\Workflow\InvalidWorkflowConfigException;
 
 
 /**
@@ -70,10 +71,38 @@ class StorageAdapterFactoryTest extends \Tests\DisturbUnitTestCase
      *
      * @return void
      */
-    public function testInvalidElasticAdapterConfig()
+    public function testMissingElasticAdapterConfig()
     {
+        $this->expectException(InvalidWorkflowConfigException::class);
         $workflowConfigDto = WorkflowConfigDtoFactory::get(
             realpath(__DIR__ . '/../../../Config/InvalidWorkflowConfig-WrongStorageAdapterConfig.json')
+        );
+        $adapter = Storage\StorageAdapterFactory::get(
+            $workflowConfigDto,
+            Storage\StorageAdapterFactory::USAGE_MONITORING
+        );
+    }
+
+    /**
+     * Test els adpater : invalid instantiation
+     *
+     * @return void
+     */
+    public function testInvalidElasticAdapterConfig()
+    {
+        $workflowConfigDto = WorkflowConfigDtoFactory::get(realpath(__DIR__ . '/Config/validWorkflowConfig.json'));
+        $reflection = new \ReflectionClass($workflowConfigDto);
+        $reflection_property = $reflection->getProperty('rawHash');
+        $reflection_property->setAccessible(true);
+        $reflection_property->setValue(
+            $workflowConfigDto,
+            [
+                "name" => "foo",
+                "storage" => [
+                    "adapter" => "elasticsearch",
+                    "config" => []
+                ]
+            ]
         );
         $this->expectException(Storage\StorageException::class);
         $adapter = Storage\StorageAdapterFactory::get(
@@ -81,4 +110,5 @@ class StorageAdapterFactoryTest extends \Tests\DisturbUnitTestCase
             Storage\StorageAdapterFactory::USAGE_MONITORING
         );
     }
+
 }

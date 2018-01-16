@@ -3,7 +3,6 @@
     "storage": {
         "adapter" : "elasticsearch",
         "config" : {
-            "host" : "wrongConfigHost"
         }
     }
 }
