@@ -296,8 +296,7 @@ class ElasticsearchAdapterTest extends \Tests\DisturbUnitTestCase
     public function testBadUpdate()
     {
         $this->initializeAdapter();
-
-        self::$elasticsearchAdapter->save(self::TEST_DOCUMENT_ID, ['a','b']);
+        $this->elasticsearchAdapter->save(self::TEST_DOCUMENT_ID, ['a','b']);
         $this->expectException(StorageException::class);
         $f = $this->elasticsearchAdapter->update(self::TEST_DOCUMENT_ID, ['a','b']);
     }
