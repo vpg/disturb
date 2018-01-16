@@ -72,6 +72,19 @@ class WorkflowConfigDtoFactoryTest extends \Tests\DisturbUnitTestCase
     }
 
     /**
+     * Test dto missing array prop
+     *
+     * @return void
+     */
+    public function testDTOMissingArrayProps()
+    {
+        $this->expectException(Workflow\InvalidWorkflowConfigException::class);
+        $workflowConfigDto = new Workflow\WorkflowConfigDto(
+            '{"name" : "foo"}'
+        );
+    }
+
+    /**
      * Test dto  props
      *
      * @return void
