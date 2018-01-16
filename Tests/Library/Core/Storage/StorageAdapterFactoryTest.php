@@ -16,14 +16,69 @@ class StorageAdapterFactoryTest extends \Tests\DisturbUnitTestCase
 {
 
     /**
-     * Test adpater instanciation
+     * Test els adpater : valid instantiation
      *
      * @return void
      */
-    public function testElastic()
+    public function testValidElasticAdapter()
     {
         $workflowConfigDto = WorkflowConfigDtoFactory::get(realpath(__DIR__ . '/Config/validWorkflowConfig.json'));
-        $adapter = Storage\StorageAdapterFactory::get($workflowConfigDto, Storage\StorageAdapterFactory::USAGE_MONITORING);
+        $adapter = Storage\StorageAdapterFactory::get(
+            $workflowConfigDto,
+            Storage\StorageAdapterFactory::USAGE_MONITORING
+        );
         $this->assertInstanceOf('Vpg\\Disturb\\Core\\Storage\\ElasticsearchAdapter', $adapter);
+    }
+
+    /**
+     * Test els adpater : invalid instantiation
+     *
+     * @return void
+     */
+    public function testMissingElasticAdapter()
+    {
+        $workflowConfigDto = WorkflowConfigDtoFactory::get(
+            realpath(__DIR__ . '/../../../Config/InvalidWorkflowConfig-MissingStorageAdapter.json')
+        );
+        $this->expectException(Storage\StorageException::class);
+        $adapter = Storage\StorageAdapterFactory::get(
+            $workflowConfigDto,
+            Storage\StorageAdapterFactory::USAGE_MONITORING
+        );
+    }
+
+    /**
+     * Test els adpater : invalid instantiation
+     *
+     * @return void
+     */
+    public function testInvalidElasticAdapter()
+    {
+
+        $workflowConfigDto = WorkflowConfigDtoFactory::get(
+            realpath(__DIR__ . '/../../../Config/InvalidWorkflowConfig-WrongStorageAdapter.json')
+        );
+        $this->expectException(Storage\StorageException::class);
+        $adapter = Storage\StorageAdapterFactory::get(
+            $workflowConfigDto,
+            Storage\StorageAdapterFactory::USAGE_MONITORING
+        );
+    }
+
+    /**
+     * Test els adpater : invalid instantiation
+     *
+     * @return void
+     */
+    public function testInvalidElasticAdapterConfig()
+    {
+        $workflowConfigDto = WorkflowConfigDtoFactory::get(
+            realpath(__DIR__ . '/../../../Config/InvalidWorkflowConfig-WrongStorageAdapterConfig.json')
+        );
+        $this->expectException(Storage\StorageException::class);
+        $adapter = Storage\StorageAdapterFactory::get(
+            $workflowConfigDto,
+            Storage\StorageAdapterFactory::USAGE_MONITORING
+        );
     }
 }
