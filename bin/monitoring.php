@@ -56,7 +56,7 @@ try {
     $paramHash = ConsoleApp::parseLongOpt(join($arguments['params'], ' '));
 
     $workflowConfigDto = Workflow\WorkflowConfigDtoFactory::get($paramHash['workflow']);
-    $projectBootstrapFilePath = $workflowConfigDto->getProjectBoostrapFilepath();
+    $projectBootstrapFilePath = $workflowConfigDto->getProjectBootstrapFilepath();
     if (is_readable($projectBootstrapFilePath)) {
         $di->get('logr')->info('Loading Bootstrap : ' . $projectBootstrapFilePath);
         require_once($projectBootstrapFilePath);

@@ -39,7 +39,7 @@ class WorkflowConfigDtoFactoryTest extends \Tests\DisturbUnitTestCase
     }
 
     /**
-     * Test wrong file ext
+     * Test dto input
      *
      * @return void
      */
@@ -56,5 +56,38 @@ class WorkflowConfigDtoFactoryTest extends \Tests\DisturbUnitTestCase
         // invalid input type
         $this->expectException(Dto\InvalidInputTypeException::class);
         $workflowConfigDto = new Workflow\WorkflowConfigDto(true);
+    }
+
+    /**
+     * Test dto missing prop
+     *
+     * @return void
+     */
+    public function testDTOMissingProps()
+    {
+        $this->expectException(Workflow\InvalidWorkflowConfigException::class);
+        $workflowConfigDto = new Workflow\WorkflowConfigDto(
+            '{"name" : "json", "storage" : {"config":{"host":""}}}'
+        );
+    }
+
+    /**
+     * Test dto  props
+     *
+     * @return void
+     */
+    public function testDTOProps()
+    {
+        $workflowConfigDto = new Workflow\WorkflowConfigDto(
+            realpath(__DIR__ . '/../../Config/serie.json')
+        );
+        $this->assertEquals(
+            $workflowConfigDto->getBrokerServerList(),
+            ['10.13.11.27', '10.13.11.28', '10.13.11.29']
+        );
+        $this->assertEquals($workflowConfigDto->getServicesClassPath(), 'app/Workflows/LoadingContract');
+        $this->assertEquals($workflowConfigDto->getServicesClassNameSpace(), 'Vpg\Turbo\Workflows\LoadingContract');
+        $this->assertEquals($workflowConfigDto->getProjectBootstrapFilepath(), 'app/Workflows/bootstrap.php');
+        $this->assertEquals($workflowConfigDto->getStorageHost(), 'http://vp-aix-elsdisturb.aix.vpg.lan:9200');
     }
 }
