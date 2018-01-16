@@ -30,6 +30,7 @@ class MessageDtoTest extends \Tests\DisturbUnitTestCase
             'id'      => 'test1',
             'type'    => Message\MessageDto::TYPE_STEP_ACK,
             'jobId'  => '1',
+            'stepCode'  => 'foo',
             'result' => ['foo' => 'bar', 'status' => Message\MessageDto::MSG_RETURN_SUCCESS]
         ];
 
@@ -54,7 +55,7 @@ class MessageDtoTest extends \Tests\DisturbUnitTestCase
     }
 
     /**
-     * Test dto getter
+     * Test WF message dto
      *
      * @return void
      */
@@ -69,7 +70,7 @@ class MessageDtoTest extends \Tests\DisturbUnitTestCase
     }
 
     /**
-     * Test dto getter
+     * Test Step control message
      *
      * @return void
      */
@@ -83,7 +84,7 @@ class MessageDtoTest extends \Tests\DisturbUnitTestCase
     }
 
     /**
-     * Test dto getter
+     * Test Step ack message
      *
      * @return void
      */
@@ -93,7 +94,34 @@ class MessageDtoTest extends \Tests\DisturbUnitTestCase
         $this->assertEquals($this->validStepAckMessageHash['id'], $messageDto->getId());
         $this->assertEquals($this->validStepAckMessageHash['type'], $messageDto->getType());
         $this->assertEquals($this->validStepAckMessageHash['jobId'], $messageDto->getJobId());
+        $this->assertEquals($this->validStepAckMessageHash['stepCode'], $messageDto->getStepCode());
         $this->assertEquals($this->validStepAckMessageHash['result'], $messageDto->getResult());
         $this->assertEquals($this->validStepAckMessageHash['result']['status'], $messageDto->getStepResultStatus());
+    }
+
+    /**
+     * Test unknown message type
+     *
+     * @return void
+     */
+    public function testInvalidMessageType()
+    {
+        $invalidHash = $this->validStepAckMessageHash;
+        $invalidHash['type'] = 'foo';
+        $this->expectException(Message\InvalidMessageException::class);
+        $messageDto = new Message\MessageDto($invalidHash);
+    }
+
+    /**
+     * Test invalid message
+     *
+     * @return void
+     */
+    public function testMissingPropMessage()
+    {
+        $invalidHash = $this->validStepAckMessageHash;
+        unset($invalidHash['jobId']);
+        $this->expectException(Message\InvalidMessageException::class);
+        $messageDto = new Message\MessageDto($invalidHash);
     }
 }
