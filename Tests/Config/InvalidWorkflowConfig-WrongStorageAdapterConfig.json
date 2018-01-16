@@ -1,0 +1,9 @@
+{
+    "name" : "Empty",
+    "storage": {
+        "adapter" : "elasticsearch",
+        "config" : {
+            "host" : "wrongConfigHost"
+        }
+    }
+}
