@@ -75,7 +75,7 @@ abstract class AbstractDto extends Component
                     $configJson = new Json($jsonConfigFilePath);
                     $this->rawHash = $configJson->toArray();
                 } else {
-                    throw new InvalidInputTypeException('Json file path not loadable' . $rawMixed);
+                    throw new InvalidInputTypeException('Json not loadable' . $rawMixed);
                 }
             break;
             case self::TYPE_PHALCON_CONFIG:

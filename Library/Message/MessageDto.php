@@ -2,6 +2,7 @@
 
 namespace Vpg\Disturb\Message;
 
+use Vpg\Disturb\Core\Dto;
 
 /**
  * Class Message
@@ -10,7 +11,7 @@ namespace Vpg\Disturb\Message;
  * @author   Jérome BOURGEAIS <jbourgeais@voyageprive.com>
  * @license  https://github.com/vpg/disturb/blob/master/LICENSE MIT Licence
  */
-class MessageDto
+class MessageDto extends Dto\AbstractDto
 {
     const TYPE_STEP_CTRL = 'STEP-CTRL';
     const TYPE_STEP_ACK = 'STEP-ACK';
@@ -34,8 +35,6 @@ class MessageDto
     const MSG_RETURN_SUCCESS = 'SUCCESS';
     const MSG_RETURN_FAILED = 'FAILED';
 
-    private $rawHash = [];
-
     const WF_REQUIRED_PROP_HASH = ['id', 'type', 'action', 'payload'];
     const STEP_REQUIRED_PROP_HASH = ['id', 'type', 'action', 'payload'];
     const STEP_ACK_REQUIRED_PROP_HASH = ['id', 'type', 'jobId', 'result'];
@@ -49,17 +48,8 @@ class MessageDto
      */
     public function __construct($rawMixed)
     {
-        if (is_array($rawMixed)) {
-            $this->rawHash = $rawMixed;
-        } elseif (is_string($rawMixed)) {
-            if (!($rawHash = json_decode($rawMixed, true))) {
-                // xxx defined typed Exception
-                throw new InvalidMessageException('Not able to parse message');
-            }
-            $this->rawHash = $rawHash;
-        } else {
-            throw new InvalidMessageException('Not supported raw message type');
-        }
+        $this->di->get('logr')->debug(json_encode(func_get_args()));
+        parent::__construct($rawMixed);
         $this->validate();
     }
 
@@ -72,34 +62,28 @@ class MessageDto
      */
     public function validate()
     {
-        $isValid = false;
         if (!isset($this->rawHash['type'])) {
             throw new InvalidMessageException('Missing message Type');
         }
-
-        $propHashRequired = [];
+        $requiredPropHash = [];
         switch ($this->rawHash['type']) {
             case self::TYPE_WF_CTRL:
-                $propHashRequired = self::WF_REQUIRED_PROP_HASH;
+                $requiredPropHash = self::WF_REQUIRED_PROP_HASH;
             break;
             case self::TYPE_STEP_CTRL:
-                $propHashRequired = self::STEP_REQUIRED_PROP_HASH;
+                $requiredPropHash = self::STEP_REQUIRED_PROP_HASH;
             break;
             case self::TYPE_STEP_ACK:
-                $propHashRequired = self::STEP_ACK_REQUIRED_PROP_HASH;
+                $requiredPropHash = self::STEP_ACK_REQUIRED_PROP_HASH;
             break;
             default:
                 throw new InvalidMessageException(
                     'Validation of message type ' . $this->rawHash['type'] . ' is not implemented yet, please do'
                 );
         }
-        $matchPropList = array_intersect_key($this->rawHash, array_flip($propHashRequired));
-        $isValid = (count($propHashRequired) == count($matchPropList));
-        if (!$isValid) {
-            throw new InvalidMessageException(
-                'Missing properties for message ' . $this->rawHash['type'] . ' : ' .
-                implode(',', $propHashRequired)
-            );
+        $missingPropList = $this->getMissingPropertyList($requiredPropHash);
+        if (!empty($missingPropList)) {
+            throw new InvalidMessageException('Missing properties :' . json_encode($missingPropList));
         }
     }
 
@@ -151,16 +135,6 @@ class MessageDto
     public function getPayload() : array
     {
         return !empty($this->rawHash['payload']) ? $this->rawHash['payload'] : [];
-    }
-
-    /**
-     * Get message sender
-     *
-     * @return string
-     */
-    public function getFrom(): string
-    {
-        return $this->rawHash['from'] ?? '';
     }
 
     /**
