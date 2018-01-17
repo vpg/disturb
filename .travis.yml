@@ -76,6 +76,9 @@ install:
   - ./configure
   - make all -j 5
   - sudo make install
+  - touch rdkafka.ini
+  - echo "extension=rdkafka.so" > rdkafka.ini
+  - phpenv config-add rdkafka.ini
 
 before_script:
     - cd $TRAVIS_BUILD_DIR
