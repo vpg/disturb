@@ -259,8 +259,6 @@ class ElasticsearchAdapterTest extends \Tests\DisturbUnitTestCase
             $this->fail('Elasticsearch save failed : ' . $exception->getMessage());
         }
 
-        $this->expectException(StorageException::class);
-        $f = self::$elasticsearchAdapter->save('', self::TEST_DOCUMENT);
 
         $this->expectException(StorageException::class);
         $f = self::$elasticsearchAdapter->update('', self::TEST_DOCUMENT);

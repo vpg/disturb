@@ -25,12 +25,13 @@ class ServiceTest extends \Tests\DisturbUnitTestCase
      *
      * @return void
      */
-    public static function setUpBeforeClass()
+    public function setUp()
     {
-        parent::setUpBeforeClass();
+        parent::setUp();
         self::$workflowConfigDto = Workflow\WorkflowConfigDtoFactory::get(realpath(__DIR__ . '/config.json'));
         self::$monitoringService = new Monitoring\Service(self::$workflowConfigDto);
     }
+
 
     /**
      * returns a new worker id

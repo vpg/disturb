@@ -96,15 +96,6 @@ class ElasticsearchAdapter extends Component implements StorageAdapterInterface
     private $commonRequestParamHash = [];
 
     /**
-     * Constructor
-     *
-     * @return void
-     */
-    public function construct()
-    {
-    }
-
-    /**
      * Initialize
      *
      * @param Json   $config config
@@ -271,20 +262,6 @@ class ElasticsearchAdapter extends Component implements StorageAdapterInterface
                 $exception
             );
         }
-    }
-
-    /**
-     * Search document by query $queryParameterHash
-     *
-     * @param array $queryParameterHash queryParameterHash
-     *
-     * @return array
-     */
-    public function search(array $queryParameterHash) : array
-    {
-        $this->di->get('logr')->debug(json_encode(func_get_args()));
-        // TODO
-        return [];
     }
 
     /**

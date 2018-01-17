@@ -34,7 +34,7 @@ class DisturbTest extends \Tests\DisturbUnitTestCase
         $workflowConfigDto = WorkflowConfigDtoFactory::get(realpath(__DIR__ . '/config.json'));
         self::$contextStorageService = new ContextStorageService($workflowConfigDto);
         self::$workflowManagerService = new Workflow\ManagerService($workflowConfigDto);
-        self::$disturbClient = new Client\Disturb();
+        self::$disturbClient = new Client\Disturb($workflowConfigDto);
     }
 
     /**
