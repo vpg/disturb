@@ -180,10 +180,6 @@ abstract class AbstractWorker extends Task implements WorkerInterface
                 );
                 continue;
             }
-            if ($msgDto->getType() == MessageDto::TYPE_WF_MONITOR) {
-                $this->processMonitoringMessage($msgDto);
-                continue;
-            }
             try {
                 $waitEndsAt = microtime(true);
                 $waitExecTime = round(($waitEndsAt - $processStartsAt), 3);
@@ -196,24 +192,6 @@ abstract class AbstractWorker extends Task implements WorkerInterface
             $processEndsAt = microtime(true);
             $processExecTime = round(($processEndsAt - $processStartsAt), 3);
             $this->getDI()->get('logr')->info("Message processed in $processExecTime secs");
-        }
-    }
-
-    /**
-     * Process monitoring message
-     *
-     * @param Vpg|Dtos|Message $messageDto Dtos message
-     *
-     * @return void
-     */
-    private function processMonitoringMessage(MessageDto $messageDto)
-    {
-        $this->getDI()->get('logr')->debug($messageDto);
-        switch ($messageDto->getAction()) {
-            case MessageDto::ACTION_WF_MONITOR_PING:
-                $this->getDI()->get('logr')->debug("PING receive from {$messageDto->getFrom()}");
-                $this->sendMessage($messageDto->getFrom(), MessageDto::ACTION_WF_MONITOR_PONG);
-            break;
         }
     }
 

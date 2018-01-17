@@ -89,7 +89,7 @@ class WorkflowConfigDto extends Dto\AbstractDto
      *
      * @return string
      */
-    public function getProjectBoostrapFilepath() : string
+    public function getProjectBootstrapFilepath() : string
     {
         return $this->rawHash['projectBootstrap'] ?? '';
     }

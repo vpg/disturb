@@ -4,6 +4,7 @@ namespace Vpg\Disturb\Client;
 use \Phalcon\Mvc\User\Component;
 
 use Vpg\Disturb\Context;
+use Vpg\Disturb\Workflow\WorkflowConfigDto;
 
 /**
  * Class Disturb Client
@@ -15,14 +16,19 @@ use Vpg\Disturb\Context;
  */
 class Disturb extends Component
 {
+    private $workflowConfig;
+
     /**
      * Disturb Client constructor
      *
+     * @param WorkflowConfigDto $workflowConfigDto config
+     *
      * @return void
      */
-    public function __construct()
+    public function __construct(WorkflowConfigDto $workflowConfigDto)
     {
         $this->di->get('logr')->debug(json_encode(func_get_args()));
+        $this->workflowConfig = $workflowConfigDto;
     }
 
     /**
@@ -35,7 +41,7 @@ class Disturb extends Component
     public function getWorkflow(string $workflowProcessId)
     {
         $this->di->get('logr')->debug(json_encode(func_get_args()));
-        $contextStorage = new Context\ContextStorageService($this->di->get('WorkflowConfig'));
+        $contextStorage = new Context\ContextStorageService($this->workflowConfig);
         return $contextStorage->get($workflowProcessId);
     }
 }

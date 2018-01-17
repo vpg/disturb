@@ -33,15 +33,6 @@ interface StorageAdapterInterface
     public function get(string $id);
 
     /**
-     * Search storage data identified by $queryHash
-     *
-     * @param array $queryHash queryHash
-     *
-     * @return mixed
-     */
-    public function search(array $queryHash);
-
-    /**
      * Check if storage date id exists
      *
      * @param string $id workflowProcessorId

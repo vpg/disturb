@@ -1,0 +1,8 @@
+{
+    "name" : "Empty",
+    "storage": {
+        "config" : {
+            "host" : "wrongConfigHost"
+        }
+    }
+}

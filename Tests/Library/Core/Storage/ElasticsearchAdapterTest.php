@@ -41,26 +41,30 @@ class ElasticsearchAdapterTest extends \Tests\DisturbUnitTestCase
     /**
      * @var string $elasticsearchTestHost
      */
-    private $elasticsearchTestHost;
+    private static $elasticsearchTestHost;
 
     /**
      * @var ElasticsearchAdapter $elasticsearchAdapter
      */
-    private $elasticsearchAdapter;
+    private static $elasticsearchAdapter;
 
     /**
      * Setup
      *
      * @return void
      */
-    public function setUp()
+    public static function setUpBeforeClass()
     {
-        parent::setUp();
+        parent::setUpBeforeClass();
 
-        $this->elasticsearchAdapter = new ElasticsearchAdapter();
+        self::$elasticsearchAdapter = new ElasticsearchAdapter();
 
         $contextStorageConfig = new Json(realpath(__DIR__ . '/Config/elasticsearchConfig.json'));
-        $this->elasticsearchTestHost = $contextStorageConfig[ElasticsearchAdapter::CONFIG_HOST];
+        self::$elasticsearchTestHost = $contextStorageConfig[ElasticsearchAdapter::CONFIG_HOST];
+        $config = new Json(
+            realpath(__DIR__ . '/Config/elasticsearchConfig.json')
+        );
+        self::$elasticsearchAdapter->initialize($config, StorageAdapterFactory::USAGE_MONITORING);
     }
 
     /**
@@ -71,8 +75,9 @@ class ElasticsearchAdapterTest extends \Tests\DisturbUnitTestCase
     public function testInitConfig()
     {
         // config not found
+        $elasticsearchAdapter = new ElasticsearchAdapter();
         try {
-            $this->invokeMethod($this->elasticsearchAdapter, 'initConfig', '');
+            $this->invokeMethod($elasticsearchAdapter, 'initConfig', '');
         } catch (\Throwable $exception) {
             if (!$exception) {
                 $this->fail('Exception expected : Elasticsearch config not found');
@@ -83,10 +88,9 @@ class ElasticsearchAdapterTest extends \Tests\DisturbUnitTestCase
         $uncompletedConfig = new Json(
             realpath(__DIR__ . '/Config/elasticsearchUncompletedConfig.json')
         );
-
         try {
             $this->invokeMethod(
-                $this->elasticsearchAdapter,
+                $elasticsearchAdapter,
                 'initConfig',
                 [$uncompletedConfig, ElasticsearchAdapter::USAGE_MONITORING_CONFIG]
             );
@@ -103,11 +107,9 @@ class ElasticsearchAdapterTest extends \Tests\DisturbUnitTestCase
             }
         }
 
-        // success
-        $this->initValidConfig();
 
-        $adapterConfig = $this->getProperty($this->elasticsearchAdapter, 'config');
-        $this->assertEquals($this->elasticsearchTestHost, $adapterConfig[ElasticsearchAdapter::CONFIG_HOST]);
+        $adapterConfig = $this->getProperty(self::$elasticsearchAdapter, 'config');
+        $this->assertEquals(self::$elasticsearchTestHost, $adapterConfig[ElasticsearchAdapter::CONFIG_HOST]);
 
         $this->assertEquals(
             ElasticsearchAdapter::USAGE_MONITORING_CONFIG[ElasticsearchAdapter::DOC_INDEX],
@@ -129,7 +131,7 @@ class ElasticsearchAdapterTest extends \Tests\DisturbUnitTestCase
     {
         $badVendorLibraryName = 'badVendorLibraryName';
         try {
-            $this->invokeMethod($this->elasticsearchAdapter, 'checkVendorLibraryAvailable', [$badVendorLibraryName]);
+            $this->invokeMethod(self::$elasticsearchAdapter, 'checkVendorLibraryAvailable', [$badVendorLibraryName]);
         } catch (StorageException $exception) {
             if ($exception) {
                 $this->assertEquals(
@@ -147,7 +149,7 @@ class ElasticsearchAdapterTest extends \Tests\DisturbUnitTestCase
 
         try {
             $this->invokeMethod(
-                $this->elasticsearchAdapter,
+                self::$elasticsearchAdapter,
                 'checkVendorLibraryAvailable',
                 [ElasticsearchAdapter::VENDOR_CLASSNAME]
             );
@@ -165,10 +167,8 @@ class ElasticsearchAdapterTest extends \Tests\DisturbUnitTestCase
      */
     public function testInitCommonRequestParams()
     {
-        $this->initValidConfig();
-
-        $this->invokeMethod($this->elasticsearchAdapter, 'initCommonRequestParams', []);
-        $commonRequestParamHash = $this->getProperty($this->elasticsearchAdapter, 'commonRequestParamHash');
+        $this->invokeMethod(self::$elasticsearchAdapter, 'initCommonRequestParams', []);
+        $commonRequestParamHash = $this->getProperty(self::$elasticsearchAdapter, 'commonRequestParamHash');
 
         $this->assertEquals(
             ElasticsearchAdapter::USAGE_MONITORING_CONFIG[ElasticsearchAdapter::DOC_INDEX],
@@ -189,15 +189,11 @@ class ElasticsearchAdapterTest extends \Tests\DisturbUnitTestCase
     public function testInitClient()
     {
         // host unavailable
-        $this->initBadConfig();
-        $config = $this->getProperty($this->elasticsearchAdapter, 'config');
-
+        $config = new Json(realpath(__DIR__ . '/Config/elasticsearchBadConfig.json'));
+        $elasticsearchAdapter = new ElasticsearchAdapter();
         try {
-            $this->invokeMethod(
-                $this->elasticsearchAdapter,
-                'initClient',
-                []
-            );
+        $elasticsearchAdapter->initialize($config, StorageAdapterFactory::USAGE_MONITORING);
+
         } catch (StorageException $exception) {
             if ($exception) {
                 $this->assertEquals(
@@ -213,12 +209,9 @@ class ElasticsearchAdapterTest extends \Tests\DisturbUnitTestCase
             }
         }
 
-        // host / index available
-        $this->initValidConfig();
-
         try {
             $this->invokeMethod(
-                $this->elasticsearchAdapter,
+                self::$elasticsearchAdapter,
                 'initClient',
                 []
             );
@@ -226,12 +219,11 @@ class ElasticsearchAdapterTest extends \Tests\DisturbUnitTestCase
             $this->fail('ElasticsearchAdapter initClient : ' . $exception->getMessage());
         }
 
-        // Bbad init
-        $config = new Json(
-            realpath(__DIR__ . '/Config/elasticsearchConfig.json')
-        );
+        // Bad init
+        $config = new Json(realpath(__DIR__ . '/Config/elasticsearchConfig.json'));
+        $elasticsearchAdapter = new ElasticsearchAdapter();
         $this->expectException(StorageException::class);
-        $this->elasticsearchAdapter->initialize($config, 'badUsage');
+        $elasticsearchAdapter->initialize($config, 'badUsage');
     }
 
     /**
@@ -241,12 +233,10 @@ class ElasticsearchAdapterTest extends \Tests\DisturbUnitTestCase
      */
     public function testSave()
     {
-        $this->initializeAdapter();
-
         // bad parameter
         try {
             $this->invokeMethod(
-                $this->elasticsearchAdapter,
+                self::$elasticsearchAdapter,
                 'save',
                 [self::TEST_DOCUMENT_EMPTY_ID, []]
             );
@@ -261,7 +251,7 @@ class ElasticsearchAdapterTest extends \Tests\DisturbUnitTestCase
         // succedeed
         try {
             $this->invokeMethod(
-                $this->elasticsearchAdapter,
+                self::$elasticsearchAdapter,
                 'save',
                 [self::TEST_DOCUMENT_ID, self::TEST_DOCUMENT]
             );
@@ -269,12 +259,30 @@ class ElasticsearchAdapterTest extends \Tests\DisturbUnitTestCase
             $this->fail('Elasticsearch save failed : ' . $exception->getMessage());
         }
 
-        $this->expectException(StorageException::class);
-        $f = $this->elasticsearchAdapter->save('', self::TEST_DOCUMENT);
 
         $this->expectException(StorageException::class);
-        $f = $this->elasticsearchAdapter->update('', self::TEST_DOCUMENT);
+        $f = self::$elasticsearchAdapter->update('', self::TEST_DOCUMENT);
     }
+
+    /**
+     * Test bad update
+     *
+     * @return void
+     */
+    public function testBadUpdate()
+    {
+        $this->expectException(StorageException::class);
+        $f = self::$elasticsearchAdapter->update(self::TEST_DOCUMENT_ID, [
+            'script' => [
+                'source' => 'ctx._source.counter += params.count',
+                'lang' => 'groovy',
+                'params' => [
+                    'count' => 4
+                ]
+            ]
+        ]);
+    }
+
 
     /**
      * Test get
@@ -283,12 +291,10 @@ class ElasticsearchAdapterTest extends \Tests\DisturbUnitTestCase
      */
     public function testGet()
     {
-        $this->initializeAdapter();
-
         // bad parameter
         try {
             $this->invokeMethod(
-                $this->elasticsearchAdapter,
+                self::$elasticsearchAdapter,
                 'get',
                 [self::TEST_DOCUMENT_EMPTY_ID]
             );
@@ -303,7 +309,7 @@ class ElasticsearchAdapterTest extends \Tests\DisturbUnitTestCase
         // document not found
         try {
             $this->invokeMethod(
-                $this->elasticsearchAdapter,
+                self::$elasticsearchAdapter,
                 'get',
                 [self::TEST_DOCUMENT_FAKE_ID]
             );
@@ -318,7 +324,7 @@ class ElasticsearchAdapterTest extends \Tests\DisturbUnitTestCase
         // document found
         try {
             $docHash = $this->invokeMethod(
-                $this->elasticsearchAdapter,
+                self::$elasticsearchAdapter,
                 'get',
                 [self::TEST_DOCUMENT_ID]
             );
@@ -336,12 +342,10 @@ class ElasticsearchAdapterTest extends \Tests\DisturbUnitTestCase
      */
     public function testExist()
     {
-        $this->initializeAdapter();
-
         // bad parameter
         try {
             $this->invokeMethod(
-                $this->elasticsearchAdapter,
+                self::$elasticsearchAdapter,
                 'exists',
                 [self::TEST_DOCUMENT_EMPTY_ID]
             );
@@ -356,7 +360,7 @@ class ElasticsearchAdapterTest extends \Tests\DisturbUnitTestCase
         // document not exists
         try {
             $doesDocumentExist = $this->invokeMethod(
-                $this->elasticsearchAdapter,
+                self::$elasticsearchAdapter,
                 'exists',
                 [self::TEST_DOCUMENT_FAKE_ID]
             );
@@ -372,7 +376,7 @@ class ElasticsearchAdapterTest extends \Tests\DisturbUnitTestCase
         // document exists
         try {
             $doesDocumentExist = $this->invokeMethod(
-                $this->elasticsearchAdapter,
+                self::$elasticsearchAdapter,
                 'exists',
                 [self::TEST_DOCUMENT_ID]
             );
@@ -386,7 +390,7 @@ class ElasticsearchAdapterTest extends \Tests\DisturbUnitTestCase
         }
 
         $this->expectException(StorageException::class);
-        $f = $this->elasticsearchAdapter->exists('');
+        $f = self::$elasticsearchAdapter->exists('');
     }
 
     /**
@@ -396,12 +400,10 @@ class ElasticsearchAdapterTest extends \Tests\DisturbUnitTestCase
      */
     public function testDelete()
     {
-        $this->initializeAdapter();
-
         // bad parameter
         try {
             $this->invokeMethod(
-                $this->elasticsearchAdapter,
+                self::$elasticsearchAdapter,
                 'delete',
                 [self::TEST_DOCUMENT_EMPTY_ID]
             );
@@ -417,7 +419,7 @@ class ElasticsearchAdapterTest extends \Tests\DisturbUnitTestCase
         try {
             // check if test document exist
             $doesDocumentExist = $this->invokeMethod(
-                $this->elasticsearchAdapter,
+                self::$elasticsearchAdapter,
                 'exists',
                 [self::TEST_DOCUMENT_ID]
             );
@@ -425,14 +427,14 @@ class ElasticsearchAdapterTest extends \Tests\DisturbUnitTestCase
 
             // deleting test document
             $this->invokeMethod(
-                $this->elasticsearchAdapter,
+                self::$elasticsearchAdapter,
                 'delete',
                 [self::TEST_DOCUMENT_ID]
             );
 
             // check if test document is correctly deleted
             $doesDocumentExist = $this->invokeMethod(
-                $this->elasticsearchAdapter,
+                self::$elasticsearchAdapter,
                 'exists',
                 [self::TEST_DOCUMENT_ID]
             );
@@ -446,7 +448,7 @@ class ElasticsearchAdapterTest extends \Tests\DisturbUnitTestCase
         }
 
         $this->expectException(StorageException::class);
-        $f = $this->elasticsearchAdapter->delete('');
+        $f = self::$elasticsearchAdapter->delete('');
     }
 
     /**
@@ -460,43 +462,9 @@ class ElasticsearchAdapterTest extends \Tests\DisturbUnitTestCase
             realpath(__DIR__ . '/Config/elasticsearchConfig.json')
         );
         $this->invokeMethod(
-            $this->elasticsearchAdapter,
+            self::$elasticsearchAdapter,
             'initConfig',
             [$config, ElasticsearchAdapter::USAGE_MONITORING_CONFIG]
-        );
-    }
-
-    /**
-     * Init bad config
-     *
-     * @return void
-     */
-    private function initBadConfig()
-    {
-        $config = new Json(
-            realpath(__DIR__ . '/Config/elasticsearchBadConfig.json')
-        );
-        $this->invokeMethod(
-            $this->elasticsearchAdapter,
-            'initConfig',
-            [$config, ElasticsearchAdapter::USAGE_MONITORING_CONFIG]
-        );
-    }
-
-    /**
-     * Initialize adapter
-     *
-     * @return void
-     */
-    private function initializeAdapter()
-    {
-        $config = new Json(
-            realpath(__DIR__ . '/Config/elasticsearchConfig.json')
-        );
-        $this->invokeMethod(
-            $this->elasticsearchAdapter,
-            'initialize',
-            [$config, StorageAdapterFactory::USAGE_MONITORING]
         );
     }
 }

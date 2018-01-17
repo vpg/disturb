@@ -12,7 +12,13 @@
         }
     },
     "steps" : [
-        { "name" : "foo" },
-        { "name" : "bar" }
+        [
+            { "name" : "foo" },
+            { "name" : "bar" }
+        ],
+        [
+            { "name" : "boo" },
+            { "name" : "far" }
+        ]
     ]
 }
