@@ -16,9 +16,9 @@ use \Vpg\Disturb\Workflow\WorkflowConfigDtoFactory;
 class ManagerServiceTest extends \Tests\DisturbUnitTestCase
 {
 
-    protected $workflowConfigDto;
-    protected $contextStorageService;
-    protected $workflowManagerService;
+    protected static $workflowConfigDto;
+    protected static $contextStorageService;
+    protected static $workflowManagerService;
 
     protected $workerHostname = 'worker-test-hostname';
 
@@ -27,13 +27,15 @@ class ManagerServiceTest extends \Tests\DisturbUnitTestCase
      *
      * @return void
      */
-    public function setUp()
+    public static function setUpBeforeClass()
     {
-        parent::setUp();
+        parent::setUpBeforeClass();
 
-        $this->workflowConfigDto = WorkflowConfigDtoFactory::get(realpath(__DIR__ . '/config.json'));
-        $this->contextStorageService = new ContextStorageService($this->workflowConfigDto);
-        $this->workflowManagerService = new Workflow\ManagerService($this->workflowConfigDto);
+        self::$workflowConfigDto = WorkflowConfigDtoFactory::get(realpath(__DIR__ . '/config.json'));
+        echo '-';
+        self::$workflowManagerService = new Workflow\ManagerService(self::$workflowConfigDto);
+        echo '-';
+        self::$contextStorageService = new ContextStorageService(self::$workflowConfigDto);
     }
 
     /**
@@ -56,10 +58,10 @@ class ManagerServiceTest extends \Tests\DisturbUnitTestCase
     {
         $wfId = $this->generateWfId();
         $this->expectException(Workflow\WorkflowException::class);
-        $this->workflowManagerService->init($wfId, ['foo' => 'bar'], $this->workerHostname);
-        $this->workflowManagerService->init($wfId, ['foo' => 'bar'], $this->workerHostname);
+        self::$workflowManagerService->init($wfId, ['foo' => 'bar'], $this->workerHostname);
+        self::$workflowManagerService->init($wfId, ['foo' => 'bar'], $this->workerHostname);
         // clean db
-        $this->contextStorageService->delete($wfId);
+        self::$contextStorageService->delete($wfId);
     }
 
     /**
@@ -70,13 +72,13 @@ class ManagerServiceTest extends \Tests\DisturbUnitTestCase
     public function testReserveStepJob()
     {
         $wfId = $this->generateWfId();
-        $this->workflowManagerService->init($wfId, ['foo' => 'bar'], $this->workerHostname);
-        $this->workflowManagerService->initNextStep($wfId);
-        $this->workflowManagerService->registerStepJob($wfId, 'foo', 0);
+        self::$workflowManagerService->init($wfId, ['foo' => 'bar'], $this->workerHostname);
+        self::$workflowManagerService->initNextStep($wfId);
+        self::$workflowManagerService->registerStepJob($wfId, 'foo', 0);
 
         // Test reservation
-        $this->workflowManagerService->reserveStepJob($wfId, 'foo', 0, $this->workerHostname, 'test-foo-0');
-        $wfContextDto = $this->workflowManagerService->getContext($wfId);
+        self::$workflowManagerService->reserveStepJob($wfId, 'foo', 0, $this->workerHostname, 'test-foo-0');
+        $wfContextDto = self::$workflowManagerService->getContext($wfId);
         $this->assertEquals(
             'test-foo-0',
             $wfContextDto->getStep('foo')['jobList'][0]['reservedBy']
@@ -84,10 +86,10 @@ class ManagerServiceTest extends \Tests\DisturbUnitTestCase
 
         // Test reservation collision
         $this->expectException(Workflow\WorkflowJobReservationException::class);
-        $this->workflowManagerService->reserveStepJob($wfId, 'foo', 0, $this->workerHostname, 'test-foo-0');
+        self::$workflowManagerService->reserveStepJob($wfId, 'foo', 0, $this->workerHostname, 'test-foo-0');
 
         // clean db
-        $this->contextStorageService->delete($wfId);
+        self::$contextStorageService->delete($wfId);
     }
 
     /**
@@ -98,10 +100,10 @@ class ManagerServiceTest extends \Tests\DisturbUnitTestCase
     public function testProcessStepJobResult()
     {
         $wfId = $this->generateWfId();
-        $this->workflowManagerService->init($wfId, ['foo' => 'bar'], $this->workerHostname);
-        $this->workflowManagerService->initNextStep($wfId);
-        $this->workflowManagerService->registerStepJob($wfId, 'foo', 0);
-        $this->workflowManagerService->registerStepJobStarted($wfId, 'foo', 0, $this->workerHostname);
+        self::$workflowManagerService->init($wfId, ['foo' => 'bar'], $this->workerHostname);
+        self::$workflowManagerService->initNextStep($wfId);
+        self::$workflowManagerService->registerStepJob($wfId, 'foo', 0);
+        self::$workflowManagerService->registerStepJobStarted($wfId, 'foo', 0, $this->workerHostname);
 
         // Test finalization
         $resultHash = [
@@ -109,8 +111,8 @@ class ManagerServiceTest extends \Tests\DisturbUnitTestCase
             'finishedAt' => '2018-01-01 01:01:01',
             'data' => ['foo' => 'ok']
         ];
-        $this->workflowManagerService->processStepJobResult($wfId, 'foo', 0, $resultHash);
-        $wfContextDto = $this->workflowManagerService->getContext($wfId);
+        self::$workflowManagerService->processStepJobResult($wfId, 'foo', 0, $resultHash);
+        $wfContextDto = self::$workflowManagerService->getContext($wfId);
         $this->assertEquals(
             $resultHash['finishedAt'],
             $wfContextDto->getStep('foo')['jobList'][0]['finishedAt']
@@ -118,10 +120,10 @@ class ManagerServiceTest extends \Tests\DisturbUnitTestCase
 
         // Test finalization collision
         $this->expectException(Workflow\WorkflowJobFinalizationException::class);
-        $this->workflowManagerService->processStepJobResult($wfId, 'foo', 0, $resultHash);
+        self::$workflowManagerService->processStepJobResult($wfId, 'foo', 0, $resultHash);
 
         // clean db
-        $this->contextStorageService->delete($wfId);
+        self::$contextStorageService->delete($wfId);
     }
 
     /**
@@ -133,59 +135,59 @@ class ManagerServiceTest extends \Tests\DisturbUnitTestCase
     {
         $wfId = $this->generateWfId();
         // init Work
-        $this->workflowManagerService->init($wfId, ['foo' => 'bar'], $this->workerHostname);
-        $wfNextStepList = $this->workflowManagerService->getNextStepList($wfId);
+        self::$workflowManagerService->init($wfId, ['foo' => 'bar'], $this->workerHostname);
+        $wfNextStepList = self::$workflowManagerService->getNextStepList($wfId);
         $this->assertEquals(
             [['name' => 'foo']],
             $wfNextStepList
         );
         // Process next step foo
-        $this->workflowManagerService->initNextStep($wfId);
-        $this->workflowManagerService->registerStepJob($wfId, $wfNextStepList[0]['name'], 0);
-        $this->workflowManagerService->registerStepJobStarted($wfId, 'foo', 0, $this->workerHostname);
+        self::$workflowManagerService->initNextStep($wfId);
+        self::$workflowManagerService->registerStepJob($wfId, $wfNextStepList[0]['name'], 0);
+        self::$workflowManagerService->registerStepJobStarted($wfId, 'foo', 0, $this->workerHostname);
         $resultHash = [
             'status' => Workflow\ManagerService::STATUS_SUCCESS,
             'finishedAt' => '2018-01-01 01:01:01',
             'data' => ['foo' => 'ok']
         ];
-        $this->workflowManagerService->processStepJobResult($wfId, 'foo', 0, $resultHash);
+        self::$workflowManagerService->processStepJobResult($wfId, 'foo', 0, $resultHash);
         // Process next step bar
-        $wfNextStepList = $this->workflowManagerService->getNextStepList($wfId);
+        $wfNextStepList = self::$workflowManagerService->getNextStepList($wfId);
         $this->assertEquals(
             [['name' => 'bar']],
             $wfNextStepList
         );
-        $this->workflowManagerService->initNextStep($wfId);
-        $this->workflowManagerService->registerStepJob($wfId, $wfNextStepList[0]['name'], 0);
-        $this->workflowManagerService->registerStepJobStarted($wfId, 'bar', 0, $this->workerHostname);
+        self::$workflowManagerService->initNextStep($wfId);
+        self::$workflowManagerService->registerStepJob($wfId, $wfNextStepList[0]['name'], 0);
+        self::$workflowManagerService->registerStepJobStarted($wfId, 'bar', 0, $this->workerHostname);
         $resultHash = [
             'status' => Workflow\ManagerService::STATUS_SUCCESS,
             'finishedAt' => '2018-01-01 01:02:01',
             'data' => ['bar' => 'ok']
         ];
-        $this->workflowManagerService->processStepJobResult($wfId, 'bar', 0, $resultHash);
-        $wfContextDto = $this->workflowManagerService->getContext($wfId);
+        self::$workflowManagerService->processStepJobResult($wfId, 'bar', 0, $resultHash);
+        $wfContextDto = self::$workflowManagerService->getContext($wfId);
         $this->assertEquals(
             $resultHash['data'],
             $wfContextDto->getStep('bar')['jobList'][0]['data']
         );
-        $wfCurrentStepStatus = $this->workflowManagerService->getCurrentStepStatus($wfId);
+        $wfCurrentStepStatus = self::$workflowManagerService->getCurrentStepStatus($wfId);
         $this->assertEquals(
             Workflow\ManagerService::STATUS_SUCCESS,
             $wfCurrentStepStatus
         );
 
         // Finalize
-        $wfHasNextStep = $this->workflowManagerService->hasNextStep($wfId);
+        $wfHasNextStep = self::$workflowManagerService->hasNextStep($wfId);
         $this->assertFalse($wfHasNextStep);
-        $this->workflowManagerService->finalize($wfId, Workflow\ManagerService::STATUS_SUCCESS);
-        $wfStatus = $this->workflowManagerService->getStatus($wfId);
+        self::$workflowManagerService->finalize($wfId, Workflow\ManagerService::STATUS_SUCCESS);
+        $wfStatus = self::$workflowManagerService->getStatus($wfId);
         $this->assertEquals(
             Workflow\ManagerService::STATUS_SUCCESS,
             $wfStatus
         );
 
         // clean db
-        $this->contextStorageService->delete($wfId);
+        self::$contextStorageService->delete($wfId);
     }
 }

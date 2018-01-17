@@ -14,16 +14,6 @@ use \Vpg\Disturb\Topic\TopicException;
 class TopicServiceTest extends \Tests\DisturbUnitTestCase
 {
     /**
-     * Setup
-     *
-     * @return void
-     */
-    public function setUp()
-    {
-        parent::setUp();
-    }
-
-    /**
      * Test manager topic name()
      *
      * @return void

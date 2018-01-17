@@ -16,8 +16,8 @@ use \Vpg\Disturb\Workflow\WorkflowConfigDtoFactory;
 class ContextStorageServiceTest extends \Tests\DisturbUnitTestCase
 {
 
-    protected $workflowConfigDto;
-    protected $contextStorageService;
+    protected static $contextStorageService;
+    protected static $workflowManagerService;
 
     protected $workerHostname = 'worker-test-hostname';
 
@@ -38,13 +38,12 @@ class ContextStorageServiceTest extends \Tests\DisturbUnitTestCase
      *
      * @return void
      */
-    public function setUp()
+    public static function setUpBeforeClass()
     {
-        parent::setUp();
-
-        $this->workflowConfigDto = WorkflowConfigDtoFactory::get(realpath(__DIR__ . '/../../Config/serie.json'));
-        $this->workflowManagerService = new Workflow\ManagerService($this->workflowConfigDto);
-        $this->contextStorageService = new ContextStorageService($this->workflowConfigDto);
+        parent::setUpBeforeClass();
+        $workflowConfigDto = WorkflowConfigDtoFactory::get(realpath(__DIR__ . '/../../Config/serie.json'));
+        self::$workflowManagerService = new Workflow\ManagerService($workflowConfigDto);
+        self::$contextStorageService = new ContextStorageService($workflowConfigDto);
     }
 
     /**
@@ -66,13 +65,13 @@ class ContextStorageServiceTest extends \Tests\DisturbUnitTestCase
     public function testSetStatus()
     {
         $wfId = $this->generateWfId();
-        $this->workflowManagerService->init($wfId, $this->validWFHash, $this->workerHostname);
-        $this->contextStorageService->setWorkflowStatus($wfId, Workflow\ManagerService::STATUS_SUCCESS, 'test');
-        $wfStatus = $this->workflowManagerService->getStatus($wfId);
+        self::$workflowManagerService->init($wfId, $this->validWFHash, $this->workerHostname);
+        self::$contextStorageService->setWorkflowStatus($wfId, Workflow\ManagerService::STATUS_SUCCESS, 'test');
+        $wfStatus = self::$workflowManagerService->getStatus($wfId);
         $this->assertEquals(Workflow\ManagerService::STATUS_SUCCESS, $wfStatus);
-        $wfDto = $this->contextStorageService->get($wfId);
+        $wfDto = self::$contextStorageService->get($wfId);
         $wfInfo = $wfDto->getWorkflowInfo($wfId);
         $this->assertEquals('test', $wfInfo);
-        $this->contextStorageService->delete($wfId);
+        self::$contextStorageService->delete($wfId);
     }
 }

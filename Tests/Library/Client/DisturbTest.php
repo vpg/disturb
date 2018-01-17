@@ -17,10 +17,9 @@ use \Vpg\Disturb\Workflow\WorkflowConfigDtoFactory;
 class DisturbTest extends \Tests\DisturbUnitTestCase
 {
 
-    protected $workflowConfigDto;
-    protected $contextStorageService;
-    protected $workflowManagerService;
-    protected $disturbClient;
+    protected static $contextStorageService;
+    protected static $workflowManagerService;
+    protected static $disturbClient;
 
     protected $workerHostname = 'worker-test-hostname';
 
@@ -29,14 +28,13 @@ class DisturbTest extends \Tests\DisturbUnitTestCase
      *
      * @return void
      */
-    public function setUp()
+    public static function setUpBeforeClass()
     {
-        parent::setUp();
-
-        $this->workflowConfigDto = WorkflowConfigDtoFactory::get(realpath(__DIR__ . '/config.json'));
-        $this->contextStorageService = new ContextStorageService($this->workflowConfigDto);
-        $this->workflowManagerService = new Workflow\ManagerService($this->workflowConfigDto);
-        $this->disturbClient = new Client\Disturb();
+        parent::setUpBeforeClass();
+        $workflowConfigDto = WorkflowConfigDtoFactory::get(realpath(__DIR__ . '/config.json'));
+        self::$contextStorageService = new ContextStorageService($workflowConfigDto);
+        self::$workflowManagerService = new Workflow\ManagerService($workflowConfigDto);
+        self::$disturbClient = new Client\Disturb();
     }
 
     /**
@@ -49,7 +47,6 @@ class DisturbTest extends \Tests\DisturbUnitTestCase
         return str_replace(' ', '', 'test' . microtime());
     }
 
-
     /**
      * Test getWf()
      *
@@ -58,14 +55,13 @@ class DisturbTest extends \Tests\DisturbUnitTestCase
     public function testGetWorkflow()
     {
         $wfId = $this->generateWfId();
-        $this->workflowManagerService->init($wfId, ['foo' => 'bar'], $this->workerHostname);
-        $wfHash = $this->disturbClient->getWorkFlow($wfId);
+        self::$workflowManagerService->init($wfId, ['foo' => 'bar'], $this->workerHostname);
+        $wfHash = self::$disturbClient->getWorkFlow($wfId);
 
         $this->assertNull($wfHash->validate());
         $this->addToAssertionCount(1);
 
         // clean db
-        $this->contextStorageService->delete($wfId);
+        self::$contextStorageService->delete($wfId);
     }
-
 }

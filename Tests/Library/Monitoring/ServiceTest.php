@@ -5,7 +5,6 @@ namespace Tests\Library\Monitoring;
 use \phalcon\Config;
 use \Vpg\Disturb\Workflow;
 use \Vpg\Disturb\Core;
-use \Vpg\Disturb\Client;
 use \Vpg\Disturb\Context\ContextStorageService;
 use \Vpg\Disturb\Monitoring;
 
@@ -18,24 +17,19 @@ use \Vpg\Disturb\Monitoring;
 class ServiceTest extends \Tests\DisturbUnitTestCase
 {
 
-    protected $workflowConfigDto;
-    protected $contextStorageService;
-    protected $workflowManagerService;
-    protected $disturbClient;
-
-    protected $workerHostname = 'worker-test-hostname';
+    protected static $workflowConfigDto;
+    protected static $monitoringService;
 
     /**
      * Setup
      *
      * @return void
      */
-    public function setUp()
+    public static function setUpBeforeClass()
     {
-        parent::setUp();
-
-        $this->workflowConfigDto = Workflow\WorkflowConfigDtoFactory::get(realpath(__DIR__ . '/config.json'));
-        $this->monitoringService = new Monitoring\Service($this->workflowConfigDto);
+        parent::setUpBeforeClass();
+        self::$workflowConfigDto = Workflow\WorkflowConfigDtoFactory::get(realpath(__DIR__ . '/config.json'));
+        self::$monitoringService = new Monitoring\Service(self::$workflowConfigDto);
     }
 
     /**
@@ -56,16 +50,16 @@ class ServiceTest extends \Tests\DisturbUnitTestCase
     public function testHeartbeat()
     {
         $workerId = $this->generateWorkerId();
-        $this->monitoringService->logWorkerBeat($workerId);
-        $workerHash = $this->monitoringService->getWorkerInfo($workerId);
+        self::$monitoringService->logWorkerBeat($workerId);
+        $workerHash = self::$monitoringService->getWorkerInfo($workerId);
         $beat1 = date($workerHash['heartBeatAt']);
         $this->assertArrayHasKey('heartBeatAt', $workerHash);
         sleep(1);
-        $this->monitoringService->logWorkerBeat($workerId);
-        $workerHash = $this->monitoringService->getWorkerInfo($workerId);
+        self::$monitoringService->logWorkerBeat($workerId);
+        $workerHash = self::$monitoringService->getWorkerInfo($workerId);
         $beat2 = date($workerHash['heartBeatAt']);
         $this->assertGreaterThan($beat1, $beat2);
-        $this->monitoringService->deleteWorkerInfo($workerId);
+        self::$monitoringService->deleteWorkerInfo($workerId);
     }
 
     /**
@@ -76,10 +70,10 @@ class ServiceTest extends \Tests\DisturbUnitTestCase
     public function testStarted()
     {
         $workerId = $this->generateWorkerId();
-        $this->monitoringService->logWorkerStarted($workerId, $pid = 1);
-        $workerHash = $this->monitoringService->getWorkerInfo($workerId);
+        self::$monitoringService->logWorkerStarted($workerId, $pid = 1);
+        $workerHash = self::$monitoringService->getWorkerInfo($workerId);
         $this->assertEquals(Core\AbstractWorker::STATUS_STARTED, $workerHash['status']);
-        $this->monitoringService->deleteWorkerInfo($workerId);
+        self::$monitoringService->deleteWorkerInfo($workerId);
     }
 
     /**
@@ -90,10 +84,10 @@ class ServiceTest extends \Tests\DisturbUnitTestCase
     public function testExited()
     {
         $workerId = $this->generateWorkerId();
-        $this->monitoringService->logWorkerExited($workerId, $pid = 1);
-        $workerHash = $this->monitoringService->getWorkerInfo($workerId);
+        self::$monitoringService->logWorkerExited($workerId, $pid = 1);
+        $workerHash = self::$monitoringService->getWorkerInfo($workerId);
         $this->assertEquals(Core\AbstractWorker::STATUS_EXITED, $workerHash['status']);
-        $this->monitoringService->deleteWorkerInfo($workerId);
+        self::$monitoringService->deleteWorkerInfo($workerId);
     }
 
 }
