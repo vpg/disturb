@@ -62,7 +62,7 @@ install:
   - ./elasticsearch-${ES_VERSION}/bin/elasticsearch &
   - sleep 20
   # RdKafka
-  - git clone git@github.com:edenhill/librdkafka.git
+  - git clone https://github.com/edenhill/librdkafka.git
   - ./configure
   - make
   - sudo make install
