@@ -19,7 +19,7 @@ class DisturbTest extends \Tests\DisturbUnitTestCase
 
     protected static $contextStorageService;
     protected static $workflowManagerService;
-    protected static $disturbClient;
+    protected static $workflowConfigDto;
 
     protected $workerHostname = 'worker-test-hostname';
 
@@ -31,10 +31,9 @@ class DisturbTest extends \Tests\DisturbUnitTestCase
     public static function setUpBeforeClass()
     {
         parent::setUpBeforeClass();
-        $workflowConfigDto = WorkflowConfigDtoFactory::get(realpath(__DIR__ . '/config.json'));
-        self::$contextStorageService = new ContextStorageService($workflowConfigDto);
-        self::$workflowManagerService = new Workflow\ManagerService($workflowConfigDto);
-        self::$disturbClient = new Client\Disturb($workflowConfigDto);
+        self::$workflowConfigDto = WorkflowConfigDtoFactory::get(realpath(__DIR__ . '/config.json'));
+        self::$contextStorageService = new ContextStorageService(self::$workflowConfigDto);
+        self::$workflowManagerService = new Workflow\ManagerService(self::$workflowConfigDto);
     }
 
     /**
@@ -54,9 +53,10 @@ class DisturbTest extends \Tests\DisturbUnitTestCase
      */
     public function testGetWorkflow()
     {
+        $disturbClient = new Client\Disturb(self::$workflowConfigDto);
         $wfId = $this->generateWfId();
         self::$workflowManagerService->init($wfId, ['foo' => 'bar'], $this->workerHostname);
-        $wfHash = self::$disturbClient->getWorkFlow($wfId);
+        $wfHash = $disturbClient->getWorkFlow($wfId);
 
         $this->assertNull($wfHash->validate());
         $this->addToAssertionCount(1);
