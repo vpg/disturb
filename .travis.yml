@@ -51,8 +51,8 @@ install:
   - if [ -f $HOME/ext/$PHP_VERSION/$PHALCON_VERSION/phalcon.so ]; then cp $HOME/ext/$PHP_VERSION/$PHALCON_VERSION/phalcon.so $PHP_EXTENSION_DIR/phalcon.so; fi;
   - phpenv config-add $HOME/cphalcon/$PHALCON_VERSION/tests/_ci/phalcon.ini
   - $(phpenv which php) --ri phalcon
-  - cd $TRAVIS_BUILD_DIR
   # Elastic
+  - cd $TRAVIS_BUILD_DIR
   - wget ${ES_DOWNLOAD_URL}
   - tar -xzf elasticsearch-${ES_VERSION}.tar.gz
   - ls ./elasticsearch-${ES_VERSION}/
@@ -62,11 +62,14 @@ install:
   - ./elasticsearch-${ES_VERSION}/bin/elasticsearch &
   - sleep 20
   # RdKafka
+  - cd $TRAVIS_BUILD_DIR
   - git clone https://github.com/edenhill/librdkafka.git
+  - cd librdkafka
   - ./configure
   - make
   - sudo make install
   # phpRdKafka
+  - cd $TRAVIS_BUILD_DIR
   - git clone https://github.com/arnaud-lb/php-rdkafka.git
   - cd php-rdkafka
   - phpize
