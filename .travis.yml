@@ -84,6 +84,7 @@ before_script:
     - cd $TRAVIS_BUILD_DIR
     - ./bin/elasticsearch/initialize.sh http://127.0.0.1:9200
     - for f in $(grep -rl 'vp-aix-elsdisturb.aix.vpg.lan' Tests/); do sed -i 's/vp-aix-elsdisturb.aix.vpg.lan/127.0.0.1/' $f; done
+    - for f in $(grep -rl '10.13.11.2' Tests/); do sed -i 's/10\.13\.11\.2./127\.0\.0\.1/' $f; done
     - curl http://127.0.0.1:9200
     - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
     - chmod +x ./cc-test-reporter
