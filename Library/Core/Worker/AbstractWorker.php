@@ -72,6 +72,11 @@ abstract class AbstractWorker extends Task implements WorkerInterface
     protected $workerCode = '';
 
     /**
+     * @var array $paramHash Worker param
+     */
+    protected $paramHash = '';
+
+    /**
      * Inits the current worker according to the given workflow config
      *  - Loads the config
      *  - Register Client biz classes
@@ -102,7 +107,7 @@ abstract class AbstractWorker extends Task implements WorkerInterface
      *
      * @return array The parsed options hash
      */
-    private function parseOpt(array $paramList)
+    protected function parseOpt(array $paramList)
     {
         $this->getDI()->get('logr')->debug(json_encode(func_get_args()));
         $paramHash = Cli\Console::parseLongOpt(join($paramList, ' '));
