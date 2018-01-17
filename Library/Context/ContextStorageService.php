@@ -380,7 +380,7 @@ eot;
         $this->di->get('logr')->debug(json_encode(func_get_args()));
         $script = <<<eot
         int nbStep = ctx._source.steps.size();
-        def jobHash = ['status':params.jobStatus, 'finishedAt':params.jobFinishedAt, 'data':params.jobResult];
+        def jobHash = ['status':params.jobStatus, 'finishedAt':params.jobFinishedAt, 'result':params.jobResult];
         // loop over steps
         for (int stepIndex = 0; stepIndex < nbStep; stepIndex++) {
             def step = ctx._source.steps[stepIndex];
