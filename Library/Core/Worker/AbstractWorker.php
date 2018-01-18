@@ -4,6 +4,7 @@ namespace Vpg\Disturb\Core\Worker;
 
 use \Phalcon\Cli\Task;
 
+use Vpg\Disturb\Core;
 use Vpg\Disturb\Message\MessageDto;
 use Vpg\Disturb\Workflow\WorkflowException;
 use Vpg\Disturb\Workflow\WorkflowConfigDtoFactory;
@@ -110,7 +111,7 @@ abstract class AbstractWorker extends Task implements WorkerInterface
     protected function parseOpt(array $paramList)
     {
         $this->getDI()->get('logr')->debug(json_encode(func_get_args()));
-        $paramHash = Cli\Console::parseLongOpt(join($paramList, ' '));
+        $paramHash = Core\Cli\Console::parseLongOpt(join($paramList, ' '));
         foreach (array_merge($this->taskOptionBaseList, $this->taskOptionList) as $option) {
             $optionMatch = preg_match('/^(?<optionnal>\?)?(?<opt>\w+):?(?<val>\w+)?/', $option, $matchHash);
             // default values
