@@ -149,7 +149,6 @@ abstract class AbstractWorker extends Task implements WorkerInterface
     {
         $this->getDI()->get('logr')->debug(json_encode(func_get_args()));
         $this->paramHash = $this->parseOpt($paramList);
-        $this->lock();
         $this->initWorker();
 
 
