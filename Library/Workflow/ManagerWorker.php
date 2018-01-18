@@ -80,7 +80,7 @@ class ManagerWorker extends Core\Worker\AbstractWorker
      *
      * @throws WorkflowException
      *
-     * @return void
+     * @return boolean true if the message has been successfully processed
      */
     protected function processMessage(Message\MessageDto $messageDto)
     {
@@ -100,7 +100,7 @@ class ManagerWorker extends Core\Worker\AbstractWorker
                             $this->getDI()->get('logr')->error(
                                 "Failed to start workflow : {$wfException->getMessage()}"
                             );
-                            return;
+                            return false;
                         }
                         $this->runNextStep($messageDto->getId());
                     break;
@@ -122,7 +122,7 @@ class ManagerWorker extends Core\Worker\AbstractWorker
                     );
                 } catch (WorkflowJobFinalizationException $workflowJobFinalizationException) {
                     $this->getDI()->get('logr')->warning($workflowJobFinalizationException->getMessage());
-                    return;
+                    return false;
                 }
 
                 $status = $this->workflowManagerService->getStatus($messageDto->getId());
@@ -166,6 +166,7 @@ class ManagerWorker extends Core\Worker\AbstractWorker
             default:
                 $this->getDI()->get('logr')->error("ERR : Unknown message type : {$messageDto->getType()}");
         }
+        return true;
     }
 
     /**

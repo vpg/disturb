@@ -97,6 +97,40 @@ class ManagerWorkerTest extends \Tests\DisturbUnitTestCase
     }
 
     /**
+     * Test a same workflow cannot be sent more than once
+     *
+     * @return void
+     */
+    public function testStartWorkflowTwice()
+    {
+        $managerWorker = new Workflow\ManagerWorker();
+        $managerWorkerReflection = new \ReflectionClass($managerWorker);
+        $parseOtpF = $managerWorkerReflection->getMethod('parseOpt');
+        $parseOtpF->setAccessible(true);
+        $parsedOptHash = $parseOtpF->invokeArgs($managerWorker, [self::$workerParamHash]);
+
+        $parseOpt = $managerWorkerReflection->getProperty('paramHash');
+        $parseOpt->setAccessible(true);
+        $parseOpt->setValue($managerWorker, $parsedOptHash);
+
+        $initWorkerF = $managerWorkerReflection->getMethod('initWorker');
+        $initWorkerF->setAccessible(true);
+        $initWorkerF->invokeArgs($managerWorker, [self::$workerParamHash]);
+
+        $wfId = $this->generateWfId();
+        $startWFMsg = '{"id":"' . $wfId . '", "type" : "WF-CONTROL", "action":"start", "payload": {"foo":"bar"}}';
+        $msgDto = new MessageDto($startWFMsg);
+
+        $processMessageF = $managerWorkerReflection->getMethod('processMessage');
+        $processMessageF->setAccessible(true);
+        $processed = $processMessageF->invokeArgs($managerWorker, [$msgDto]);
+        $this->assertTrue($processed);
+
+        $processed = $processMessageF->invokeArgs($managerWorker, [$msgDto]);
+        $this->assertFalse($processed);
+    }
+
+    /**
      * Test init()
      *
      * @return void
