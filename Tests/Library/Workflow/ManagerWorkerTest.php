@@ -52,7 +52,7 @@ class ManagerWorkerTest extends \Tests\DisturbUnitTestCase
     }
 
     /**
-     * Test init()
+     * Test start workflow
      *
      * @return void
      */

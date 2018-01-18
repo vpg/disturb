@@ -104,7 +104,7 @@ class MessageDto extends Dto\AbstractDto
      */
     public function getJobId(): string
     {
-        return $this->rawHash['jobId'] ?? '';
+        return $this->rawHash['jobId'] ?? '0';
     }
 
     /**
