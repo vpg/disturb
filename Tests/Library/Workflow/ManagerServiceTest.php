@@ -182,7 +182,7 @@ class ManagerServiceTest extends \Tests\DisturbUnitTestCase
         $wfContextDto = self::$serieWorkflowManagerService->getContext($wfId);
         $this->assertEquals(
             $resultHash['data'],
-            $wfContextDto->getStep('bar')['jobList'][0]['data']
+            $wfContextDto->getStep('bar')['jobList'][0]['result']
         );
         $wfCurrentStepStatus = self::$serieWorkflowManagerService->getCurrentStepStatus($wfId);
         $this->assertEquals(
