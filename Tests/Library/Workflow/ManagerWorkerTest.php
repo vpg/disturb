@@ -33,11 +33,11 @@ class ManagerWorkerTest extends \Tests\DisturbUnitTestCase
     public static function setUpBeforeClass()
     {
         parent::setUpBeforeClass();
-        $configFilpath = realpath(__DIR__ . '/../../Config/serie.json');
-        self::$workflowSerieConfigDto = WorkflowConfigDtoFactory::get($configFilpath);
+        $configFilepath = realpath(__DIR__ . '/../../Config/serie.json');
+        self::$workflowSerieConfigDto = WorkflowConfigDtoFactory::get($configFilepath);
         self::$contextStorageService = new ContextStorageService(self::$workflowSerieConfigDto);
         self::$workerParamHash = [
-           "--workflow=$configFilpath"
+           "--workflow=$configFilepath"
         ];
     }
 
@@ -137,7 +137,7 @@ class ManagerWorkerTest extends \Tests\DisturbUnitTestCase
      */
     public function testBadInitClientParams()
     {
-        $configFilpath = realpath(__DIR__ . '/../../Config/serieWrongClientClass.json');
+        $configFilepath = realpath(__DIR__ . '/../../Config/serieWrongClientClass.json');
         $workerParamHash = [
         ];
         $managerWorker = new Workflow\ManagerWorker();
@@ -154,9 +154,9 @@ class ManagerWorkerTest extends \Tests\DisturbUnitTestCase
      */
     public function testBadInitClientClass()
     {
-        $configFilpath = realpath(__DIR__ . '/../../Config/serieWrongClientClass.json');
+        $configFilepath = realpath(__DIR__ . '/../../Config/serieWrongClientClass.json');
         $workerParamHash = [
-           "--workflow=$configFilpath"
+           "--workflow=$configFilepath"
         ];
         $managerWorker = new Workflow\ManagerWorker();
         $managerWorkerReflection = new \ReflectionClass($managerWorker);

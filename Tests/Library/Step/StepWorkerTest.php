@@ -35,11 +35,11 @@ class StepWorkerTest extends \Tests\DisturbUnitTestCase
     public static function setUpBeforeClass()
     {
         parent::setUpBeforeClass();
-        $configFilpath = realpath(__DIR__ . '/../../Config/serie.json');
-        self::$workflowSerieConfigDto = WorkflowConfigDtoFactory::get($configFilpath);
+        $configFilepath = realpath(__DIR__ . '/../../Config/serie.json');
+        self::$workflowSerieConfigDto = WorkflowConfigDtoFactory::get($configFilepath);
         self::$contextStorageService = new ContextStorageService(self::$workflowSerieConfigDto);
         self::$workerParamHash = [
-           "--workflow=$configFilpath"
+           "--workflow=$configFilepath"
         ];
     }
 
@@ -60,7 +60,7 @@ class StepWorkerTest extends \Tests\DisturbUnitTestCase
      */
     public function testBadInitClientParams()
     {
-        $configFilpath = realpath(__DIR__ . '/../../Config/serieWrongClientClass.json');
+        $configFilepath = realpath(__DIR__ . '/../../Config/serieWrongClientClass.json');
         $workerParamHash = [
         ];
         $stepWorker = new Step\StepWorker();
