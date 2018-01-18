@@ -13,7 +13,7 @@ use Vpg\Disturb\Core;
  * @author   Jérome BOURGEAIS <jbourgeais@voyageprive.com>
  * @license  https://github.com/vpg/disturb/blob/master/LICENSE MIT Licence
  */
-class ManagerWorker extends Core\AbstractWorker
+class ManagerWorker extends Core\Worker\AbstractWorker
 {
     protected $taskOptionList = [
         '?name:'    // optional workflow name

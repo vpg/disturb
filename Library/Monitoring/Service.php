@@ -76,7 +76,7 @@ class Service extends Component
     {
         $this->di->get('logr')->debug(json_encode(func_get_args()));
         $workerHash = [
-            'status' => Core\AbstractWorker::STATUS_STARTED,
+            'status' => Core\Worker\AbstractWorker::STATUS_STARTED,
             'runingOn' => php_uname("n"),
             'pid' => $pid,
             'startedAt' => date('Y-m-d H:i:s'),
@@ -99,7 +99,7 @@ class Service extends Component
         $workerHash = [
             'exitedAt' => date('Y-m-d H:i:s'),
             'runingOn' => php_uname("n"),
-            'status' => Core\AbstractWorker::STATUS_EXITED,
+            'status' => Core\Worker\AbstractWorker::STATUS_EXITED,
             'exitCode' => $exitCode
         ];
         $this->storageClient->save($workerCode, $workerHash);

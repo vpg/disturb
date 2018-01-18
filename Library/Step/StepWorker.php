@@ -2,7 +2,7 @@
 
 namespace Vpg\Disturb\Step;
 
-use Vpg\Disturb\Core\AbstractWorker;
+use Vpg\Disturb\Core;
 use Vpg\Disturb\Message;
 use Vpg\Disturb\Topic;
 use Vpg\Disturb\Workflow\ManagerService;
@@ -17,7 +17,7 @@ use Vpg\Disturb\Context\ContextStorageService;
  * @author   Jérome BOURGEAIS <jbourgeais@voyageprive.com>
  * @license  https://github.com/vpg/disturb/blob/master/LICENSE MIT Licence
  */
-class StepWorker extends AbstractWorker
+class StepWorker extends Core\Worker\AbstractWorker
 {
 
     protected $taskOptionList = [
