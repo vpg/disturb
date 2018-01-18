@@ -1,10 +1,11 @@
 <?php
 
-namespace Tests\Library\Context;
+namespace Tests\Library\Workflow;
 
 use \phalcon\Config;
+use \Vpg\Disturb\Core\Worker;
 use \Vpg\Disturb\Workflow;
-use Vpg\Disturb\Message\MessageDto;
+use \Vpg\Disturb\Message\MessageDto;
 use \Vpg\Disturb\Context\ContextStorageService;
 use \Vpg\Disturb\Workflow\WorkflowConfigDtoFactory;
 
@@ -95,6 +96,23 @@ class ManagerWorkerTest extends \Tests\DisturbUnitTestCase
         );
     }
 
+    /**
+     * Test init()
+     *
+     * @return void
+     */
+    public function testBadInitClientParams()
+    {
+        $configFilpath = realpath(__DIR__ . '/../../Config/serieWrongClientClass.json');
+        $workerParamHash = [
+        ];
+        $managerWorker = new Workflow\ManagerWorker();
+        $managerWorkerReflection = new \ReflectionClass($managerWorker);
+        $parseOtpF = $managerWorkerReflection->getMethod('parseOpt');
+        $parseOtpF->setAccessible(true);
+        $this->expectException(Worker\WorkerException::class);
+        $parsedOptHash = $parseOtpF->invokeArgs($managerWorker, [$workerParamHash]);
+    }
     /**
      * Test init()
      *

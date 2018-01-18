@@ -132,7 +132,7 @@ abstract class AbstractWorker extends Task implements WorkerInterface
                 !array_key_exists($matchHash['opt'], $paramHash)
             ) {
                 $this->usage();
-                exit(1);
+                throw new WorkerException('Wrong Usage : Missing params');
             }
         }
         return $paramHash;
@@ -264,40 +264,6 @@ abstract class AbstractWorker extends Task implements WorkerInterface
 
         $this->kafkaProducer = new \RdKafka\Producer();
         $this->kafkaProducer->addBrokers($brokers);
-    }
-
-    /**
-     * Sets a lock for the current process according to its params
-     *
-     * @throws WorkflowException if lock exists or perm issue
-     * @return void
-     */
-    private function lock()
-    {
-        return true;
-        $this->getDI()->get('logr')->debug(json_encode(func_get_args()));
-        $pid = getMyPid();
-        $lockFileName = $this->getLockFilePath();
-        if (file_exists($lockFileName) && !isset($this->paramHash['force'])) {
-            throw new WorkflowException('Failed to lock process, already running or zombie');
-        }
-        if (!file_put_contents($lockFileName, $pid, LOCK_EX)) {
-            throw new WorkflowException('Failed to lock process : failed to write file ' . $lockFileName);
-        }
-    }
-
-    /**
-     * Returns a lock file path related to the current process
-     *
-     * @return string a log file path. e.g. : /var/run/disturb-step-checkInfraGroupLodging-0.pid
-     */
-    private function getLockFilePath()
-    {
-        $this->getDI()->get('logr')->debug(json_encode(func_get_args()));
-        $lockDirPath = '/var/run/';
-        $workerName = self::getWorkerCode($this->paramHash);
-        $lockFileName = $workerName;
-        return $lockDirPath . $lockFileName . '.pid';
     }
 
     /**
