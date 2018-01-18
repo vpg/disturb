@@ -26,36 +26,65 @@ env:
     - PHALCON_VERSION="v3.2.1"
     - ES_VERSION=6.1.1 ES_DOWNLOAD_URL=https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-${ES_VERSION}.tar.gz
     - CC_TEST_REPORTER_ID=6494dfcb48d910c8f64f3a3c0634de13eeedfe6ba62d94d16a35c28f586c7b87
+    - ZOOKEEPER_HOST=localhost:2181
+    - KAFKA_HOST=localhost:9092
 
 before_install:
   - sudo apt-get -qq update
+  # Phalcon
   - export PHP_MAJOR="$(echo $TRAVIS_PHP_VERSION | cut -d '.' -f 1)"
   - export PHP_EXTENSION_DIR=$(php-config --extension-dir)
   - if [ ! -z "${GH_TOKEN}" ]; then composer config github-oauth.github.com ${GH_TOKEN}; echo "Configured Github token"; fi;
   - if [ ! -f "$HOME/cphalcon/$PHALCON_VERSION/tests/_ci/phalcon.ini" ]; then mkdir -p $HOME/cphalcon/$PHALCON_VERSION && git clone -q --depth=1 https://github.com/phalcon/cphalcon.git $HOME/cphalcon/$PHALCON_VERSION >/dev/null 2>&1; fi;
+  # Kafka
+  - wget http://mirrors.standaloneinstaller.com/apache/kafka/1.0.0/kafka_2.11-1.0.0.tgz -O kafka.tgz
+  - mkdir -p kafka && tar xzf kafka.tgz -C kafka --strip-components 1
+  - nohup bash -c "cd kafka && bin/zookeeper-server-start.sh config/zookeeper.properties &"
+  - nohup bash -c "cd kafka && bin/kafka-server-start.sh config/server.properties &"
+  - sleep 5
+  - kafka/bin/kafka-topics.sh --create --partitions 1 --replication-factor 1 --topic disturb-test-manager --zookeeper $ZOOKEEPER_HOST
 
 install:
   - travis_retry composer install --prefer-dist --no-interaction --quiet --no-ansi --no-progress --optimize-autoloader --dev --no-suggest --ignore-platform-reqs
+  # Phalcon
   - if [ ! -f $HOME/ext/$PHP_VERSION/$PHALCON_VERSION/phalcon.so ]; then cd $HOME/cphalcon/$PHALCON_VERSION/build && bash ./install --phpize $(phpenv which phpize) --php-config $(phpenv which php-config) && mkdir -p $HOME/ext/$PHP_VERSION/$PHALCON_VERSION && cp $PHP_EXTENSION_DIR/phalcon.so $HOME/ext/$PHP_VERSION/$PHALCON_VERSION/phalcon.so; fi;
   - if [ -f $HOME/ext/$PHP_VERSION/$PHALCON_VERSION/phalcon.so ]; then cp $HOME/ext/$PHP_VERSION/$PHALCON_VERSION/phalcon.so $PHP_EXTENSION_DIR/phalcon.so; fi;
   - phpenv config-add $HOME/cphalcon/$PHALCON_VERSION/tests/_ci/phalcon.ini
-  - cd $TRAVIS_BUILD_DIR
   - $(phpenv which php) --ri phalcon
+  # Elastic
+  - cd $TRAVIS_BUILD_DIR
   - wget ${ES_DOWNLOAD_URL}
-  - ls -l
   - tar -xzf elasticsearch-${ES_VERSION}.tar.gz
   - ls ./elasticsearch-${ES_VERSION}/
-
-
   - 'echo "script.allowed_types: inline" | sudo tee -a ./elasticsearch-${ES_VERSION}/config/elasticsearch.yml'
   - 'echo "script.allowed_contexts: search, update" | sudo tee -a ./elasticsearch-${ES_VERSION}/config/elasticsearch.yml'
   - grep -r script ./elasticsearch-${ES_VERSION}/config/ 
   - ./elasticsearch-${ES_VERSION}/bin/elasticsearch &
   - sleep 20
+  # RdKafka
+  - cd $TRAVIS_BUILD_DIR
+  - git clone https://github.com/edenhill/librdkafka.git
+  - cd librdkafka
+  - ./configure
+  - make
+  - sudo make install
+  # phpRdKafka
+  - cd $TRAVIS_BUILD_DIR
+  - git clone https://github.com/arnaud-lb/php-rdkafka.git
+  - cd php-rdkafka
+  - phpize
+  - ./configure
+  - make all -j 5
+  - sudo make install
+  - touch rdkafka.ini
+  - echo "extension=rdkafka.so" > rdkafka.ini
+  - phpenv config-add rdkafka.ini
 
 before_script:
+    - cd $TRAVIS_BUILD_DIR
     - ./bin/elasticsearch/initialize.sh http://127.0.0.1:9200
     - for f in $(grep -rl 'vp-aix-elsdisturb.aix.vpg.lan' Tests/); do sed -i 's/vp-aix-elsdisturb.aix.vpg.lan/127.0.0.1/' $f; done
+    - for f in $(grep -rl '10.13.11.2' Tests/); do sed -i 's/10\.13\.11\.2./127\.0\.0\.1/' $f; done
     - curl http://127.0.0.1:9200
     - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
     - chmod +x ./cc-test-reporter
@@ -68,6 +97,8 @@ script:
 
 after_script:
     - ./cc-test-reporter after-build --exit-code $TRAVIS_TEST_RESULT
+    - curl -X PURGE "https://camo.githubusercontent.com/3779ff2c101d84c0e04e677bc3b5cfa2d9e3887e/68747470733a2f2f636f766572616c6c732e696f2f7265706f732f6769746875622f7670672f646973747572622f62616467652e7376673f6272616e63683d616c70686126736572766963653d676974687562"
+
 after_success:
     - travis_retry php vendor/bin/php-coveralls -v
 

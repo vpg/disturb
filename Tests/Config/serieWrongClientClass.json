@@ -1,5 +1,5 @@
 {
-    "name" : "test",
+    "name" : "testBadCLass",
     "version" : "0.0.1",
     "brokerServerList" : ["10.13.11.27", "10.13.11.28", "10.13.11.29"],
     "servicesClassPath" : "./Tests/Mocks/Client/",
@@ -11,7 +11,7 @@
         }
     },
     "steps" : [
-        { "name" : "foo" },
-        { "name" : "bar" }
+        { "name" : "badFoo" },
+        { "name" : "badFar" }
     ]
 }

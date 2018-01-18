@@ -4,6 +4,7 @@ namespace Vpg\Disturb\Core\Worker;
 
 use \Phalcon\Cli\Task;
 
+use Vpg\Disturb\Core;
 use Vpg\Disturb\Message\MessageDto;
 use Vpg\Disturb\Workflow\WorkflowException;
 use Vpg\Disturb\Workflow\WorkflowConfigDtoFactory;
@@ -72,6 +73,11 @@ abstract class AbstractWorker extends Task implements WorkerInterface
     protected $workerCode = '';
 
     /**
+     * @var array $paramHash Worker param
+     */
+    protected $paramHash = '';
+
+    /**
      * Inits the current worker according to the given workflow config
      *  - Loads the config
      *  - Register Client biz classes
@@ -102,10 +108,10 @@ abstract class AbstractWorker extends Task implements WorkerInterface
      *
      * @return array The parsed options hash
      */
-    private function parseOpt(array $paramList)
+    protected function parseOpt(array $paramList)
     {
         $this->getDI()->get('logr')->debug(json_encode(func_get_args()));
-        $paramHash = Cli\Console::parseLongOpt(join($paramList, ' '));
+        $paramHash = Core\Cli\Console::parseLongOpt(join($paramList, ' '));
         foreach (array_merge($this->taskOptionBaseList, $this->taskOptionList) as $option) {
             $optionMatch = preg_match('/^(?<optionnal>\?)?(?<opt>\w+):?(?<val>\w+)?/', $option, $matchHash);
             // default values
@@ -126,7 +132,7 @@ abstract class AbstractWorker extends Task implements WorkerInterface
                 !array_key_exists($matchHash['opt'], $paramHash)
             ) {
                 $this->usage();
-                exit(1);
+                throw new WorkerException('Wrong Usage : Missing params');
             }
         }
         return $paramHash;
@@ -258,40 +264,6 @@ abstract class AbstractWorker extends Task implements WorkerInterface
 
         $this->kafkaProducer = new \RdKafka\Producer();
         $this->kafkaProducer->addBrokers($brokers);
-    }
-
-    /**
-     * Sets a lock for the current process according to its params
-     *
-     * @throws WorkflowException if lock exists or perm issue
-     * @return void
-     */
-    private function lock()
-    {
-        return true;
-        $this->getDI()->get('logr')->debug(json_encode(func_get_args()));
-        $pid = getMyPid();
-        $lockFileName = $this->getLockFilePath();
-        if (file_exists($lockFileName) && !isset($this->paramHash['force'])) {
-            throw new WorkflowException('Failed to lock process, already running or zombie');
-        }
-        if (!file_put_contents($lockFileName, $pid, LOCK_EX)) {
-            throw new WorkflowException('Failed to lock process : failed to write file ' . $lockFileName);
-        }
-    }
-
-    /**
-     * Returns a lock file path related to the current process
-     *
-     * @return string a log file path. e.g. : /var/run/disturb-step-checkInfraGroupLodging-0.pid
-     */
-    private function getLockFilePath()
-    {
-        $this->getDI()->get('logr')->debug(json_encode(func_get_args()));
-        $lockDirPath = '/var/run/';
-        $workerName = self::getWorkerCode($this->paramHash);
-        $lockFileName = $workerName;
-        return $lockDirPath . $lockFileName . '.pid';
     }
 
     /**

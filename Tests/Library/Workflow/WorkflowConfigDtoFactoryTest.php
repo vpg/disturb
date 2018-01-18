@@ -52,7 +52,7 @@ class WorkflowConfigDtoFactoryTest extends \Tests\DisturbUnitTestCase
         $workflowConfigDto = new Workflow\WorkflowConfigDto(
             realpath(__DIR__ . '/../../Config/serie.json')
         );
-        $this->assertEquals($workflowConfigDto->getWorkflowName(), 'loadingContract');
+        $this->assertEquals($workflowConfigDto->getWorkflowName(), 'test');
         // invalid input type
         $this->expectException(Dto\InvalidInputTypeException::class);
         $workflowConfigDto = new Workflow\WorkflowConfigDto(true);
@@ -98,9 +98,8 @@ class WorkflowConfigDtoFactoryTest extends \Tests\DisturbUnitTestCase
             $workflowConfigDto->getBrokerServerList(),
             ['10.13.11.27', '10.13.11.28', '10.13.11.29']
         );
-        $this->assertEquals($workflowConfigDto->getServicesClassPath(), 'app/Workflows/LoadingContract');
-        $this->assertEquals($workflowConfigDto->getServicesClassNameSpace(), 'Vpg\Turbo\Workflows\LoadingContract');
-        $this->assertEquals($workflowConfigDto->getProjectBootstrapFilepath(), 'app/Workflows/bootstrap.php');
+        $this->assertEquals($workflowConfigDto->getServicesClassPath(), './Tests/Mocks/Client/');
+        $this->assertEquals($workflowConfigDto->getServicesClassNameSpace(), 'Vpg\Disturb\Test');
         $this->assertEquals($workflowConfigDto->getStorageHost(), 'http://vp-aix-elsdisturb.aix.vpg.lan:9200');
     }
 }
