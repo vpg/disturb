@@ -1,6 +1,6 @@
 <?php
 
-namespace Vpg\Disturb\Core;
+namespace Vpg\Disturb\Core\Worker;
 
 use \Phalcon\Cli\Task;
 
@@ -9,9 +9,9 @@ use Vpg\Disturb\Workflow\WorkflowException;
 use Vpg\Disturb\Workflow\WorkflowConfigDtoFactory;
 
 /**
- * Abstract task
+ * Abstract Worker
  *
- * @package  Disturb\Core
+ * @package  Disturb\Core\Worker
  * @author   Jérome BOURGEAIS <jbourgeais@voyageprive.com>
  * @license  https://github.com/vpg/disturb/blob/master/LICENSE MIT Licence
  */

@@ -1,6 +1,6 @@
 <?php
 
-namespace Vpg\Disturb\Core;
+namespace Vpg\Disturb\Core\Worker;
 
 /**
  * Interface Worker

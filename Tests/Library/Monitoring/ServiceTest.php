@@ -73,7 +73,7 @@ class ServiceTest extends \Tests\DisturbUnitTestCase
         $workerId = $this->generateWorkerId();
         self::$monitoringService->logWorkerStarted($workerId, $pid = 1);
         $workerHash = self::$monitoringService->getWorkerInfo($workerId);
-        $this->assertEquals(Core\AbstractWorker::STATUS_STARTED, $workerHash['status']);
+        $this->assertEquals(Core\Worker\AbstractWorker::STATUS_STARTED, $workerHash['status']);
         self::$monitoringService->deleteWorkerInfo($workerId);
     }
 
@@ -87,7 +87,7 @@ class ServiceTest extends \Tests\DisturbUnitTestCase
         $workerId = $this->generateWorkerId();
         self::$monitoringService->logWorkerExited($workerId, $pid = 1);
         $workerHash = self::$monitoringService->getWorkerInfo($workerId);
-        $this->assertEquals(Core\AbstractWorker::STATUS_EXITED, $workerHash['status']);
+        $this->assertEquals(Core\Worker\AbstractWorker::STATUS_EXITED, $workerHash['status']);
         self::$monitoringService->deleteWorkerInfo($workerId);
     }
 
