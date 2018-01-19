@@ -6,6 +6,7 @@
 
 ----
 
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/7c3b34fbb5d84c3e9333179e6b35e916)](https://www.codacy.com/app/jrmbrgs/disturb?utm_source=github.com&utm_medium=referral&utm_content=vpg/disturb&utm_campaign=badger)
 [![](https://img.shields.io/travis/vpg/disturb.svg)](https://travis-ci.org/vpg/disturb)
 [![Codacy Badge](https://api.codacy.com/project/badge/Coverage/81bc03379df244ef9ff95ca59932bb64)](https://www.codacy.com/app/jrmbrgs/disturb?utm_source=github.com&utm_medium=referral&utm_content=vpg/disturb&utm_campaign=Badge_Coverage)
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/81bc03379df244ef9ff95ca59932bb64)](https://www.codacy.com/app/jrmbrgs/disturb?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=vpg/disturb&amp;utm_campaign=Badge_Grade)
