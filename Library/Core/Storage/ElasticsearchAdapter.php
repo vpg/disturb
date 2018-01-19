@@ -293,9 +293,6 @@ class ElasticsearchAdapter extends Component implements StorageAdapterInterface
         }
     }
 
-    public function foo($fooBarFarBooGooGarSoLongParameter) {
-        return $fooBarFarBooGooGarSoLongParameter;
-    }
     /**
      * Save document  with id ($id)
      *
