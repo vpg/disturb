@@ -10,6 +10,6 @@
         }
     ],
     "require": {
-        "vpg/disturb": "dev-alpha"
+        "vpg/disturb": "1.0.0-beta.1"
     }
 }
