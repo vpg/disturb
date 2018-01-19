@@ -100,10 +100,7 @@ script:
   - vendor/phpunit/phpunit/phpunit -c Tests/phpunit.xml
 
 after_script:
-    - ./cc-test-reporter after-build --exit-code $TRAVIS_TEST_RESULT
     - curl -X PURGE "https://camo.githubusercontent.com/3779ff2c101d84c0e04e677bc3b5cfa2d9e3887e/68747470733a2f2f636f766572616c6c732e696f2f7265706f732f6769746875622f7670672f646973747572622f62616467652e7376673f6272616e63683d616c70686126736572766963653d676974687562"
-
-after_success:
     - travis_retry php vendor/bin/php-coveralls -v
     - php vendor/bin/codacycoverage clover build/cov/clover.xml
 
