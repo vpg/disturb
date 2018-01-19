@@ -8,7 +8,6 @@ class TestManager implements Disturb\Workflow\ManagerServiceInterface
 {
 
     public function getStepInput(string $contractCode, string $stepCode) : array {
-        $disturbClient  = new Client\Disturb();
         switch ($stepCode) {
         case 'start':
             $stepPayloadHash = [

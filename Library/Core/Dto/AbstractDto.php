@@ -101,7 +101,7 @@ abstract class AbstractDto extends Component
         foreach ($requiredPropList as $prop) {
             // xxx w/ refacto could be recursive
             if (is_array($prop)) {
-                if (empty($this->rawHash[$prop[0]])) {
+                if (!isset($this->rawHash[$prop[0]])) {
                     $missingPropList[] = [$prop[0]];
                     continue;
                 }
@@ -110,7 +110,7 @@ abstract class AbstractDto extends Component
                 unset($prop[0]);
                 foreach ($prop as $key) {
                     $missingDeepProp[] = $key;
-                    if (empty($deepProp[$key])) {
+                    if (!isset($deepProp[$key])) {
                         $missingPropList[] = $missingDeepProp;
                         break;
                     }
@@ -118,7 +118,7 @@ abstract class AbstractDto extends Component
                 }
                 continue;
             }
-            if (empty($this->rawHash[$prop])) {
+            if (!isset($this->rawHash[$prop])) {
                 $missingPropList[] = $prop;
             }
 
