@@ -296,24 +296,24 @@ class ElasticsearchAdapter extends Component implements StorageAdapterInterface
     /**
      * Save document  with id ($id)
      *
-     * @param string $id           id
+     * @param string $docId        id
      * @param array  $documentHash document hash
      *
      * @return array
      *
      * @throws StorageException
      */
-    public function save(string $id, array $documentHash) : array
+    public function save(string $docId, array $documentHash) : array
     {
         $this->di->get('logr')->debug(json_encode(func_get_args()));
         // Specify how many times should the operation be retried when a conflict occurs (simultaneous doc update)
         // TODO : check for param "retry_on_conflict"
 
-        $this->checkParameters([$id, $documentHash]);
+        $this->checkParameters([$docId, $documentHash]);
 
         try {
             $requestParamHash = array_merge(
-                ['id' => $id],
+                ['id' => $docId],
                 $this->commonRequestParamHash
             );
 
