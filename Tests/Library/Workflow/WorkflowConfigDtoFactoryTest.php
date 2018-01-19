@@ -67,7 +67,7 @@ class WorkflowConfigDtoFactoryTest extends \Tests\DisturbUnitTestCase
     {
         $this->expectException(Workflow\InvalidWorkflowConfigException::class);
         $workflowConfigDto = new Workflow\WorkflowConfigDto(
-            '{"name" : "json", "storage" : {"config":{"host":""}}}'
+            '{"name" : "json", "storage" : {"config":{}}}'
         );
     }
 
