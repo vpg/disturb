@@ -31,6 +31,7 @@ env:
 
 before_install:
   - sudo apt-get -qq update
+  - sudo apt-get install jq
   # Phalcon
   - export PHP_MAJOR="$(echo $TRAVIS_PHP_VERSION | cut -d '.' -f 1)"
   - export PHP_EXTENSION_DIR=$(php-config --extension-dir)
@@ -43,6 +44,9 @@ before_install:
   - nohup bash -c "cd kafka && bin/kafka-server-start.sh config/server.properties &"
   - sleep 5
   - kafka/bin/kafka-topics.sh --create --partitions 1 --replication-factor 1 --topic disturb-test-manager --zookeeper $ZOOKEEPER_HOST
+  # Codacy
+  - wget -O ~/codacy-coverage-reporter-assembly-latest.jar $(curl https://api.github.com/repos/codacy/codacy-coverage-reporter/releases/latest | jq -r .assets[0].browser_download_url)
+
 
 install:
   - travis_retry composer install --prefer-dist --no-interaction --quiet --no-ansi --no-progress --optimize-autoloader --dev --no-suggest --ignore-platform-reqs
@@ -92,15 +96,13 @@ before_script:
 
 script:
   - mkdir -p build/cov
-  - vendor/bin/phpcs --standard=./ruleset.xml ./Library/
+  - vendor/bin/phpcs --standard=./phpcs.xml ./Library/
   - vendor/phpunit/phpunit/phpunit -c Tests/phpunit.xml
 
 after_script:
-    - ./cc-test-reporter after-build --exit-code $TRAVIS_TEST_RESULT
     - curl -X PURGE "https://camo.githubusercontent.com/3779ff2c101d84c0e04e677bc3b5cfa2d9e3887e/68747470733a2f2f636f766572616c6c732e696f2f7265706f732f6769746875622f7670672f646973747572622f62616467652e7376673f6272616e63683d616c70686126736572766963653d676974687562"
-
-after_success:
     - travis_retry php vendor/bin/php-coveralls -v
+    - php vendor/bin/codacycoverage clover build/cov/clover.xml
 
 notifications:
     email: false

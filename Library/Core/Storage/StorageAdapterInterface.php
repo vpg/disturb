@@ -44,12 +44,12 @@ interface StorageAdapterInterface
     /**
      * Save storage data identified by $id
      *
-     * @param string $id        id
+     * @param string $docId     id
      * @param array  $valueHash valueHash
      *
      * @return mixed
      */
-    public function save(string $id, array $valueHash);
+    public function save(string $docId, array $valueHash);
 
     /**
      * Delete storage data identified by $id
