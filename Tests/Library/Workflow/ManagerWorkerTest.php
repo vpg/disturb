@@ -147,6 +147,7 @@ class ManagerWorkerTest extends \Tests\DisturbUnitTestCase
         $this->expectException(Worker\WorkerException::class);
         $parsedOptHash = $parseOtpF->invokeArgs($managerWorker, [$workerParamHash]);
     }
+
     /**
      * Test init()
      *
@@ -172,6 +173,65 @@ class ManagerWorkerTest extends \Tests\DisturbUnitTestCase
         $parsedOptHash = $initWorkerF->setAccessible(true);
         $this->expectException(Workflow\WorkflowException::class);
         $initWorkerF->invokeArgs($managerWorker, [self::$workerParamHash]);
+    }
 
+    /**
+     * Test ttl
+     *
+     * @return void
+     */
+    public function testKeepAliveNoTTL()
+    {
+        $managerWorker = new Workflow\ManagerWorker();
+        $managerWorkerReflection = new \ReflectionClass($managerWorker);
+        $parseOtpF = $managerWorkerReflection->getMethod('parseOpt');
+        $parseOtpF->setAccessible(true);
+        $parsedOptHash = $parseOtpF->invokeArgs($managerWorker, [self::$workerParamHash]);
+        $parseOpt = $managerWorkerReflection->getProperty('paramHash');
+        $parseOpt->setAccessible(true);
+        $parseOpt->setValue($managerWorker, $parsedOptHash);
+
+        $initWorkerF = $managerWorkerReflection->getMethod('initWorker');
+        $initWorkerF->setAccessible(true);
+        $initWorkerF->invokeArgs($managerWorker, []);
+
+        $keepAliveF = $managerWorkerReflection->getMethod('keepItAlive');
+        $keepAliveF->setAccessible(true);
+        $keepAlive = $keepAliveF->invokeArgs($managerWorker, []);
+        $this->assertTrue($keepAlive);
+    }
+
+    /**
+     * Test with ttl
+     *
+     * @return void
+     */
+    public function testKeepAliveTTL()
+    {
+        $paramHash = self::$workerParamHash;
+        $paramHash[] = '--ttl=2';
+
+        $managerWorker = new Workflow\ManagerWorker();
+        $managerWorkerReflection = new \ReflectionClass($managerWorker);
+        $parseOtpF = $managerWorkerReflection->getMethod('parseOpt');
+        $parseOtpF->setAccessible(true);
+        $parsedOptHash = $parseOtpF->invokeArgs($managerWorker, [$paramHash]);
+        $parseOpt = $managerWorkerReflection->getProperty('paramHash');
+        $parseOpt->setAccessible(true);
+        $parseOpt->setValue($managerWorker, $parsedOptHash);
+
+        $initWorkerF = $managerWorkerReflection->getMethod('initWorker');
+        $initWorkerF->setAccessible(true);
+        $initWorkerF->invokeArgs($managerWorker, []);
+
+        $keepAliveF = $managerWorkerReflection->getMethod('keepItAlive');
+        $keepAliveF->setAccessible(true);
+        $keepAlive = $keepAliveF->invokeArgs($managerWorker, []);
+        $this->assertTrue($keepAlive);
+
+        sleep(3);
+
+        $keepAlive = $keepAliveF->invokeArgs($managerWorker, []);
+        $this->assertFalse($keepAlive);
     }
 }
