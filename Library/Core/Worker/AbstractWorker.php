@@ -33,8 +33,8 @@ abstract class AbstractWorker extends Task implements WorkerInterface
     const STATUS_EXITED = 'exited';
 
     protected $taskOptionBaseList = [
-        'workflow:', // required step code config file
-        '?force',    // Optional force run even if lockfile exists
+        'workflow:', // Required string : wf config filepath
+        '?ttl:',     // Optionnal int : TTL
     ];
 
     protected $topicPartitionNo = 0;
@@ -78,6 +78,11 @@ abstract class AbstractWorker extends Task implements WorkerInterface
     protected $paramHash = '';
 
     /**
+     * @var integer $startedAtSec the timestamp the worker started at
+     */
+    protected $startedAtSec = 0;
+
+    /**
      * Inits the current worker according to the given workflow config
      *  - Loads the config
      *  - Register Client biz classes
@@ -96,8 +101,9 @@ abstract class AbstractWorker extends Task implements WorkerInterface
             $this->workflowConfigDto->getServicesClassPath()
         );
         $this->workerHostname = php_uname('n');
-        $this->workerCode = $this->workerHostname . '-' . $this->getWorkerCode($this->paramHash);
+        $this->workerCode = $this->getWorkerCode($this->paramHash);
         $this->initMq();
+        $this->startedAtSec = round(microtime(true));
     }
 
     /**
@@ -151,16 +157,23 @@ abstract class AbstractWorker extends Task implements WorkerInterface
         $this->paramHash = $this->parseOpt($paramList);
         $this->initWorker();
 
-
         // xxx Factorize stdout/err support
         $this->getDI()->get('logr')->info(
-            "Worker listening on \033[32m" .
+            "Worker \033[38;5;75m" . $this->workerCode .
+            "\033[0m listening on \33[38;5;24m" .
             implode(',', $this->workflowConfigDto->getBrokerServerList()) .
-            ":\033[32m" . $this->topicName . "\033[0m"
+            "\033[0m#\33[38;5;80m" . $this->topicName . "\033[0m"
         );
         $this->kafkaConsumer->subscribe([$this->topicName]);
         while (true) {
             $processStartsAt = microtime(true);
+            if (!$this->keepItAlive()) {
+                $this->getDI()->get('logr')->info(
+                    "TTL reach by Worker \033[38;5;75m" . $this->workerCode .
+                    "\033[0m :\033[38;5;208m Stopping \033[0m"
+                );
+                break;
+            }
             $msg = $this->kafkaConsumer->consume(10000);
             // xxx q&d err handling
             if (!$msg ||  $msg->err) {
@@ -275,12 +288,34 @@ abstract class AbstractWorker extends Task implements WorkerInterface
     public static function getWorkerCode(array $paramHash)
     {
         $taskFullName = get_called_class();
+        $workflowConfigDto = WorkflowConfigDtoFactory::get($paramHash['workflow']);
+        $workflowName = $workflowConfigDto->getWorkflowName();
         // xxx We will probably have to deal w/ the BU
         if (strpos($taskFullName, 'Manager')) {
-            $workerName = 'disturb-manager';
+            $workerName = sprintf('disturb-manager-%s', $workflowName);
         } else {
-            $workerName = 'disturb-step-' . $paramHash['step'] . '-' . $paramHash['workerId'];
+            $workerName = sprintf(
+                'disturb-step-%s-%s-%d',
+                $workflowName,
+                $paramHash['step'],
+                $paramHash['workerId']
+            );
         }
         return $workerName;
+    }
+
+    /**
+     * Returns true if the worker has to be kept alive
+     *
+     * @return boolean keep alive state
+     */
+    private function keepItAlive()
+    {
+        $this->getDI()->get('logr')->debug(json_encode(func_get_args()));
+        $nowTS = round(microtime(true));
+        return !(
+            !empty($this->paramHash['ttl']) &&
+            ($nowTS - $this->startedAtSec) > $this->paramHash['ttl']
+        );
     }
 }
