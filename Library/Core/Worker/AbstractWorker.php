@@ -241,6 +241,13 @@ abstract class AbstractWorker extends Task implements WorkerInterface
     private function registerClientNS(string $clientServicesNamespace, string $clientServicesPath)
     {
         $this->getDI()->get('logr')->debug(json_encode(func_get_args()));
+        if ( strpos($clientServicesPath, '/') != 0) {
+            $baseDir = str_replace('Library/Core/Worker/AbstractWorker.php', '', realpath(__file__));
+            if (false !== strpos(realpath(__file__), 'vendor/')) {
+                $baseDir .= '../../../';
+            }
+            $clientServicesPath = $baseDir . $clientServicesPath;
+        }
         $loader = $this->getDI()->getShared('loader');
         $loader->registerNamespaces([$clientServicesNamespace => $clientServicesPath], true);
         $loader->register();
