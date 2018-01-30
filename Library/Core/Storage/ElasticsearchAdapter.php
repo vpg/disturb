@@ -222,7 +222,10 @@ class ElasticsearchAdapter extends Component implements StorageAdapterInterface
             ->setHosts([$this->config[self::CONFIG_HOST]])
             ->build();
 
-        $this->getDI()->get('logr')->info("Connecting to Elastic " . json_encode($this->config[self::CONFIG_HOST]));
+        $this->getDI()->get('logr')->info(
+            "Connecting to Elastic " . json_encode($this->config[self::CONFIG_HOST]) .
+            " on " . $this->config[self::DOC_INDEX]
+        );
         // Check host connexion
         if (! $this->client->ping()) {
             throw new StorageException('host : ' . $this->config[self::CONFIG_HOST] . ' not available');

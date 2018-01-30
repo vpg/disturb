@@ -44,8 +44,6 @@ class WorkflowConfigDtoFactory
             );
         }
 
-        Di::getDefault()->get('logr')->info("Loading Workflow config from '$workflowConfigFilePath'");
-
         // instanciate config adapter
         $workflowConfigAdpter = '\Phalcon\Config\Adapter\\' . ucfirst($workflowConfigFileExtension);
 
