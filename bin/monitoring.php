@@ -5,11 +5,6 @@ use \Vpg\Disturb\Workflow;
 use \Vpg\Disturb\Step;
 use \Vpg\Disturb\Monitoring;
 
-define('DISTURB_DEBUG', getenv('DISTURB_DEBUG'));
-define('DISTURB_TOPIC_PREFIX', getenv('DISTURB_TOPIC_PREFIX'));
-define('DISTURB_ELASTIC_HOST', getenv('DISTURB_ELASTIC_HOST'));
-define('DISTURB_KAFKA_BROKER', getenv('DISTURB_KAFKA_BROKER'));
-
 try {
     /**
      * Register the autoloader and tell it to register the tasks directory
@@ -56,11 +51,6 @@ try {
     $paramHash = ConsoleApp::parseLongOpt(join($arguments['params'], ' '));
 
     $workflowConfigDto = Workflow\WorkflowConfigDtoFactory::get($paramHash['workflow']);
-    $projectBootstrapFilePath = $workflowConfigDto->getProjectBootstrapFilepath();
-    if (is_readable($projectBootstrapFilePath)) {
-        $di->get('logr')->info('Loading Bootstrap : ' . $projectBootstrapFilePath);
-        require_once($projectBootstrapFilePath);
-    }
 
     switch ($arguments['worker']) {
         case 'manager':
@@ -74,16 +64,14 @@ try {
     switch ($arguments['action']) {
         case 'start':
             $monitoringService->logWorkerStarted($workerCode, $paramHash['pid']);
-            break;
-        case 'exit':
-            $monitoringService->logWorkerExited($workerCode, $paramHash['exitCode']);
-            break;
-        case 'heartbeat':
             while (true) {
                 $monitoringService->logWorkerBeat($workerCode);
                 // xxx put it in conf
                 sleep(5);
             }
+            break;
+        case 'exit':
+            $monitoringService->logWorkerExited($workerCode, $paramHash['exitCode']);
             break;
     }
 } catch (\Phalcon\Exception $e) {
