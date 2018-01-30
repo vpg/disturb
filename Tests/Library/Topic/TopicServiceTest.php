@@ -5,6 +5,7 @@ namespace Tests\Library\Topic;
 use \phalcon\Config;
 use \Vpg\Disturb\Topic\TopicService;
 use \Vpg\Disturb\Topic\TopicException;
+use \Vpg\Disturb\Workflow;
 
 /**
  * Workflow Manager Service test class
@@ -39,9 +40,19 @@ class TopicServiceTest extends \Tests\DisturbUnitTestCase
      */
     public function testGetWorkflowTopicNameWithPrefix()
     {
+        $configFilepath = realpath(__DIR__ . '/../../Config/serie.json');
+        $workerParamHash = [
+            "--workflow=$configFilepath",
+            "--topicPrefix=test-"
+        ];
+        $managerWorker = new Workflow\ManagerWorker();
+        $managerWorkerReflection = new \ReflectionClass($managerWorker);
+        $parseOtpF = $managerWorkerReflection->getMethod('parseOpt');
+        $parseOtpF->setAccessible(true);
+        $parsedOptHash = $parseOtpF->invokeArgs($managerWorker, [$workerParamHash]);
+
         $wfName = 'foo';
         $stepName = 'bar';
-        define('DISTURB_TOPIC_PREFIX', 'test-');
         $topicName = TopicService::getWorkflowManagerTopicName($wfName);
         $this->assertEquals('test-disturb-foo-manager', $topicName);
         $topicName = TopicService::getWorkflowStepTopicName($stepName, $wfName);

@@ -81,9 +81,9 @@ class TopicService
      */
     public static function getTopicPrefix() : string
     {
-        return !empty(DI::getDefault()->get('disturb-config')['topicPrefix']) ?
-            trim(DI::getDefault()->get('disturb-config')['topicPrefix']) :
-            '';
+        return !empty(
+            DI::getDefault()->get('disturb-config')['topicPrefix']
+        ) ? trim(DI::getDefault()->get('disturb-config')['topicPrefix']) : '';
     }
 
 }
