@@ -17,7 +17,6 @@ use \Vpg\Disturb\Monitoring;
 class ServiceTest extends \Tests\DisturbUnitTestCase
 {
 
-    protected static $workflowConfigDto;
     protected static $monitoringService;
 
     /**
@@ -28,8 +27,7 @@ class ServiceTest extends \Tests\DisturbUnitTestCase
     public function setUp()
     {
         parent::setUp();
-        self::$workflowConfigDto = Workflow\WorkflowConfigDtoFactory::get(realpath(__DIR__ . '/config.json'));
-        self::$monitoringService = new Monitoring\Service(self::$workflowConfigDto);
+        self::$monitoringService = new Monitoring\Service(realpath(__DIR__ . '/config.json'));
     }
 
 

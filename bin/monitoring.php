@@ -51,6 +51,10 @@ try {
     $paramHash = ConsoleApp::parseLongOpt(join($arguments['params'], ' '));
 
     $workflowConfigDto = Workflow\WorkflowConfigDtoFactory::get($paramHash['workflow']);
+    $projectBootstrapFilePath = $workflowConfigDto->getProjectBootstrapFilepath();
+    if (is_readable($projectBootstrapFilePath)) {
+        require_once($projectBootstrapFilePath);
+    }
 
     switch ($arguments['worker']) {
         case 'manager':
@@ -60,7 +64,7 @@ try {
             $workerCode = Step\StepWorker::getWorkerCode($paramHash);
             break;
     }
-    $monitoringService = new Monitoring\Service($workflowConfigDto);
+    $monitoringService = new Monitoring\Service($paramHash['workflow']);
     switch ($arguments['action']) {
         case 'start':
             $monitoringService->logWorkerStarted($workerCode, $paramHash['pid']);
