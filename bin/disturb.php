@@ -3,11 +3,6 @@
 use \Vpg\Disturb\Core\Cli\Console as ConsoleApp;
 use \Vpg\Disturb\Workflow\WorkflowConfigDtoFactory;
 
-define('DISTURB_DEBUG', getenv('DISTURB_DEBUG'));
-define('DISTURB_TOPIC_PREFIX', getenv('DISTURB_TOPIC_PREFIX'));
-define('DISTURB_ELASTIC_HOST', getenv('DISTURB_ELASTIC_HOST'));
-define('DISTURB_KAFKA_BROKER', getenv('DISTURB_KAFKA_BROKER'));
-
 try {
     /**
      * Register the autoloader and tell it to register the tasks directory
@@ -51,6 +46,10 @@ try {
 
     // Load client bootstrap file
     $paramHash = ConsoleApp::parseLongOpt(join($arguments['params'], ' '));
+
+    if (isset($paramHash['debug']) && !defined('DISTURB_DEBUG')) {
+        define('DISTURB_DEBUG', true);
+    }
 
     $workflowConfigDto = WorkflowConfigDtoFactory::get($paramHash['workflow']);
     $projectBootstrapFilePath = $workflowConfigDto->getProjectBootstrapFilepath();

@@ -33,8 +33,10 @@ abstract class AbstractWorker extends Task implements WorkerInterface
     const STATUS_EXITED = 'exited';
 
     protected $taskOptionBaseList = [
-        'workflow:', // Required string : wf config filepath
-        '?ttl:',     // Optionnal int : TTL
+        'workflow:',     // Required string : wf config filepath
+        '?topicPrefix:', // Optionnal string : define a prefix foreach topic used in the given workflow
+        '?ttl:',         // Optionnal int : TTL
+        '?debug',        // Optionnal debug mode (verbose)
     ];
 
     protected $topicPartitionNo = 0;
@@ -95,6 +97,7 @@ abstract class AbstractWorker extends Task implements WorkerInterface
     protected function initWorker()
     {
         $this->getDI()->get('logr')->debug(json_encode(func_get_args()));
+        $this->getDI()->get('logr')->info("Loading workflow config from {$this->paramHash['workflow']}");
         $this->workflowConfigDto = WorkflowConfigDtoFactory::get($this->paramHash['workflow']);
         $this->registerClientNS(
             $this->workflowConfigDto->getServicesClassNameSpace(),
@@ -140,6 +143,9 @@ abstract class AbstractWorker extends Task implements WorkerInterface
                 $this->usage();
                 throw new WorkerException('Wrong Usage : Missing params');
             }
+        }
+        if (!empty($paramHash['topicPrefix'])) {
+            $this->getDI()->get('disturb-config')->topicPrefix = $paramHash['topicPrefix'];
         }
         return $paramHash;
     }

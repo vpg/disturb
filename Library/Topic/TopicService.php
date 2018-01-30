@@ -2,6 +2,8 @@
 
 namespace Vpg\Disturb\Topic;
 
+use \Phalcon\DI;
+
 /**
  * Class TopicService
  *
@@ -43,7 +45,7 @@ class TopicService
 
         return str_replace(
             ['@prefix@', '@workflow_name@'],
-            [defined('DISTURB_TOPIC_PREFIX') ? trim(DISTURB_TOPIC_PREFIX) : '', $workflowName],
+            [self::getTopicPrefix(), $workflowName],
             self::TOPIC_WORKFLOW_MANAGER_NAME
         );
     }
@@ -67,9 +69,21 @@ class TopicService
 
         return str_replace(
             ['@prefix@', '@step_name@','@workflow_name@'],
-            [defined('DISTURB_TOPIC_PREFIX') ? trim(DISTURB_TOPIC_PREFIX) : '', $stepName, $workflowName],
+            [self::getTopicPrefix() , $stepName, $workflowName],
             self::TOPIC_WORKFLOW_MANAGER_STEP_NAME
         );
     }
-}
 
+    /**
+     * Returns the topic prefix
+     *
+     * @return String
+     */
+    public static function getTopicPrefix() : string
+    {
+        return !empty(DI::getDefault()->get('disturb-config')['topicPrefix']) ?
+            trim(DI::getDefault()->get('disturb-config')['topicPrefix']) :
+            '';
+    }
+
+}
