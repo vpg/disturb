@@ -8,6 +8,7 @@ use \Vpg\Disturb\Workflow;
 use \Vpg\Disturb\Message\MessageDto;
 use \Vpg\Disturb\Context\ContextStorageService;
 use \Vpg\Disturb\Workflow\WorkflowConfigDtoFactory;
+use Tests\Helper\Workflow\ManagerHelper;
 
 
 /**
@@ -80,27 +81,9 @@ class ManagerWorkerTest extends \Tests\DisturbUnitTestCase
      */
     public function testStartWorkflow()
     {
-        $managerWorker = new Workflow\ManagerWorker();
-        $managerWorkerReflection = new \ReflectionClass($managerWorker);
-        $parseOtpF = $managerWorkerReflection->getMethod('parseOpt');
-        $parseOtpF->setAccessible(true);
-        $parsedOptHash = $parseOtpF->invokeArgs($managerWorker, [self::$workerParamHash]);
-
-        $parseOpt = $managerWorkerReflection->getProperty('paramHash');
-        $parseOpt->setAccessible(true);
-        $parseOpt->setValue($managerWorker, $parsedOptHash);
-
-        $initWorkerF = $managerWorkerReflection->getMethod('initWorker');
-        $initWorkerF->setAccessible(true);
-        $initWorkerF->invokeArgs($managerWorker, [self::$workerParamHash]);
-
+        $managerHelper = new ManagerHelper(self::$workerParamHash);
         $wfId = $this->generateWfId();
-        $startWFMsg = '{"id":"' . $wfId . '", "type" : "WF-CONTROL", "action":"start", "payload": {"foo":"bar"}}';
-        $msgDto = new MessageDto($startWFMsg);
-
-        $processMessageF = $managerWorkerReflection->getMethod('processMessage');
-        $processMessageF->setAccessible(true);
-        $processMessageF->invokeArgs($managerWorker, [$msgDto]);
+        $managerHelper->processMessage('{"id":"' . $wfId . '", "type" : "WF-CONTROL", "action":"start", "payload": {"foo":"bar"}}');
 
         $wfDto = self::$contextStorageService->get($wfId);
 
@@ -125,30 +108,12 @@ class ManagerWorkerTest extends \Tests\DisturbUnitTestCase
      */
     public function testStartWorkflowTwice()
     {
-        $managerWorker = new Workflow\ManagerWorker();
-        $managerWorkerReflection = new \ReflectionClass($managerWorker);
-        $parseOtpF = $managerWorkerReflection->getMethod('parseOpt');
-        $parseOtpF->setAccessible(true);
-        $parsedOptHash = $parseOtpF->invokeArgs($managerWorker, [self::$workerParamHash]);
-
-        $parseOpt = $managerWorkerReflection->getProperty('paramHash');
-        $parseOpt->setAccessible(true);
-        $parseOpt->setValue($managerWorker, $parsedOptHash);
-
-        $initWorkerF = $managerWorkerReflection->getMethod('initWorker');
-        $initWorkerF->setAccessible(true);
-        $initWorkerF->invokeArgs($managerWorker, [self::$workerParamHash]);
-
+        $managerHelper = new ManagerHelper(self::$workerParamHash);
         $wfId = $this->generateWfId();
-        $startWFMsg = '{"id":"' . $wfId . '", "type" : "WF-CONTROL", "action":"start", "payload": {"foo":"bar"}}';
-        $msgDto = new MessageDto($startWFMsg);
-
-        $processMessageF = $managerWorkerReflection->getMethod('processMessage');
-        $processMessageF->setAccessible(true);
-        $processed = $processMessageF->invokeArgs($managerWorker, [$msgDto]);
+        $processed = $managerHelper->processMessage('{"id":"' . $wfId . '", "type" : "WF-CONTROL", "action":"start", "payload": {"foo":"bar"}}');
         $this->assertTrue($processed);
 
-        $processed = $processMessageF->invokeArgs($managerWorker, [$msgDto]);
+        $processed = $managerHelper->processMessage('{"id":"' . $wfId . '", "type" : "WF-CONTROL", "action":"start", "payload": {"foo":"bar"}}');
         $this->assertFalse($processed);
     }
 
@@ -181,20 +146,8 @@ class ManagerWorkerTest extends \Tests\DisturbUnitTestCase
         $workerParamHash = [
            "--workflow=$configFilepath"
         ];
-        $managerWorker = new Workflow\ManagerWorker();
-        $managerWorkerReflection = new \ReflectionClass($managerWorker);
-        $parseOtpF = $managerWorkerReflection->getMethod('parseOpt');
-        $parseOtpF->setAccessible(true);
-        $parsedOptHash = $parseOtpF->invokeArgs($managerWorker, [$workerParamHash]);
-
-        $parseOpt = $managerWorkerReflection->getProperty('paramHash');
-        $parseOpt->setAccessible(true);
-        $parseOpt->setValue($managerWorker, $parsedOptHash);
-
-        $initWorkerF = $managerWorkerReflection->getMethod('initWorker');
-        $parsedOptHash = $initWorkerF->setAccessible(true);
         $this->expectException(Workflow\WorkflowException::class);
-        $initWorkerF->invokeArgs($managerWorker, [self::$workerParamHash]);
+        $managerHelper = new ManagerHelper($workerParamHash);
     }
 
     /**
@@ -204,22 +157,8 @@ class ManagerWorkerTest extends \Tests\DisturbUnitTestCase
      */
     public function testKeepAliveNoTTL()
     {
-        $managerWorker = new Workflow\ManagerWorker();
-        $managerWorkerReflection = new \ReflectionClass($managerWorker);
-        $parseOtpF = $managerWorkerReflection->getMethod('parseOpt');
-        $parseOtpF->setAccessible(true);
-        $parsedOptHash = $parseOtpF->invokeArgs($managerWorker, [self::$workerParamHash]);
-        $parseOpt = $managerWorkerReflection->getProperty('paramHash');
-        $parseOpt->setAccessible(true);
-        $parseOpt->setValue($managerWorker, $parsedOptHash);
-
-        $initWorkerF = $managerWorkerReflection->getMethod('initWorker');
-        $initWorkerF->setAccessible(true);
-        $initWorkerF->invokeArgs($managerWorker, []);
-
-        $keepAliveF = $managerWorkerReflection->getMethod('keepItAlive');
-        $keepAliveF->setAccessible(true);
-        $keepAlive = $keepAliveF->invokeArgs($managerWorker, []);
+        $managerHelper = new ManagerHelper(self::$workerParamHash);
+        $keepAlive = $managerHelper->keepItAlive();
         $this->assertTrue($keepAlive);
     }
 
@@ -233,27 +172,13 @@ class ManagerWorkerTest extends \Tests\DisturbUnitTestCase
         $paramHash = self::$workerParamHash;
         $paramHash[] = '--ttl=2';
 
-        $managerWorker = new Workflow\ManagerWorker();
-        $managerWorkerReflection = new \ReflectionClass($managerWorker);
-        $parseOtpF = $managerWorkerReflection->getMethod('parseOpt');
-        $parseOtpF->setAccessible(true);
-        $parsedOptHash = $parseOtpF->invokeArgs($managerWorker, [$paramHash]);
-        $parseOpt = $managerWorkerReflection->getProperty('paramHash');
-        $parseOpt->setAccessible(true);
-        $parseOpt->setValue($managerWorker, $parsedOptHash);
-
-        $initWorkerF = $managerWorkerReflection->getMethod('initWorker');
-        $initWorkerF->setAccessible(true);
-        $initWorkerF->invokeArgs($managerWorker, []);
-
-        $keepAliveF = $managerWorkerReflection->getMethod('keepItAlive');
-        $keepAliveF->setAccessible(true);
-        $keepAlive = $keepAliveF->invokeArgs($managerWorker, []);
+        $managerHelper = new ManagerHelper($paramHash);
+        $keepAlive = $managerHelper->keepItAlive();
         $this->assertTrue($keepAlive);
 
         sleep(3);
 
-        $keepAlive = $keepAliveF->invokeArgs($managerWorker, []);
+        $keepAlive = $managerHelper->keepItAlive();
         $this->assertFalse($keepAlive);
     }
 
@@ -275,29 +200,11 @@ class ManagerWorkerTest extends \Tests\DisturbUnitTestCase
      */
     public function testNoStepJobToRun()
     {
-        // init Manager worker
-        $managerWorker = new Workflow\ManagerWorker();
-        $managerWorkerReflection = new \ReflectionClass($managerWorker);
-        $parseOtpF = $managerWorkerReflection->getMethod('parseOpt');
-        $parseOtpF->setAccessible(true);
-        $parsedOptHash = $parseOtpF->invokeArgs($managerWorker, [self::$workerWithoutJobParamHash]);
-
-        $parseOpt = $managerWorkerReflection->getProperty('paramHash');
-        $parseOpt->setAccessible(true);
-        $parseOpt->setValue($managerWorker, $parsedOptHash);
-
-        // init worker with params hash (workflow name)
-        $initWorkerF = $managerWorkerReflection->getMethod('initWorker');
-        $initWorkerF->setAccessible(true);
-        $initWorkerF->invokeArgs($managerWorker, [self::$workerWithoutJobParamHash]);
+        $managerHelper = new ManagerHelper(self::$workerWithoutJobParamHash);
 
         //simulate workflow start message
         $wfId = $this->generateWfId();
-        $startWFMsg = '{"id":"' . $wfId . '", "type" : "WF-CONTROL", "action":"start", "payload": {"foo":"bar"}}';
-        $msgDto = new MessageDto($startWFMsg);
-        $processMessageF = $managerWorkerReflection->getMethod('processMessage');
-        $processMessageF->setAccessible(true);
-        $processMessageF->invokeArgs($managerWorker, [$msgDto]);
+        $managerHelper->processMessage('{"id":"' . $wfId . '", "type" : "WF-CONTROL", "action":"start", "payload": {"foo":"bar"}}');
 
         $wfDto = self::$contextStorageService->get($wfId);
 
@@ -317,11 +224,7 @@ class ManagerWorkerTest extends \Tests\DisturbUnitTestCase
 
         //simulate foo successful execution
         //process message foo -> run next step on "noJob step"
-        $fooStepAckMsg = '{"id":"' . $wfId . '", "type":"STEP-ACK","stepCode":"foo","jobId":"0","result":{"status":"SUCCESS","data":[],"finishedAt":"2018-01-30 16:39:26"}}';
-        $msgDto = new MessageDto($fooStepAckMsg);
-        $processMessageF = $managerWorkerReflection->getMethod('processMessage');
-        $processMessageF->setAccessible(true);
-        $processMessageF->invokeArgs($managerWorker, [$msgDto]);
+        $managerHelper->processMessage('{"id":"' . $wfId . '", "type":"STEP-ACK","stepCode":"foo","jobId":"0","result":{"status":"SUCCESS","data":[],"finishedAt":"2018-01-30 16:39:26"}}');
 
         //get workflow in order to verify if "noJob" step has been skipped
         $wfDto = self::$contextStorageService->get($wfId);
@@ -341,14 +244,8 @@ class ManagerWorkerTest extends \Tests\DisturbUnitTestCase
         );
 
         //simulate bar successful execution
-        $barOneStepAckMsg = '{"id":"' . $wfId . '", "type":"STEP-ACK","stepCode":"bar","jobId":"0","result":{"status":"SUCCESS","data":[],"finishedAt":"2018-01-30 16:39:26"}}';
-        $barTwoStepAckMsg = '{"id":"' . $wfId . '", "type":"STEP-ACK","stepCode":"bar","jobId":"1","result":{"status":"SUCCESS","data":[],"finishedAt":"2018-01-30 16:39:26"}}';
-        $msgDto = new MessageDto($barOneStepAckMsg);
-        $processMessageF = $managerWorkerReflection->getMethod('processMessage');
-        $processMessageF->setAccessible(true);
-        $processMessageF->invokeArgs($managerWorker, [$msgDto]);
-        $msgDto = new MessageDto($barTwoStepAckMsg);
-        $processMessageF->invokeArgs($managerWorker, [$msgDto]);
+        $managerHelper->processMessage('{"id":"' . $wfId . '", "type":"STEP-ACK","stepCode":"bar","jobId":"0","result":{"status":"SUCCESS","data":[],"finishedAt":"2018-01-30 16:39:26"}}');
+        $managerHelper->processMessage('{"id":"' . $wfId . '", "type":"STEP-ACK","stepCode":"bar","jobId":"1","result":{"status":"SUCCESS","data":[],"finishedAt":"2018-01-30 16:39:26"}}');
 
         // test if boo is started
         $wfDto = self::$contextStorageService->get($wfId);
@@ -370,11 +267,7 @@ class ManagerWorkerTest extends \Tests\DisturbUnitTestCase
 
         //simulate foo successful execution
         //process message foo -> run next step on "noJob step"
-        $booStepAckMsg = '{"id":"' . $wfId . '", "type":"STEP-ACK","stepCode":"boo","jobId":"0","result":{"status":"SUCCESS","data":[],"finishedAt":"2018-01-30 16:39:26"}}';
-        $msgDto = new MessageDto($booStepAckMsg);
-        $processMessageF = $managerWorkerReflection->getMethod('processMessage');
-        $processMessageF->setAccessible(true);
-        $processMessageF->invokeArgs($managerWorker, [$msgDto]);
+        $managerHelper->processMessage('{"id":"' . $wfId . '", "type":"STEP-ACK","stepCode":"boo","jobId":"0","result":{"status":"SUCCESS","data":[],"finishedAt":"2018-01-30 16:39:26"}}');
 
         //get workflow in order to verify if "noJobParallelizedBis" step has been skipped
         $wfDto = self::$contextStorageService->get($wfId);
