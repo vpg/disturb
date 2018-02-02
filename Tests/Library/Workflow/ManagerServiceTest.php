@@ -35,7 +35,7 @@ class ManagerServiceTest extends \Tests\DisturbUnitTestCase
     {
         parent::setUpBeforeClass();
         self::$workflowSerieConfigDto = WorkflowConfigDtoFactory::get(realpath(__DIR__ . '/../../Config/serie.json'));
-        self::$workflowSerieWithoutJobConfigDto = WorkflowConfigDtoFactory::get(realpath(__DIR__ . '/../../Config/serieWithoutJob.json'));
+        self::$workflowSerieWithoutJobConfigDto = WorkflowConfigDtoFactory::get(realpath(__DIR__ . '/../../Config/withoutJob.json'));
         self::$workflowParallelizedConfigDto = WorkflowConfigDtoFactory::get(
             realpath(__DIR__ . '/../../Config/parallelized.json')
         );
