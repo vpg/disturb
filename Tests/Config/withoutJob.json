@@ -13,6 +13,14 @@
     "steps" : [
         { "name" : "foo" },
         { "name" : "noJob" },
-        { "name" : "bar" }
+        { "name" : "bar" },
+        [
+            { "name" : "boo" },
+            { "name" : "noJobParallelized" }
+        ],
+        [
+            { "name" : "noJobParallelizedBis" },
+            { "name" : "noJobParallelizedTris" }
+        ]
     ]
 }

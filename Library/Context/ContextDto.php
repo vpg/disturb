@@ -181,7 +181,7 @@ class ContextDto extends Dto\AbstractDto
             if (!(array_keys($stepHash) !== array_keys(array_keys($stepHash)))) {
                 foreach ($stepHash as $parallelizedStepHash) {
                     if ($parallelizedStepHash['name'] == $code) {
-                        return $stepHash;
+                        return $parallelizedStepHash;
                     }
                 }
             } else {

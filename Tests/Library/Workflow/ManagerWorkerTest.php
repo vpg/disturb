@@ -259,10 +259,17 @@ class ManagerWorkerTest extends \Tests\DisturbUnitTestCase
 
     /**
      * Test a full WF execution with a step without job
-     * - start workflow
-     * - simulate foo
-     * - skip noJob
-     * - next step properly launched
+     * { "name" : "foo" },
+     * { "name" : "noJob" },
+     * { "name" : "bar" },
+     * [
+     *   { "name" : "boo" },
+     *   { "name" : "noJob" }
+     * ],
+     * [
+     *   { "name" : "noJob" },
+     *   { "name" : "noJob" }
+     * ]
      *
      * @return void
      */
@@ -331,6 +338,69 @@ class ManagerWorkerTest extends \Tests\DisturbUnitTestCase
         $barStepHash = $wfDto->getStep('bar');
         $this->assertNotEmpty(
             $barStepHash['jobList']
+        );
+
+        //simulate bar successful execution
+        $barOneStepAckMsg = '{"id":"' . $wfId . '", "type":"STEP-ACK","stepCode":"bar","jobId":"0","result":{"status":"SUCCESS","data":[],"finishedAt":"2018-01-30 16:39:26"}}';
+        $barTwoStepAckMsg = '{"id":"' . $wfId . '", "type":"STEP-ACK","stepCode":"bar","jobId":"1","result":{"status":"SUCCESS","data":[],"finishedAt":"2018-01-30 16:39:26"}}';
+        $msgDto = new MessageDto($barOneStepAckMsg);
+        $processMessageF = $managerWorkerReflection->getMethod('processMessage');
+        $processMessageF->setAccessible(true);
+        $processMessageF->invokeArgs($managerWorker, [$msgDto]);
+        $msgDto = new MessageDto($barTwoStepAckMsg);
+        $processMessageF->invokeArgs($managerWorker, [$msgDto]);
+
+        // test if boo is started
+        $wfDto = self::$contextStorageService->get($wfId);
+        $booStepHash = $wfDto->getStep('boo');
+        $this->assertEquals(
+            Workflow\ManagerService::STATUS_NO_STARTED,
+            $booStepHash['jobList'][0]['status']
+        );
+
+        //get workflow in order to verify if "noJobParallelized" step has been skipped
+        $wfDto = self::$contextStorageService->get($wfId);
+        $noJobParallelizedStepHash = $wfDto->getStep('noJobParallelized');
+        $this->assertEmpty(
+            $noJobParallelizedStepHash['jobList']
+        );
+        $this->assertNotEmpty(
+            $noJobParallelizedStepHash['skippedAt']
+        );
+
+        //simulate foo successful execution
+        //process message foo -> run next step on "noJob step"
+        $booStepAckMsg = '{"id":"' . $wfId . '", "type":"STEP-ACK","stepCode":"boo","jobId":"0","result":{"status":"SUCCESS","data":[],"finishedAt":"2018-01-30 16:39:26"}}';
+        $msgDto = new MessageDto($booStepAckMsg);
+        $processMessageF = $managerWorkerReflection->getMethod('processMessage');
+        $processMessageF->setAccessible(true);
+        $processMessageF->invokeArgs($managerWorker, [$msgDto]);
+
+        //get workflow in order to verify if "noJobParallelizedBis" step has been skipped
+        $wfDto = self::$contextStorageService->get($wfId);
+        $noJobParallelizedStepHash = $wfDto->getStep('noJobParallelizedBis');
+        $this->assertEmpty(
+            $noJobParallelizedStepHash['jobList']
+        );
+        $this->assertNotEmpty(
+            $noJobParallelizedStepHash['skippedAt']
+        );
+
+        //get workflow in order to verify if "noJobParallelizedTris" step has been skipped
+        $wfDto = self::$contextStorageService->get($wfId);
+        $noJobParallelizedStepHash = $wfDto->getStep('noJobParallelizedTris');
+        $this->assertEmpty(
+            $noJobParallelizedStepHash['jobList']
+        );
+        $this->assertNotEmpty(
+            $noJobParallelizedStepHash['skippedAt']
+        );
+
+        //test if workflow is properly ended
+        $wfStatus = $wfDto->getWorkflowStatus();
+        $this->assertEquals(
+            Workflow\ManagerService::STATUS_SUCCESS,
+            $wfStatus
         );
 
         // clean db
