@@ -140,9 +140,14 @@ class ManagerWorker extends Core\Worker\AbstractWorker
                         // xxx check timeout
                     break;
                     case ManagerService::STATUS_SUCCESS:
-                        if ($this->workflowManagerService->hasNextStep($messageDto->getId())) {
-                            $this->runNextStep($messageDto->getId());
-                        } else {
+                        // go to next step if there is a next step and while the current step has no job
+                        while ($hasNext = $this->workflowManagerService->hasNextStep($messageDto->getId()) &&
+                            false == $this->runNextStep($messageDto->getId())
+                        ) {
+                            $this->getDI()->get('logr')->warning("Current step skipped");
+                        };
+
+                        if (!$hasNext) {
                             $this->workflowManagerService->finalize(
                                 $messageDto->getId(),
                                 ManagerService::STATUS_SUCCESS
@@ -189,14 +194,22 @@ class ManagerWorker extends Core\Worker\AbstractWorker
         $this->workflowManagerService->initNextStep($workflowProcessId);
 
         try {
+            $hasJob = false;
             // run through the next step(s)
             foreach ($stepHashList as $stepHash) {
                 $stepCode = $stepHash['name'];
                 $stepInputList = $this->service->getStepInput($workflowProcessId, $stepCode);
+
                 $this->getDI()->get('logr')->info("Nb job(s) to run for $stepCode : " . count($stepInputList));
+
+                if (empty($stepInputList)) {
+                    $this->workflowManagerService->registerStepWithoutJob($workflowProcessId, $stepCode);
+                    $this->getDI()->get('logr')->warning("No job to run for $stepCode");
+                }
 
                 // run through the "job" to send to each step
                 foreach ($stepInputList as $jobId => $stepJobHash) {
+                    $hasJob = true;
                     $this->workflowManagerService->registerStepJob($workflowProcessId, $stepCode, $jobId);
                     $messageHash = [
                         'id' => $workflowProcessId,
@@ -218,6 +231,8 @@ class ManagerWorker extends Core\Worker\AbstractWorker
                     );
                 }
             }
+
+            return $hasJob;
         } catch (\Exception $exception) {
             $this->getDI()->get('logr')->error($exception->getMessage());
             $this->workflowManagerService->finalize(
