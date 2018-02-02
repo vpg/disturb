@@ -69,6 +69,9 @@ class TestManager implements Disturb\Workflow\ManagerServiceInterface
                 ]
             ];
             break;
+        case 'noJob':
+            $stepPayloadHash = [];
+            break;
         case 'end':
             $stepPayloadHash = [
                 [

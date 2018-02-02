@@ -235,6 +235,10 @@ class ManagerService extends Component implements WorkflowManagerInterface
         $jobStatusList = [];
         $jobList = $step['jobList'];
 
+        if (empty($jobList) && isset($step['skippedAt'])) {
+            return self::STATUS_SUCCESS;
+        }
+
         foreach ($jobList as $job) {
             array_push($jobStatusList, $job['status']);
         }
@@ -408,6 +412,30 @@ class ManagerService extends Component implements WorkflowManagerInterface
             'registeredAt' => date(ContextStorageService::DATE_FORMAT),
             'result' => []
         ];
+        $this->di->get('contextStorage')->updateWorkflowStep($workflowProcessId, $stepCode, $stepHash);
+    }
+
+    /**
+     * Registers in context the step's who has no job
+     * Stores in context as below :
+     *  {
+     *      'jobList' : [],
+     *      'hasJob' : false
+     *  }
+     *
+     * @param string $workflowProcessId the wf process identifier to which belongs the step's job result
+     * @param string $stepCode          the step to which belongs the job
+     *
+     * @return void
+     */
+    public function registerStepWithoutJob($workflowProcessId, $stepCode)
+    {
+        $this->di->get('logr')->debug(json_encode(func_get_args()));
+        // q&d search in context the job for which saving the result
+        $stepHash = $this->getContextWorkflowStep($workflowProcessId, $stepCode);
+
+        $stepHash['jobList'] = [];
+        $stepHash['skippedAt'] = date(ContextStorageService::DATE_FORMAT);
         $this->di->get('contextStorage')->updateWorkflowStep($workflowProcessId, $stepCode, $stepHash);
     }
 

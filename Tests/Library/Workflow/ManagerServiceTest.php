@@ -18,9 +18,11 @@ class ManagerServiceTest extends \Tests\DisturbUnitTestCase
 
     protected static $workflowSerieConfigDto;
     protected static $workflowParallelizedConfigDto;
+    protected static $workflowSerieWithoutJobConfigDto;
     protected static $contextStorageService;
     protected static $serieWorkflowManagerService;
     protected static $parallelizedWorkflowManagerService;
+    protected static $serieWithoutJobWorkflowManagerService;
 
     protected $workerHostname = 'worker-test-hostname';
 
@@ -33,6 +35,7 @@ class ManagerServiceTest extends \Tests\DisturbUnitTestCase
     {
         parent::setUpBeforeClass();
         self::$workflowSerieConfigDto = WorkflowConfigDtoFactory::get(realpath(__DIR__ . '/../../Config/serie.json'));
+        self::$workflowSerieWithoutJobConfigDto = WorkflowConfigDtoFactory::get(realpath(__DIR__ . '/../../Config/serieWithoutJob.json'));
         self::$workflowParallelizedConfigDto = WorkflowConfigDtoFactory::get(
             realpath(__DIR__ . '/../../Config/parallelized.json')
         );
@@ -48,6 +51,7 @@ class ManagerServiceTest extends \Tests\DisturbUnitTestCase
         parent::setUp();
         self::$serieWorkflowManagerService = new Workflow\ManagerService(self::$workflowSerieConfigDto);
         self::$parallelizedWorkflowManagerService = new Workflow\ManagerService(self::$workflowParallelizedConfigDto);
+        self::$serieWithoutJobWorkflowManagerService = new Workflow\ManagerService(self::$workflowSerieWithoutJobConfigDto);
         self::$contextStorageService = new ContextStorageService(self::$workflowSerieConfigDto);
     }
 
@@ -400,7 +404,7 @@ class ManagerServiceTest extends \Tests\DisturbUnitTestCase
      *
      * @return void
      */
-    public function testNoJobToProccess()
+    public function testNoJobResultToProcess()
     {
         $wfId = $this->generateWfId();
         // init Work
@@ -434,5 +438,48 @@ class ManagerServiceTest extends \Tests\DisturbUnitTestCase
             2,
             $resultHash
         );
+    }
+
+    /**
+     * Test current step status (w and w/o jobs)
+     *
+     * @return void
+     */
+    public function testCurrentStepStatus()
+    {
+        $wfId = $this->generateWfId();
+        // init Work
+        self::$serieWithoutJobWorkflowManagerService->init($wfId, ['foo' => 'bar'], $this->workerHostname);
+        $wfNextStepList = self::$serieWithoutJobWorkflowManagerService->getNextStepList($wfId);
+        $this->assertEquals(
+            [['name' => 'foo']],
+            $wfNextStepList
+        );
+        // Process next step foo
+        self::$serieWithoutJobWorkflowManagerService->initNextStep($wfId);
+        self::$serieWithoutJobWorkflowManagerService->registerStepJob($wfId, $wfNextStepList[0]['name'], 0);
+        self::$serieWithoutJobWorkflowManagerService->registerStepJobStarted($wfId, 'foo', 0, $this->workerHostname);
+        $resultHash = [
+            'status' => Workflow\ManagerService::STATUS_SUCCESS,
+            'finishedAt' => '2018-01-01 01:01:01',
+            'data' => ['foo' => 'ok']
+        ];
+        self::$serieWithoutJobWorkflowManagerService->processStepJobResult($wfId, 'foo', 0, $resultHash);
+        // Process next step bar
+        $wfNextStepList = self::$serieWithoutJobWorkflowManagerService->getNextStepList($wfId);
+        $this->assertEquals(
+            [['name' => 'noJob']],
+            $wfNextStepList
+        );
+        self::$serieWithoutJobWorkflowManagerService->initNextStep($wfId);
+        self::$serieWithoutJobWorkflowManagerService->registerStepWithoutJob($wfId, $wfNextStepList[0]['name']);
+
+        $this->assertEquals(
+            self::$serieWithoutJobWorkflowManagerService->getCurrentStepStatus($wfId),
+            Workflow\ManagerService::STATUS_SUCCESS
+        );
+
+        // clean db
+        self::$contextStorageService->delete($wfId);
     }
 }

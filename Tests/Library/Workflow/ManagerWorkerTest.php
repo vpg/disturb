@@ -19,8 +19,12 @@ class ManagerWorkerTest extends \Tests\DisturbUnitTestCase
 {
 
     protected static $workflowSerieConfigDto;
+    protected static $workflowWithoutJobConfigDto;
     protected static $workerParamHash;
+    protected static $workerWithoutJobParamHash;
     protected static $contextStorageService;
+    protected static $serieWorkflowManagerService;
+    protected static $withoutJobWorkflowManagerService;
     protected $managerWorker;
 
     protected $workerHostname = 'worker-test-hostname';
@@ -35,10 +39,28 @@ class ManagerWorkerTest extends \Tests\DisturbUnitTestCase
         parent::setUpBeforeClass();
         $configFilepath = realpath(__DIR__ . '/../../Config/serie.json');
         self::$workflowSerieConfigDto = WorkflowConfigDtoFactory::get($configFilepath);
+        $configWithoutJobFilepath = realpath(__DIR__ . '/../../Config/withoutJob.json');
+        self::$workflowWithoutJobConfigDto = WorkflowConfigDtoFactory::get($configWithoutJobFilepath);
         self::$contextStorageService = new ContextStorageService(self::$workflowSerieConfigDto);
         self::$workerParamHash = [
            "--workflow=$configFilepath"
         ];
+        self::$workerWithoutJobParamHash = [
+            "--workflow=$configWithoutJobFilepath"
+        ];
+    }
+
+    /**
+     * Setup
+     *
+     * @return void
+     */
+    public function setUp()
+    {
+        parent::setUp();
+        self::$serieWorkflowManagerService = new Workflow\ManagerService(self::$workflowSerieConfigDto);
+        self::$withoutJobWorkflowManagerService = new Workflow\ManagerService(self::$workflowWithoutJobConfigDto);
+        self::$contextStorageService = new ContextStorageService(self::$workflowSerieConfigDto);
     }
 
     /**
@@ -233,5 +255,85 @@ class ManagerWorkerTest extends \Tests\DisturbUnitTestCase
 
         $keepAlive = $keepAliveF->invokeArgs($managerWorker, []);
         $this->assertFalse($keepAlive);
+    }
+
+    /**
+     * Test a full WF execution with a step without job
+     * - start workflow
+     * - simulate foo
+     * - skip noJob
+     * - next step properly launched
+     *
+     * @return void
+     */
+    public function testNoStepJobToRun()
+    {
+        // init Manager worker
+        $managerWorker = new Workflow\ManagerWorker();
+        $managerWorkerReflection = new \ReflectionClass($managerWorker);
+        $parseOtpF = $managerWorkerReflection->getMethod('parseOpt');
+        $parseOtpF->setAccessible(true);
+        $parsedOptHash = $parseOtpF->invokeArgs($managerWorker, [self::$workerWithoutJobParamHash]);
+
+        $parseOpt = $managerWorkerReflection->getProperty('paramHash');
+        $parseOpt->setAccessible(true);
+        $parseOpt->setValue($managerWorker, $parsedOptHash);
+
+        // init worker with params hash (workflow name)
+        $initWorkerF = $managerWorkerReflection->getMethod('initWorker');
+        $initWorkerF->setAccessible(true);
+        $initWorkerF->invokeArgs($managerWorker, [self::$workerWithoutJobParamHash]);
+
+        //simulate workflow start message
+        $wfId = $this->generateWfId();
+        $startWFMsg = '{"id":"' . $wfId . '", "type" : "WF-CONTROL", "action":"start", "payload": {"foo":"bar"}}';
+        $msgDto = new MessageDto($startWFMsg);
+        $processMessageF = $managerWorkerReflection->getMethod('processMessage');
+        $processMessageF->setAccessible(true);
+        $processMessageF->invokeArgs($managerWorker, [$msgDto]);
+
+        $wfDto = self::$contextStorageService->get($wfId);
+
+        //test if workflow is properly started
+        $wfStatus = $wfDto->getWorkflowStatus();
+        $this->assertEquals(
+            Workflow\ManagerService::STATUS_STARTED,
+            $wfStatus
+        );
+
+        // test if foo is started
+        $fooStepHash = $wfDto->getStep('foo');
+        $this->assertEquals(
+            Workflow\ManagerService::STATUS_NO_STARTED,
+            $fooStepHash['jobList'][0]['status']
+        );
+
+        //simulate foo successful execution
+        //process message foo -> run next step on "noJob step"
+        $fooStepAckMsg = '{"id":"' . $wfId . '", "type":"STEP-ACK","stepCode":"foo","jobId":"0","result":{"status":"SUCCESS","data":[],"finishedAt":"2018-01-30 16:39:26"}}';
+        $msgDto = new MessageDto($fooStepAckMsg);
+        $processMessageF = $managerWorkerReflection->getMethod('processMessage');
+        $processMessageF->setAccessible(true);
+        $processMessageF->invokeArgs($managerWorker, [$msgDto]);
+
+        //get workflow in order to verify if "noJob" step has been skipped
+        $wfDto = self::$contextStorageService->get($wfId);
+        $noJobStepHash = $wfDto->getStep('noJob');
+        $this->assertEmpty(
+            $noJobStepHash['jobList']
+        );
+        $this->assertNotEmpty(
+            $noJobStepHash['skippedAt']
+        );
+
+        //get workflow in order to verify if "bar" is started
+        $wfDto = self::$contextStorageService->get($wfId);
+        $barStepHash = $wfDto->getStep('bar');
+        $this->assertNotEmpty(
+            $barStepHash['jobList']
+        );
+
+        // clean db
+        self::$contextStorageService->delete($wfId);
     }
 }
