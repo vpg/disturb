@@ -37,8 +37,6 @@ class DisturbStarter extends Component
         $kafkaProducer = new \RdKafka\Producer();
         $kafkaProducer->addBrokers($brokers);
         $kafkaTopic = $kafkaProducer->newTopic($topicName);
-        error_log($topicName);
-        error_log(print_r($messageHash,1));
         $kafkaTopic->produce(RD_KAFKA_PARTITION_UA, 0, json_encode($messageHash));
     }
 }
