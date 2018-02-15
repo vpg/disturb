@@ -8,6 +8,13 @@ use Vpg\Disturb\Context;
 
 include realpath(__DIR__ . '/../../bin/configCommand.php');
 
+/**
+ * Class Disturb Client Command
+ *
+ * @package  Disturb\Client
+ * @author   Maxime BRENGUIER <mbrenguier@voyageprive.com>
+ * @license  https://github.com/vpg/disturb/blob/master/LICENSE MIT Licence
+ */
 class Command extends Component
 {
     /**
@@ -18,6 +25,7 @@ class Command extends Component
      * @param String $brokers           broker list
      * @param String $topicName         topic name
      *
+     * @return void
      */
     public static function start(string $workflowProcessId, array $payloadHash, string $brokers, string $topicName)
     {
@@ -39,6 +47,8 @@ class Command extends Component
      *
      * @param string $workflowProcessId      workflow process id
      * @param string $workflowConfigFilePath workflow config file path
+     *
+     * @return string
      */
     public static function getStatus(string $workflowProcessId, string $workflowConfigFilePath)
     {
