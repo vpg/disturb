@@ -141,11 +141,13 @@ class ManagerWorker extends Core\Worker\AbstractWorker
                     break;
                     case ManagerService::STATUS_SUCCESS:
                         // go to next step if there is a next step and while the current step has no job
-                        while ($hasNext = $this->workflowManagerService->hasNextStep($messageDto->getId()) &&
+                        while (($hasNext = $this->workflowManagerService->hasNextStep($messageDto->getId())) &&
                             false == $this->runNextStep($messageDto->getId())
                         ) {
                             $this->getDI()->get('logr')->warning("Current step skipped");
                         };
+
+
 
                         if (!$hasNext) {
                             $this->workflowManagerService->finalize(
