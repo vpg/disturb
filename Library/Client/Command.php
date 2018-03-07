@@ -56,4 +56,19 @@ class Command extends Component
         $contextStorage = new Context\ContextStorageService($workflowConfigDto);
         return $contextStorage->get($workflowProcessId)->getWorkflowStatus();
     }
+
+    /**
+     * Get context for a specified workflow process id
+     *
+     * @param string $workflowProcessId      workflow process id
+     * @param string $workflowConfigFilePath workflow config file path
+     *
+     * @return array
+     */
+    public static function getContext(string $workflowProcessId, string $workflowConfigFilePath)
+    {
+        $workflowConfigDto = WorkflowConfigDtoFactory::get($workflowConfigFilePath);
+        $contextStorage = new Context\ContextStorageService($workflowConfigDto);
+        return $contextStorage->get($workflowProcessId)->getStepResultData();
+    }
 }
