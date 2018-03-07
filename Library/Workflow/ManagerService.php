@@ -214,9 +214,11 @@ class ManagerService extends Component implements WorkflowManagerInterface
      */
     public function hasNextStep(string $workflowProcessId) : bool
     {
-        $this->di->get('logr')->debug(json_encode(func_get_args()));
+        $this->di->get('logr')->info(json_encode(func_get_args()));
         $contextDto = $this->di->get('contextStorage')->get($workflowProcessId);
+
         $nextStepPos = $contextDto->getWorkflowCurrentPosition() + 1;
+
         return !empty($this->workflowConfig->getStepList()[$nextStepPos]);
     }
 
